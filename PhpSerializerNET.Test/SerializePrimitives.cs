@@ -1,0 +1,127 @@
+/**
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at http://mozilla.org/MPL/2.0/.
+**/
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PhpSerializerNET;
+
+namespace PhpSerializerNET.Test
+{
+	[TestClass]
+	public class SerializePrimitives
+	{
+		[TestMethod]
+		public void SerializesNull()
+		{
+			Assert.AreEqual(
+				"N;",
+				PhpSerializer.Serialize(null)
+			);
+		}
+
+		[TestMethod]
+		public void SerializesBool()
+		{
+			Assert.AreEqual(
+				"b:1;",
+				PhpSerializer.Serialize(true)
+			);
+
+			Assert.AreEqual(
+				"b:0;",
+				PhpSerializer.Serialize(false)
+			);
+		}
+
+
+		[TestMethod]
+		public void SerializeInteger()
+		{
+			Assert.AreEqual(
+				"i:0;",
+				PhpSerializer.Serialize(0)
+			);
+			Assert.AreEqual(
+				"i:1;",
+				PhpSerializer.Serialize(1)
+			);
+			Assert.AreEqual(
+				"i:2147483647;",
+				PhpSerializer.Serialize(int.MaxValue)
+			);
+			Assert.AreEqual(
+				"i:-2147483648;",
+				PhpSerializer.Serialize(int.MinValue)
+			);
+		}
+
+		[TestMethod]
+		public void SerializeLong()
+		{
+			Assert.AreEqual(
+				"i:9223372036854775807;",
+				PhpSerializer.Serialize(long.MaxValue)
+			);
+			Assert.AreEqual(
+				"i:-9223372036854775808;", // Note: PHP 8 serializes this to a double, but it works fine on deserialization.
+				PhpSerializer.Serialize(long.MinValue)
+			);
+		}
+
+		[TestMethod]
+		public void SerializesDouble()
+		{
+			Assert.AreEqual(
+				"d:1.23456789;",
+				PhpSerializer.Serialize(1.23456789)
+			);
+			Assert.AreEqual(
+				"d:1;",
+				PhpSerializer.Serialize((double)1)
+			);
+			Assert.AreEqual(
+				"d:-1.7976931348623157E+308;",
+				PhpSerializer.Serialize(double.MinValue)
+			);
+			Assert.AreEqual(
+				"d:1.7976931348623157E+308;",
+				PhpSerializer.Serialize(double.MaxValue)
+			);
+			Assert.AreEqual(
+				"d:INF;",
+				PhpSerializer.Serialize(double.PositiveInfinity)
+			);
+			Assert.AreEqual(
+				"d:-INF;",
+				PhpSerializer.Serialize(double.NegativeInfinity)
+			);
+			Assert.AreEqual(
+				"d:NAN;",
+				PhpSerializer.Serialize(double.NaN)
+			);
+		}
+
+		[TestMethod]
+		public void SerializesString()
+		{
+			Assert.AreEqual(
+				"s:12:\"Hello World!\";",
+				PhpSerializer.Serialize("Hello World!")
+			);
+			Assert.AreEqual(
+				"s:0:\"\";",
+				PhpSerializer.Serialize("")
+			);
+			Assert.AreEqual(
+				"s:14:\"äöüßÄÖÜ\";",
+				PhpSerializer.Serialize("äöüßÄÖÜ")
+			);
+			Assert.AreEqual(
+				"s:4:\"👻\";",
+				PhpSerializer.Serialize("👻")
+			);
+		}
+	}
+}

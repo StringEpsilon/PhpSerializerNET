@@ -18,6 +18,13 @@ using PhpSerializerNET;
 object deserializedObject = PhpSerializer.Deserialize("s:12:\"Hello World!\"");
 ```
 
+`Deserialize()`  will return one of the follow object types:
+
+`bool`, `long`, `double`, `string`, `null` (object), `Dictionary<object, object>` or `List<object>`.
+
+`List<object>` is only returned when an associative array has only integers as keys. This behavior might be adjusted in the future.
+
+
 This library also supports deserialising into specific datatypes:
 
 ```c#
@@ -44,12 +51,18 @@ And any classes with a public parameterless constructor.
 ## TODOs
 
 - Documentation.
-
 - Write better exceptions.
 - Check the compliance with the serialization format more closely while parsing.
 - Deduplicate some of the code, especially around the IConvertible handling.
 - Split off the tokenizer into it's own class.
 - General polish.
+
+
+And maybe publish to nuget? IDK.
+
+## Non-TODO:
+
+- Support for the object notation PHP has for the format. I simply don't need it. But if you do, please submit a PR.
 
 ## Why?
 

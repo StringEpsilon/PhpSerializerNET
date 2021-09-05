@@ -16,14 +16,42 @@ namespace PhpSerializerNET
 	public static class PhpSerializer
 	{
 
+		/// <summary>
+		/// Deserialize the given string into an object.
+		/// </summary>
+		/// <param name="input">
+		/// PHP serialization data.
+		/// </param>
+		/// <returns>
+		/// The deserialized object of type:
+		///
+		/// object (null),
+		/// <see cref="bool" />,
+		/// <see cref="long" />,
+		/// <see cref="double" />,
+		/// <see cref="string" />,
+		/// <see cref="List{object}"/>, or
+		/// <see cref="Dictionary{object,object}"/>
+		/// </returns>
 		public static object Deserialize(string input)
 		{
 			var tokens = Tokenize(input);
 			return tokens[0].ToObject();
 		}
 
-
-
+		/// <summary>
+		/// Try to deserialize the input string into a specific type.
+		/// </summary>
+		/// <param name="input">
+		/// PHP serialization data.
+		/// </param>
+		/// <typeparam name="T">
+		/// The desired output type.
+		/// This should be one of the primitives or a class with a public parameterless constructor.
+		/// </typeparam>
+		/// <returns>
+		/// The deserialized object.
+		/// </returns>
 		public static T Deserialize<T>(string input)
 		{
 			var tokens = Tokenize(input);
@@ -50,7 +78,7 @@ namespace PhpSerializerNET
 			}
 			else
 			{
-				if (typeof(IConvertible).IsAssignableFrom(typeof(T)))
+				if (typeof(T).IsIConvertible())
 				{
 					var value = tokens[0].ToObject();
 					if (value is IConvertible convertible)
@@ -63,7 +91,21 @@ namespace PhpSerializerNET
 			throw new Exception($"Can not deserialize {Enum.GetName(tokens[0].Type)} into {typeof(T).Name}");
 		}
 
-
+		/// <summary>
+		/// Serialize an object into the PHP format.
+		/// </summary>
+		/// <param name="input">
+		/// Object to serialize.
+		/// </param>
+		/// <param name="seen">
+		/// For internal use only. This might be removed in a later release.
+		/// (It's to avoid circulare references causing a stackoverflow)
+		/// </param>
+		/// <returns>
+		/// String representation of the input object.
+		/// Note that circular references are terminated with "N;"
+		/// and that all classes are serialized as associative arrays.
+		/// </returns>
 		public static string Serialize(object input, List<Object> seen = null)
 		{
 			StringBuilder output = new StringBuilder();
@@ -100,6 +142,7 @@ namespace PhpSerializerNET
 					}
 				case string stringValue:
 					{
+						// Use the UTF8 byte count, because that's what the PHP implementation does:
 						return $"s:{ASCIIEncoding.UTF8.GetByteCount(stringValue)}:\"{stringValue}\";";
 					}
 				case bool boolValue:
@@ -114,6 +157,9 @@ namespace PhpSerializerNET
 					{
 						if (seen.Contains(input))
 						{
+							// Terminate circular reference:
+							// It might be better to make this optional. The PHP implementation seems to
+							// throw an exception, from what I can tell
 							return "N;";
 						}
 						seen.Add(input);
@@ -134,7 +180,7 @@ namespace PhpSerializerNET
 					{
 						if (seen.Contains(input))
 						{
-							return "N;";
+							return "N;"; // See above.
 						}
 						seen.Add(input);
 						output.Append($"a:{collection.Count}:");
@@ -150,8 +196,9 @@ namespace PhpSerializerNET
 					{
 						if (seen.Contains(input))
 						{
-							return "N;";
+							return "N;"; // See above.
 						}
+
 						seen.Add(input);
 						var properties = input.GetType().GetProperties().Where(x => x.CanRead);
 						output.Append($"a:{properties.Count()}:");
@@ -180,6 +227,7 @@ namespace PhpSerializerNET
 			{
 				if (entry.Key is string propertyName)
 				{
+					// TODO: This really should be an option. Plus it might create conflicts.
 					var property = targetProperties.FirstOrDefault(y => y.Name.ToLower() == propertyName.ToLower());
 					if (property != null)
 					{
@@ -187,7 +235,7 @@ namespace PhpSerializerNET
 						{
 							property.SetValue(result, entry.Value);
 						}
-						else if (typeof(IConvertible).IsAssignableFrom(property.PropertyType))
+						else if (property.PropertyType.IsIConvertible())
 						{
 							if (entry.Value is IConvertible convertible)
 							{
@@ -233,17 +281,10 @@ namespace PhpSerializerNET
 			{
 				itemType = targetType.GenericTypeArguments[0];
 			}
+
 			foreach (var item in sourceList)
 			{
-				if (typeof(IConvertible).IsAssignableFrom(itemType) && item is IConvertible convertible)
-				{
-					result.Add(convertible.ToType(itemType, CultureInfo.InvariantCulture));
-				}
-				else
-				{
-					result.Add(item);
-				}
-
+				result.Add(itemType.Convert(item, true));
 			}
 			return result;
 		}
@@ -257,24 +298,8 @@ namespace PhpSerializerNET
 				var valueType = targetType.GenericTypeArguments[1];
 				foreach (var entry in dictionary)
 				{
-					object key;
-					object value;
-					if (typeof(IConvertible).IsAssignableFrom(keyType) && entry.Key is IConvertible convertibleKey)
-					{
-						key = convertibleKey.ToType(keyType, CultureInfo.InvariantCulture);
-					}
-					else
-					{
-						key = entry.Key;
-					}
-					if (typeof(IConvertible).IsAssignableFrom(valueType) && entry.Value is IConvertible convertibleValue)
-					{
-						value = convertibleValue.ToType(valueType, CultureInfo.InvariantCulture);
-					}
-					else
-					{
-						value = entry.Value;
-					}
+					object key = keyType.Convert(entry.Key, true);
+					object value = valueType.Convert(entry.Value, true);
 					resultDictionary.Add(key, value);
 				}
 				return resultDictionary;

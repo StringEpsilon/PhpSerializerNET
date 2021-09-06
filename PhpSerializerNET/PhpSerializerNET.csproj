@@ -1,9 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
+		<Title>PhpSerializerNET</Title>
 		<TargetFramework>net5.0</TargetFramework>
 		<Version>0.1.0</Version>
 		<Authors>StringEpsilon</Authors>
-		<Description>A library for working with the PHP serialization format.</Description>
+		<Summary>A library for working with the PHP serialization format.</Summary>
 		<PackageTags>php-serialization, php-serializer, php-deserializer</PackageTags>
+		<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<EmbedUntrackedSources>false</EmbedUntrackedSources>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<PackageProjectUrl>https://github.com/StringEpsilon/PhpSerializerNET</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/StringEpsilon/PhpSerializerNET</RepositoryUrl>
+		<RespositoryType>git</RespositoryType>
 	</PropertyGroup>
+	<ItemGroup>
+		<None Include="..\LICENSE" Pack="true" PackagePath="/"/>
+	</ItemGroup>
 </Project>

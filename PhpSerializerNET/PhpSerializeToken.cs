@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace PhpSerializerNET
 {
@@ -22,7 +23,7 @@ namespace PhpSerializerNET
 		{
 		}
 
-		internal object ToObject()
+		internal object ToObject(PhpDeserializationOptions options)
 		{
 			return this.Type switch
 			{
@@ -31,7 +32,7 @@ namespace PhpSerializerNET
 				PhpSerializerType.Integer => long.Parse(this.Value),
 				PhpSerializerType.Floating => this.ParseFloat(this.Value),
 				PhpSerializerType.String => this.Value,
-				PhpSerializerType.Array => this.ToCollection(),
+				PhpSerializerType.Array => this.ToCollection(options),
 				_ => throw new Exception("Unsupported datatype.")
 			};
 		}
@@ -47,37 +48,42 @@ namespace PhpSerializerNET
 			};
 		}
 
-		private object ToCollection()
+		private object ToCollection(PhpDeserializationOptions options)
 		{
-			bool isList = true;
-
+			var result = new Dictionary<object, object>();
 			for (int i = 0; i < this.Children.Count; i += 2)
 			{
-				if (this.Children[i].Type != PhpSerializerType.Integer)
-				{
-					isList = false;
-					break;
-				}
+				result.Add(this.Children[i].ToObject(options), this.Children[i + 1].ToObject(options));
 			}
 
-			if (isList)
+			if (options.UseLists != ListOptions.Never)
 			{
-				var result = new List<object>();
-				for (int i = 0; i < this.Children.Count; i += 2)
-				{
-					result.Add(this.Children[i + 1].ToObject());
+				if (result.Any(x => x.Key is not long)){
+					return result;
 				}
-				return result;
-			}
-			else
-			{
-				var result = new Dictionary<object, object>();
-				for (int i = 0; i < this.Children.Count; i += 2)
+
+				if (options.UseLists == ListOptions.Default)
 				{
-					result.Add(this.Children[i].ToObject(), this.Children[i + 1].ToObject());
+					var orderedEntries = result.OrderBy(x => (long)x.Key);
+					var previousKey = ((long)orderedEntries.First().Key)-1;
+					var resultList = new List<object>();
+					foreach(var entry in orderedEntries){
+						if ((long)entry.Key == previousKey + 1){
+							previousKey = (long)entry.Key;
+							resultList.Add(entry.Value);
+						}else{
+							return result;
+						}
+					}
+					return resultList;
 				}
-				return result;
+				else
+				{
+					return result.Values.ToList();
+				}
 			}
+			return result;
+
 		}
 	}
 }

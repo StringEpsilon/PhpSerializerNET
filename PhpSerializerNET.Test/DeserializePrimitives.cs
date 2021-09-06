@@ -5,7 +5,6 @@
 **/
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PhpSerializerNET;
 
 namespace PhpSerializerNET.Test
 {
@@ -128,20 +127,20 @@ namespace PhpSerializerNET.Test
 			Assert.AreEqual("Hello World!", greeting);
 
 			Assert.AreEqual(
-				"s:12:\"Hello World!\";",
-				PhpSerializer.Serialize("Hello World!")
+				"Hello World!",
+				PhpSerializer.Deserialize("s:12:\"Hello World!\";")
 			);
 			Assert.AreEqual(
-				"s:0:\"\";",
-				PhpSerializer.Serialize("")
+				"",
+				PhpSerializer.Deserialize("s:0:\"\";")
 			);
 			Assert.AreEqual(
-				"s:14:\"äöüßÄÖÜ\";",
-				PhpSerializer.Serialize("äöüßÄÖÜ")
+				"äöüßÄÖÜ",
+				PhpSerializer.Deserialize("s:14:\"äöüßÄÖÜ\";")
 			);
 			Assert.AreEqual(
-				"s:4:\"👻\";",
-				PhpSerializer.Serialize("👻")
+				"👻",
+				PhpSerializer.Deserialize("s:4:\"👻\";")
 			);
 		}
 	}

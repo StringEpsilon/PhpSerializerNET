@@ -22,8 +22,11 @@ object deserializedObject = PhpSerializer.Deserialize("s:12:\"Hello World!\"");
 
 `bool`, `long`, `double`, `string`, `null` (object), `Dictionary<object, object>` or `List<object>`.
 
-`List<object>` is only returned when an associative array has only integers as keys. This behavior might be adjusted in the future.
-
+`List<object>` is only returned when an associative array only has consecutive integers as keys. 
+You can adjust this behavior via the `PhpDeserializationOptions.UseLists` option:
+`Default` => Return list on consecutive integers.
+`OnAllIntegerKeys` => Return list if all keys are integers.
+`Never` => Always return a dictionary.
 
 This library also supports deserialising into specific datatypes:
 
@@ -43,19 +46,19 @@ Tested and supported are:
 
 And any classes with a public parameterless constructor.
 
-## Known Issues
-
-- Some legal / valid string values can throw off the parser and result in exceptions.
-	- See PhpSerializer.cs, line 390. It just searches for `;}`.
+When deserializing associative arrays into objects, 
+`PhpDeserializationOptions.CaseSensitiveProperties` enables / disables case sensistive matching of array key to property. Default is case sensitive search.
+`PhpDeserializationOptions.AllowExcessKeys` will pass over keys that are in the array data but not on the object instead of throwing an exception.
 
 ## TODOs
 
-- Documentation.
-- Write better exceptions.
-- Check the compliance with the serialization format more closely while parsing.
-- Deduplicate some of the code, especially around the IConvertible handling.
-- Split off the tokenizer into it's own class.
-- General polish.
+[ ] Documentation.
+[ ] Write better exceptions.
+	- Partially done.
+[ ] Check the compliance with the serialization format more closely while parsing.
+[ ] Deduplicate some of the code
+[ ] General polish.
+[ ] Cover all features and most error handlinng with unit tests.
 
 
 And maybe publish to nuget? IDK.

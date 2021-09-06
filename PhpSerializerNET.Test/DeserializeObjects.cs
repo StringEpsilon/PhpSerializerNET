@@ -45,13 +45,21 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void DeserializesObjectBracketNesting()
+		public void DeserializesBracketJunk()
 		{
 			var deserializedObject = PhpSerializer.Deserialize<SimpleClass>(
-				"a:1:{s:7:\"AString\";s:11:\"}}}}}}}}}}}\";}"
+				"a:2:{s:7:\"AString\";s:12:\"\"\"\"\"}}}}{{{{\";s:9:\"AnInteger\";i:10;}"
 			);
-			Assert.AreEqual("}}}}}}}}}}}", deserializedObject.AString);
+			Assert.AreEqual("\"\"\"\"}}}}{{{{", deserializedObject.AString);
+			Assert.AreEqual(10, deserializedObject.AnInteger);
+
+			deserializedObject = PhpSerializer.Deserialize<SimpleClass>(
+				"a:2:{s:7:\"AString\";s:12:\";;};};};::::\";s:9:\"AnInteger\";i:10;}"
+			);
+			Assert.AreEqual(";;};};};::::", deserializedObject.AString);
+			Assert.AreEqual(10, deserializedObject.AnInteger);
 		}
+
 
 		[TestMethod]
 		public void DeserializesDistionary()
@@ -133,6 +141,23 @@ namespace PhpSerializerNET.Test
 			Assert.AreEqual("Hello", result[0]);
 			Assert.AreEqual("World", result[1]);
 			Assert.AreEqual("12345", result[2]);
+		}
+
+		[TestMethod]
+		public void DeserializeNestedObject(){
+			var result = PhpSerializer.Deserialize<CircularTest>("a:2:{s:3:\"Foo\";s:5:\"First\";s:3:\"Bar\";a:2:{s:3:\"Foo\";s:6:\"Second\";s:3:\"Bar\";N;}}");
+
+			Assert.AreEqual(
+				"First",
+				result.Foo
+			);
+			Assert.IsNotNull(
+				result.Bar
+			);
+			Assert.AreEqual(
+				"Second",
+				result.Bar.Foo
+			);
 		}
 	}
 }

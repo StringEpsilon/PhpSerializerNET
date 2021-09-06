@@ -61,16 +61,16 @@ namespace PhpSerializerNET
 						{
 							if ( _utf8Input[_position + 1] != ':')
 							{
-								throw new DeserializationException($"Expected ':' around position {_position}.",
+								throw new DeserializationException($"Expected ':' at position {_position+1}.",
 									_input, 
-									_position
+									_position +1
 								);
 							}
-							var tokenClose = Array.IndexOf(_utf8Input, (byte)';', _position);
+							var tokenClose = Array.IndexOf(_utf8Input, (byte)';', _position+1);
 							if (tokenClose < 0){
-								throw new DeserializationException($"Expected ';' around position {_position}.",
+								throw new DeserializationException($"Expected ';' around position {_position+2}.",
 									_input, 
-									_position
+									_position +2
 								);
 							}
 							var token = new PhpSerializeToken()
@@ -80,7 +80,7 @@ namespace PhpSerializerNET
 									'b' => PhpSerializerType.Boolean,
 									'i' => PhpSerializerType.Integer,
 									'd' => PhpSerializerType.Floating,
-									_ => throw new Exception("Unknown token type.")
+									_ => throw new Exception("This branch should be impossible to hit.")
 								},
 								Value = _utf8Input.Utf8Substring(_position+2, tokenClose - (_position + 2))
 							};
@@ -98,6 +98,7 @@ namespace PhpSerializerNET
 									_position+1
 								);
 							}
+
 							var lengthClose = Array.IndexOf(_utf8Input, (byte)':', lengthStart + 1);
 							if (lengthClose < 0)
 							{
@@ -106,8 +107,8 @@ namespace PhpSerializerNET
 									lengthStart + 1
 								);
 							}
+
 							var valueStart = Array.IndexOf(_utf8Input, (byte)'"', lengthClose ) + 1;
-							Console.WriteLine(valueStart);
 							if (valueStart == 0)
 							{
 								throw new DeserializationException($"Expected opening '\"' around position {lengthClose + 1}.",
@@ -117,6 +118,7 @@ namespace PhpSerializerNET
 							}else if (valueStart == _utf8Input.Length-1){
 								throw new DeserializationException("Unexpected end of data.",  _input, valueStart);
 							}
+
 							var length = int.Parse(
 								_utf8Input.Utf8Substring(lengthStart, lengthClose - lengthStart)
 							);
@@ -142,10 +144,10 @@ namespace PhpSerializerNET
 					case 'a':
 						{
 							var lengthStart = _position + 2;
-							if (lengthStart <0)
+							if ( _utf8Input[_position + 1] != ':')
 							{
 								throw new DeserializationException(
-									$"(Array) Expected ':' around position {_position + 1}",
+									$"Expected ':' around position {_position + 1}",
 									_input, 
 									_position
 								);
@@ -167,13 +169,14 @@ namespace PhpSerializerNET
 							tokens.Add(new()
 							{
 								Type = PhpSerializerType.Array,
+								Position = _position,
+								Length = length,
 								Children = this.Tokenize()
 							});
 							_position++;
 							_position++;
 							break;
 						}
-
 				}
 			}
 			return tokens;

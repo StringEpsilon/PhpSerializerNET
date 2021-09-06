@@ -135,12 +135,23 @@ namespace PhpSerializerNET.Test
 		[TestMethod]
 		public void DeserializeList()
 		{
-			var result = PhpSerializer.Deserialize<List<String>>("a:2:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}");
+			var result = PhpSerializer.Deserialize<List<String>>("a:3:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}");
 
 			Assert.AreEqual(3, result.Count);
 			Assert.AreEqual("Hello", result[0]);
 			Assert.AreEqual("World", result[1]);
 			Assert.AreEqual("12345", result[2]);
+		}
+
+		[TestMethod]
+		public void DeserializeListInvalidLength()
+		{
+			var exception = Assert.ThrowsException<DeserializationException>(
+				() => PhpSerializer.Deserialize<List<String>>("a:2:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}")
+			);
+			
+			Assert.AreEqual("Array at position 5 should be of length 2, but actual length is 3.", exception.Message);
+			Assert.AreEqual(5, exception.Position);
 		}
 
 		[TestMethod]

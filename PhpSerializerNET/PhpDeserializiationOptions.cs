@@ -21,7 +21,7 @@ namespace PhpSerializerNET
 		Never
 	}
 
-	public class PhpDeserializationOptions
+	public class PhpDeserializationOptions 
 	{
 		public bool CaseSensitiveProperties = true;
 		public bool AllowExcessKeys = false;

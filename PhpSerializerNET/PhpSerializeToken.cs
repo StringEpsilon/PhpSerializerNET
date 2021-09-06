@@ -18,6 +18,7 @@ namespace PhpSerializerNET
 		public string Value { get; set; }
 
 		public List<PhpSerializeToken> Children { get; set; }
+		public int Position { get; internal set; }
 
 		public PhpSerializeToken()
 		{
@@ -54,6 +55,12 @@ namespace PhpSerializerNET
 			for (int i = 0; i < this.Children.Count; i += 2)
 			{
 				result.Add(this.Children[i].ToObject(options), this.Children[i + 1].ToObject(options));
+			}
+			if (this.Length != result.Count()){
+				throw new DeserializationException(
+					$"Array at position {this.Position} should be of length {this.Length}, but actual length is {result.Count}.",
+					this.Position
+				);
 			}
 
 			if (options.UseLists != ListOptions.Never)

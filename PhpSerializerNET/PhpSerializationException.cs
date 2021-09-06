@@ -27,6 +27,10 @@ namespace PhpSerializerNET
 			this.Input = input;
 			this.Position = position;
 		}
+		public DeserializationException(string message, long position) : base(message)
+		{
+			this.Position = position;
+		}
 
 		public DeserializationException(string message, Exception innerException) : base(message, innerException)
 		{

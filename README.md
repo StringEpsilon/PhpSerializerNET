@@ -52,13 +52,13 @@ When deserializing associative arrays into objects,
 
 ## TODOs
 
-[ ] Documentation.
-[ ] Write better exceptions.
+* [ ] Documentation.
+* [ ] Write better exceptions.
 	- Partially done.
-[ ] Check the compliance with the serialization format more closely while parsing.
-[ ] Deduplicate some of the code
-[ ] General polish.
-[ ] Cover all features and most error handlinng with unit tests.
+* [ ] Check the compliance with the serialization format more closely while parsing.
+* [ ] Deduplicate some of the code
+* [ ] General polish.
+* [ ] Cover all features and most error handlinng with unit tests.
 
 
 And maybe publish to nuget? IDK.

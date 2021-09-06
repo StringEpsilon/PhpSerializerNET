@@ -8,8 +8,10 @@ trigger:
 
 pool:
   vmImage: ubuntu-latest
+  name: "Test"
 
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'test'
-    projects: '**/*Test.csproj'
+steps:
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: 'test'
+      projects: '**/*Test.csproj'

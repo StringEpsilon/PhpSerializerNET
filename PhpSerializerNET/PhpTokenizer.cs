@@ -32,68 +32,84 @@ namespace PhpSerializerNET
 			{
 				switch (_input[position])
 				{
-					case 'N': {
- 						var match = new Regex(@"N;").Match(_input,position);
-						if (!match.Success || match.Index != position){
-							throw new DeserializationException($"Malformed null at position {position}");
+					case 'N':
+						{
+							var match = new Regex(@"N;").Match(_input, position);
+							if (!match.Success || match.Index != position)
+							{
+								throw new DeserializationException($"Malformed null at position {position}");
+							}
+							position += match.Length - 1;
+							break;
 						}
-						position += match.Length-1;
-						break;
-					}
-					case 'b': {
- 						var match = new Regex(@"b:[10];").Match(_input,position);
-						if (!match.Success || match.Index != position){
-							throw new DeserializationException($"Malformed boolean at position {position}");
+					case 'b':
+						{
+							var match = new Regex(@"b:[10];").Match(_input, position);
+							if (!match.Success || match.Index != position)
+							{
+								throw new DeserializationException($"Malformed boolean at position {position}");
+							}
+							position += match.Length - 1;
+							break;
 						}
-						position += match.Length-1;
-						break;
-					}
-					case 'i': {
- 						var match = new Regex(@"i:[+-]?\d+;").Match(_input,position);
-						if (!match.Success || match.Index != position){
-							throw new DeserializationException($"Malformed integer at position {position}");
+					case 'i':
+						{
+							var match = new Regex(@"i:[+-]?\d+;").Match(_input, position);
+							if (!match.Success || match.Index != position)
+							{
+								throw new DeserializationException($"Malformed integer at position {position}");
+							}
+							position += match.Length - 1;
+							break;
 						}
-						position += match.Length-1;
-						break;
-					}
-					case 'd': {
-						// Validate the correctness of the actual value in the proper parsing step:
- 						var match = new Regex(@"d:.+;").Match(_input,position);
-						if (!match.Success || match.Index != position){
-							throw new DeserializationException($"Malformed double at position {position}");
+					case 'd':
+						{
+							// Validate the correctness of the actual value in the proper parsing step:
+							var match = new Regex(@"d:.+;").Match(_input, position);
+							if (!match.Success || match.Index != position)
+							{
+								throw new DeserializationException($"Malformed double at position {position}");
+							}
+							position += match.Length - 1;
+							break;
 						}
-						position += match.Length-1;
-						break;
-					}
-					case 's': {
- 						var match = new Regex(@"s:\d+:"".*?"";").Match(_input,position);
-						if (!match.Success ){
-							throw new DeserializationException($"Malformed string at position {position}");
+					case 's':
+						{
+							var match = new Regex(@"s:\d+:"".*?"";").Match(_input, position);
+							if (!match.Success)
+							{
+								throw new DeserializationException($"Malformed string at position {position}");
+							}
+							position += match.Length - 1;
+							break;
 						}
-						position += match.Length-1;
-						break;
-					}
 					case 'a':
 						{
-							var match = new Regex(@"a:\d+:{").Match(_input,position);
-							if (!match.Success || match.Index != position){
+							var match = new Regex(@"a:\d+:{").Match(_input, position);
+							if (!match.Success || match.Index != position)
+							{
 								throw new DeserializationException($"Malformed array at position {position}");
 							}
-							position+= match.Length;
+							position += match.Length;
 							ValidateFormat(ref position, true);
 
 							break;
 						}
-					case '}': {
-						if (inArray){
-							return true;
-						}else{
-							throw new DeserializationException($"unexpected token '{_input[position]} at position {position}'.");
+					case '}':
+						{
+							if (inArray)
+							{
+								return true;
+							}
+							else
+							{
+								throw new DeserializationException($"Unexpected token '{_input[position]}' at position {position}.");
+							}
 						}
-					}
-					default: {
-						throw new DeserializationException($"unexpected token '{_input[position]} at position {position}'.");
-					}
+					default:
+						{
+							throw new DeserializationException($"Unexpected token '{_input[position]}' at position {position}.");
+						}
 				}
 			}
 			return true;

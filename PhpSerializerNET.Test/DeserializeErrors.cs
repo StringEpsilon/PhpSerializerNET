@@ -12,27 +12,27 @@ namespace PhpSerializerNET.Test
 	public class DeserializeErrors
 	{
 		[TestMethod]
-		public void DeserializesMalformedNull()
+		public void ThrowsOnMalformedNull()
 		{
-			var ex = Assert.ThrowsException<DeserializationException>(() =>PhpSerializer.Deserialize("N"));
+			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("N"));
 			Assert.AreEqual("Malformed null at position 0", ex.Message);
 
 			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("N?"));
 			Assert.AreEqual("Malformed null at position 0", ex.Message);
 		}
-		
+
 		[TestMethod]
-		public void DeserializesMalformedBool()
+		public void ThrowsOnMalformedBool()
 		{
-			var ex = Assert.ThrowsException<DeserializationException>(() =>PhpSerializer.Deserialize("b"));
+			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("b"));
 			Assert.IsNotNull(ex);
 			Assert.AreEqual("Malformed boolean at position 0", ex.Message);
 
-			ex = Assert.ThrowsException<DeserializationException>(() =>PhpSerializer.Deserialize("b?"));
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("b?"));
 			Assert.IsNotNull(ex);
 			Assert.AreEqual("Malformed boolean at position 0", ex.Message);
 
-			ex = Assert.ThrowsException<DeserializationException>(() =>PhpSerializer.Deserialize("b:1"));
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("b:1"));
 			Assert.IsNotNull(ex);
 			Assert.AreEqual("Malformed boolean at position 0", ex.Message);
 		}
@@ -57,6 +57,60 @@ namespace PhpSerializerNET.Test
 
 			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("s:1:\"a"));
 			Assert.AreEqual("Malformed string at position 0", ex.Message);
+		}
+
+		[TestMethod]
+		public void ThrowsOnMalformedInteger()
+		{
+			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("i"));
+			Assert.AreEqual("Malformed integer at position 0", ex.Message);
+
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("i?"));
+			Assert.AreEqual("Malformed integer at position 0", ex.Message);
+
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("i:1"));
+			Assert.AreEqual("Malformed integer at position 0", ex.Message);
+		}
+
+
+		[TestMethod]
+		public void ThrowsOnMalformedDouble()
+		{
+			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("d"));
+			Assert.AreEqual("Malformed double at position 0", ex.Message);
+
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("d?"));
+			Assert.AreEqual("Malformed double at position 0", ex.Message);
+
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("d:1"));
+			Assert.AreEqual("Malformed double at position 0", ex.Message);
+		}
+
+		[TestMethod]
+		public void ThrowsOnMalformedArray()
+		{
+			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("a"));
+			Assert.AreEqual("Malformed array at position 0", ex.Message);
+
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("a?"));
+			Assert.AreEqual("Malformed array at position 0", ex.Message);
+
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("a:1"));
+			Assert.AreEqual("Malformed array at position 0", ex.Message);
+		}
+
+
+		[TestMethod]
+		public void ThrowsOnUnexpectedToken()
+		{
+			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("_"));
+			Assert.AreEqual("Unexpected token '_' at position 0.", ex.Message);
+
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("i:42;_"));
+			Assert.AreEqual("Unexpected token '_' at position 5.", ex.Message);
+
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("_i:42;"));
+			Assert.AreEqual("Unexpected token '_' at position 0.", ex.Message);
 		}
 	}
 }

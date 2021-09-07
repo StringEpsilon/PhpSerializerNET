@@ -31,15 +31,16 @@ namespace PhpSerializerNET.Test
 			public bool False { get; set; }
 		}
 
-		public class MappedClass {
+		public class MappedClass
+		{
 			[PhpProperty("en")]
-			public string English {get;set;}
+			public string English { get; set; }
 
 			[PhpProperty("de")]
-			public string German {get;set;}
+			public string German { get; set; }
 
 			[PhpIgnore]
-			public string it {get;set;}
+			public string it { get; set; }
 		}
 
 		[TestMethod]
@@ -54,6 +55,25 @@ namespace PhpSerializerNET.Test
 			Assert.AreEqual(true, deserializedObject.True);
 			Assert.AreEqual(false, deserializedObject.False);
 		}
+
+		[TestMethod]
+		public void ErrorOnFlatValue()
+		{
+			var ex = Assert.ThrowsException<DeserializationException>(
+				() => PhpSerializer.Deserialize<SimpleClass>("s:7:\"AString\";s:7:\"AString\";")
+			);
+
+			Assert.AreEqual("Can not deserialize loose collection of values into object", ex.Message);
+		}
+
+		[TestMethod]
+		public void ReturnsNull()
+		{
+			var result = PhpSerializer.Deserialize<SimpleClass>("N;");
+
+			Assert.IsNull(result);
+		}
+
 
 		[TestMethod]
 		public void DeserializesObjectWithMappingInfo()
@@ -174,12 +194,13 @@ namespace PhpSerializerNET.Test
 			var exception = Assert.ThrowsException<DeserializationException>(
 				() => PhpSerializer.Deserialize<List<String>>("a:2:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}")
 			);
-			
+
 			Assert.AreEqual("Array at position 5 should be of length 2, but actual length is 3.", exception.Message);
 		}
 
 		[TestMethod]
-		public void DeserializeNestedObject(){
+		public void DeserializeNestedObject()
+		{
 			var result = PhpSerializer.Deserialize<CircularTest>("a:2:{s:3:\"Foo\";s:5:\"First\";s:3:\"Bar\";a:2:{s:3:\"Foo\";s:6:\"Second\";s:3:\"Bar\";N;}}");
 
 			Assert.AreEqual(

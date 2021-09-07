@@ -35,6 +35,38 @@ namespace PhpSerializerNET.Test
 			);
 		}
 
+		[TestMethod]
+		public void StringNReturnsNull()
+		{
+			var result = PhpSerializer.Deserialize<string>("N;");
+
+			Assert.IsNull(result);
+		}
+
+		[TestMethod]
+		public void LongNReturnsZero()
+		{
+			var result = PhpSerializer.Deserialize<long>("N;");
+
+			Assert.AreEqual(0, result);
+		}
+
+		[TestMethod]
+		public void ConvertsProperly()
+		{
+			var result = PhpSerializer.Deserialize<long>("b:0;");
+
+			Assert.AreEqual(0, result);
+
+			result = PhpSerializer.Deserialize<long>("b:1;");
+
+			Assert.AreEqual(1, result);
+
+
+			double number = PhpSerializer.Deserialize<double>("i:10;");
+
+			Assert.AreEqual(10.00, number);
+		}
 
 		[TestMethod]
 		public void SerializeInteger()

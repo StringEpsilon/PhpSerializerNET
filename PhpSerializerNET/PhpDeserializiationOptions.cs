@@ -17,7 +17,7 @@ namespace PhpSerializerNET
 		Default,
 
 		/// <summary>
-		/// Convert associative array to list when all keys are integers, consecutive or not.
+		/// Convert associative array to list when all keys are integers, consecutiveh or not.
 		/// </summary>
 		OnAllIntegerKeys,
 

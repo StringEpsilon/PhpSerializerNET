@@ -123,7 +123,7 @@ namespace PhpSerializerNET.Test
 		[TestMethod]
 		public void DeserializesString()
 		{
-			var greeting = PhpSerializer.Deserialize<string>("s:12:\"Hello World!\"");
+			var greeting = PhpSerializer.Deserialize<string>("s:12:\"Hello World!\";");
 			Assert.AreEqual("Hello World!", greeting);
 
 			Assert.AreEqual(

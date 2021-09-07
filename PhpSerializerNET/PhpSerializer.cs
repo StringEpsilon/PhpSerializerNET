@@ -9,6 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace PhpSerializerNET
@@ -216,12 +217,15 @@ namespace PhpSerializerNET
 						}
 
 						seenObjects.Add(input);
-						var properties = input.GetType().GetProperties().Where(x => x.CanRead);
+						var properties = input.GetType().GetProperties().Where(y => y.CanRead && y.GetCustomAttribute<PhpIgnoreAttribute>() == null);
 						output.Append($"a:{properties.Count()}:");
 						output.Append("{");
 						foreach (var property in properties)
 						{
-							output.Append($"{Serialize(property.Name)}{Serialize(property.GetValue(input), seenObjects)}");
+							var propertyName = property.GetCustomAttribute<PhpPropertyAttribute>() != null
+								? property.GetCustomAttribute<PhpPropertyAttribute>().Name
+								: property.Name;
+							output.Append($"{Serialize(propertyName)}{Serialize(property.GetValue(input), seenObjects)}");
 						}
 						output.Append("}");
 						return output.ToString();
@@ -243,70 +247,71 @@ namespace PhpSerializerNET
 			{
 				if (entry.Key is string propertyName && entry.Value != null)
 				{
-					// TODO: This really should be an option. Plus it might create conflicts.
-					var property = options.CaseSensitiveProperties
-						? targetProperties.FirstOrDefault(y => y.Name == propertyName)
-						: targetProperties.FirstOrDefault(y => y.Name.ToLower() == propertyName.ToLower());
+					var property = targetProperties.FindProperty(propertyName, options);
 
-					if (property != null)
-					{
-						if (property.PropertyType == entry.Value.GetType())
-						{
-							property.SetValue(result, entry.Value);
-						}
-						else if (property.PropertyType == typeof(bool) && entry.Value is string value && (value == "1" || value == "0"))
-						{
-							if (options.NumberStringToBool)
-							{
-								property.SetValue(result, (string)value == "1" ? true : false);
-							}
-							else
-							{
-								throw new Exception(
-									$"Can not assign '{entry.Value.ToString()}' to property '{property.Name}' of type '{property.PropertyType.Name}'"
-								);
-							}
-						}
-						else if (property.PropertyType.IsIConvertible())
-						{
-							if (entry.Value is IConvertible convertible)
-							{
-								property.SetValue(result, property.PropertyType.Convert(entry.Value));
-							}
-							else
-							{
-								throw new Exception(
-									$"Can not assign '{entry.Value.ToString()}' to property '{property.Name}' of type '{property.PropertyType.Name}'"
-								);
-							}
-						}
-						else
-						{
-							if (property.PropertyType.IsClass)
-							{
-								// TODO: handle lists, handle dictionaries.
-
-								if (entry.Value is Dictionary<object, object>)
-								{
-									property.SetValue(
-										result,
-										ConstructObject(
-											property.PropertyType,
-											entry.Value as Dictionary<object, object>,
-											options
-										)
-									);
-								}
-							}
-						}
-					}
-					else
+					if (property == null)
 					{
 						if (!options.AllowExcessKeys)
 						{
 							throw new Exception($"Error: Could not bind the key {entry.Key} to object of type {targetType.Name}: No such property.");
 						}
+						break;
 					}
+
+					if (property.GetCustomAttribute<PhpIgnoreAttribute>() != null)
+					{
+						break;
+					}
+					if (property.PropertyType == entry.Value.GetType())
+					{
+						property.SetValue(result, entry.Value);
+					}
+					else if (property.PropertyType == typeof(bool) && entry.Value is string value && (value == "1" || value == "0"))
+					{
+						if (options.NumberStringToBool)
+						{
+							property.SetValue(result, (string)value == "1" ? true : false);
+						}
+						else
+						{
+							throw new Exception(
+								$"Can not assign '{entry.Value.ToString()}' to property '{property.Name}' of type '{property.PropertyType.Name}'"
+							);
+						}
+					}
+					else if (property.PropertyType.IsIConvertible())
+					{
+						if (entry.Value is IConvertible convertible)
+						{
+							property.SetValue(result, convertible.ToType(property.PropertyType, CultureInfo.InvariantCulture));
+						}
+						else
+						{
+							throw new Exception(
+								$"Can not assign '{entry.Value.ToString()}' to property '{property.Name}' of type '{property.PropertyType.Name}'"
+							);
+						}
+					}
+					else
+					{
+						if (property.PropertyType.IsClass)
+						{
+							// TODO: handle lists, handle dictionaries.
+
+							if (entry.Value is Dictionary<object, object>)
+							{
+								property.SetValue(
+									result,
+									ConstructObject(
+										property.PropertyType,
+										entry.Value as Dictionary<object, object>,
+										options
+									)
+								);
+							}
+						}
+					}
+
 				}
 			}
 			return result;

@@ -15,15 +15,10 @@ namespace PhpSerializerNET.Test
 		public void DeserializesMalformedNull()
 		{
 			var ex = Assert.ThrowsException<DeserializationException>(() =>PhpSerializer.Deserialize("N"));
-			Assert.AreEqual("N", ex.Input);
-			Assert.AreEqual("Unexpected end of data.", ex.Message);
-			Assert.AreEqual(1, ex.Position);
-			
+			Assert.AreEqual("Malformed null at position 0", ex.Message);
 
 			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("N?"));
-			Assert.AreEqual("N?", ex.Input);
-			Assert.AreEqual("Expected ';' at position 1.", ex.Message);
-			Assert.AreEqual(1, ex.Position);
+			Assert.AreEqual("Malformed null at position 0", ex.Message);
 		}
 		
 		[TestMethod]
@@ -31,78 +26,37 @@ namespace PhpSerializerNET.Test
 		{
 			var ex = Assert.ThrowsException<DeserializationException>(() =>PhpSerializer.Deserialize("b"));
 			Assert.IsNotNull(ex);
-			Assert.AreEqual("b", ex.Input);
-			Assert.AreEqual("Unexpected end of data.", ex.Message);
-			Assert.AreEqual(1, ex.Position);
+			Assert.AreEqual("Malformed boolean at position 0", ex.Message);
 
 			ex = Assert.ThrowsException<DeserializationException>(() =>PhpSerializer.Deserialize("b?"));
 			Assert.IsNotNull(ex);
-			Assert.AreEqual("Expected ':' at position 1.", ex.Message);
-			Assert.AreEqual(1, ex.Position);
+			Assert.AreEqual("Malformed boolean at position 0", ex.Message);
 
 			ex = Assert.ThrowsException<DeserializationException>(() =>PhpSerializer.Deserialize("b:1"));
 			Assert.IsNotNull(ex);
-			Assert.AreEqual("Expected ';' around position 2.", ex.Message);
-			Assert.AreEqual(2, ex.Position);
+			Assert.AreEqual("Malformed boolean at position 0", ex.Message);
 		}
 
 		[TestMethod]
 		public void DeserializeMalformedString()
 		{
-			DeserializationException exception = null;
-			try {
-				PhpSerializer.Deserialize("s");
-			}catch(DeserializationException ex){
-				exception = ex;
-			}
-			Assert.IsNotNull(exception);
-			Assert.AreEqual("Unexpected end of data.", exception.Message);
-			Assert.AreEqual(1, exception.Position);
+			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("s"));
+			Assert.AreEqual("Malformed string at position 0", ex.Message);
 
-			try {
-				PhpSerializer.Deserialize("s_");
-			}catch(DeserializationException ex){
-				exception = ex;
-			}
-			Assert.IsNotNull(exception);
-			Assert.AreEqual("Expected ':' at position 1.", exception.Message);
-			Assert.AreEqual(1, exception.Position);
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("s_"));
+			Assert.AreEqual("Malformed string at position 0", ex.Message);
 
-			try {
-				PhpSerializer.Deserialize("s:1");
-			}catch(DeserializationException ex){
-				exception = ex;
-			}
-			Assert.IsNotNull(exception);
-			Assert.AreEqual("Expected ':' around position 3.", exception.Message);
-			Assert.AreEqual(3, exception.Position);
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("s:1"));
+			Assert.AreEqual("Malformed string at position 0", ex.Message);
 
-			try {
-				PhpSerializer.Deserialize("s:1:");
-			}catch(DeserializationException ex){
-				exception = ex;
-			}
-			Assert.IsNotNull(exception);
-			Assert.AreEqual("Expected opening '\"' around position 4.", exception.Message);
-			Assert.AreEqual(4, exception.Position);
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("s:1:"));
+			Assert.AreEqual("Malformed string at position 0", ex.Message);
 
-			try {
-				PhpSerializer.Deserialize("s:1:\"a ");
-			}catch(DeserializationException ex){
-				exception = ex;
-			}
-			Assert.IsNotNull(exception);
-			Assert.AreEqual("Expected closing '\"' at position 6.", exception.Message);
-			Assert.AreEqual(6, exception.Position);
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("s:1:\"a "));
+			Assert.AreEqual("Malformed string at position 0", ex.Message);
 
-			try {
-				PhpSerializer.Deserialize("s:1:\"a");
-			}catch(DeserializationException ex){
-				exception = ex;
-			}
-			Assert.IsNotNull(exception);
-			Assert.AreEqual("Unexpected end of data.", exception.Message);
-			Assert.AreEqual(5, exception.Position);
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("s:1:\"a"));
+			Assert.AreEqual("Malformed string at position 0", ex.Message);
 		}
 	}
 }

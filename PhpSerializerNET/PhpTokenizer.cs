@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace PhpSerializerNET
 {
@@ -25,33 +26,100 @@ namespace PhpSerializerNET
 			this._utf8Input = Encoding.Convert(Encoding.Default, Encoding.UTF8, Encoding.Default.GetBytes(input));
 		}
 
-		internal List<PhpSerializeToken> Tokenize() {
+		internal bool ValidateFormat(ref int position, bool inArray = false)
+		{
+			for (; position < _input.Length; position++)
+			{
+				switch (_input[position])
+				{
+					case 'N': {
+ 						var match = new Regex(@"N;").Match(_input,position);
+						if (!match.Success || match.Index != position){
+							throw new DeserializationException($"Malformed null at position {position}");
+						}
+						position += match.Length-1;
+						break;
+					}
+					case 'b': {
+ 						var match = new Regex(@"b:[10];").Match(_input,position);
+						if (!match.Success || match.Index != position){
+							throw new DeserializationException($"Malformed boolean at position {position}");
+						}
+						position += match.Length-1;
+						break;
+					}
+					case 'i': {
+ 						var match = new Regex(@"i:[+-]?\d+;").Match(_input,position);
+						if (!match.Success || match.Index != position){
+							throw new DeserializationException($"Malformed integer at position {position}");
+						}
+						position += match.Length-1;
+						break;
+					}
+					case 'd': {
+						// Validate the correctness of the actual value in the proper parsing step:
+ 						var match = new Regex(@"d:.+;").Match(_input,position);
+						if (!match.Success || match.Index != position){
+							throw new DeserializationException($"Malformed double at position {position}");
+						}
+						position += match.Length-1;
+						break;
+					}
+					case 's': {
+ 						var match = new Regex(@"s:\d+:"".*?"";").Match(_input,position);
+						if (!match.Success ){
+							throw new DeserializationException($"Malformed string at position {position}");
+						}
+						position += match.Length-1;
+						break;
+					}
+					case 'a':
+						{
+							var match = new Regex(@"a:\d+:{").Match(_input,position);
+							if (!match.Success || match.Index != position){
+								throw new DeserializationException($"Malformed array at position {position}");
+							}
+							position+= match.Length;
+							ValidateFormat(ref position, true);
+
+							break;
+						}
+					case '}': {
+						if (inArray){
+							return true;
+						}else{
+							throw new DeserializationException($"unexpected token '{_input[position]} at position {position}'.");
+						}
+					}
+					default: {
+						throw new DeserializationException($"unexpected token '{_input[position]} at position {position}'.");
+					}
+				}
+			}
+			return true;
+		}
+
+		internal List<PhpSerializeToken> Tokenize()
+		{
+			int position = 0;
+			this.ValidateFormat(ref position);
 			List<PhpSerializeToken> tokens = new();
 
 			for (; _position < _utf8Input.Length; _position++)
 			{
-				if ((char)_utf8Input[_position] == '}'){
+				if ((char)_utf8Input[_position] == '}')
+				{
 					return tokens;
 				}
-				if ( _utf8Input.Length-1 <= _position){
-					throw new DeserializationException("Unexpected end of data.",  _input, _position+1);
+				if (_utf8Input.Length - 1 <= _position)
+				{
+					throw new DeserializationException($"Unexpected end of data at position { _position + 1}");
 				}
-				switch ((char)_utf8Input[_position] )
+				switch ((char)_utf8Input[_position])
 				{
 					case 'N':
 						{
-							if ( _utf8Input[_position + 1] == ';')
-							{
-								tokens.Add(new PhpSerializeToken() { Type = PhpSerializerType.Null });
-							}
-							else
-							{
-								throw new DeserializationException(
-									$"Expected ';' at position {_position+1}.",  
-									_input, 
-									_position+1
-								);
-							}
+							tokens.Add(new PhpSerializeToken() { Type = PhpSerializerType.Null });
 							_position++;
 							break;
 						}
@@ -59,20 +127,7 @@ namespace PhpSerializerNET
 					case 'i':
 					case 'd':
 						{
-							if ( _utf8Input[_position + 1] != ':')
-							{
-								throw new DeserializationException($"Expected ':' at position {_position+1}.",
-									_input, 
-									_position +1
-								);
-							}
-							var tokenClose = Array.IndexOf(_utf8Input, (byte)';', _position+1);
-							if (tokenClose < 0){
-								throw new DeserializationException($"Expected ';' around position {_position+2}.",
-									_input, 
-									_position +2
-								);
-							}
+							var tokenClose = Array.IndexOf(_utf8Input, (byte)';', _position + 1);
 							var token = new PhpSerializeToken()
 							{
 								Type = (char)_utf8Input[_position] switch
@@ -82,7 +137,7 @@ namespace PhpSerializerNET
 									'd' => PhpSerializerType.Floating,
 									_ => throw new Exception("This branch should be impossible to hit.")
 								},
-								Value = _utf8Input.Utf8Substring(_position+2, tokenClose - (_position + 2))
+								Value = _utf8Input.Utf8Substring(_position + 2, tokenClose - (_position + 2))
 							};
 							tokens.Add(token);
 							_position = tokenClose;
@@ -90,47 +145,13 @@ namespace PhpSerializerNET
 						}
 					case 's':
 						{
-							var lengthStart = _position+2;
-							if ( _utf8Input[_position + 1] != ':')
-							{
-								throw new DeserializationException($"Expected ':' at position {_position+1}.",
-									_input,
-									_position+1
-								);
-							}
-
+							var lengthStart = _position + 2;
 							var lengthClose = Array.IndexOf(_utf8Input, (byte)':', lengthStart + 1);
-							if (lengthClose < 0)
-							{
-								throw new DeserializationException($"Expected ':' around position {lengthStart + 1}.",
-									_input,
-									lengthStart + 1
-								);
-							}
-
-							var valueStart = Array.IndexOf(_utf8Input, (byte)'"', lengthClose ) + 1;
-							if (valueStart == 0)
-							{
-								throw new DeserializationException($"Expected opening '\"' around position {lengthClose + 1}.",
-									_input, 
-									lengthClose + 1
-								);
-							}else if (valueStart == _utf8Input.Length-1){
-								throw new DeserializationException("Unexpected end of data.",  _input, valueStart);
-							}
+							var valueStart = Array.IndexOf(_utf8Input, (byte)'"', lengthClose) + 1;
 
 							var length = int.Parse(
 								_utf8Input.Utf8Substring(lengthStart, lengthClose - lengthStart)
 							);
- 
-							// TODO: Check for closing '"' and the token terminating ';'
-							if (_utf8Input[valueStart + length] != '"')
-							{								
-								throw new DeserializationException($"Expected closing '\"' at position {valueStart + length}.",
-									_input, 
-									valueStart + length
-								);
-							}
 
 							tokens.Add(new PhpSerializeToken()
 							{
@@ -144,24 +165,8 @@ namespace PhpSerializerNET
 					case 'a':
 						{
 							var lengthStart = _position + 2;
-							if ( _utf8Input[_position + 1] != ':')
-							{
-								throw new DeserializationException(
-									$"Expected ':' around position {_position + 1}",
-									_input, 
-									_position
-								);
-							}
-							var lengthClose = Array.IndexOf(_utf8Input,(byte)':', lengthStart + 1);
-							if (lengthClose < 0)
-							{
-								throw new DeserializationException(
-									$"(Array) Expected ':' after position {lengthStart + 1}",
-									_input, 
-									_position
-								);
-							}
-							var length = int.Parse(	
+							var lengthClose = Array.IndexOf(_utf8Input, (byte)':', lengthStart + 1);
+							var length = int.Parse(
 								_utf8Input.Utf8Substring(lengthStart, lengthClose - lengthStart)
 							);
 

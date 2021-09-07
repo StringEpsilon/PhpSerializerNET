@@ -58,8 +58,7 @@ namespace PhpSerializerNET
 			}
 			if (this.Length != result.Count()){
 				throw new DeserializationException(
-					$"Array at position {this.Position} should be of length {this.Length}, but actual length is {result.Count}.",
-					this.Position
+					$"Array at position {this.Position} should be of length {this.Length}, but actual length is {result.Count}."
 				);
 			}
 

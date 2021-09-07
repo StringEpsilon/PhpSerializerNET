@@ -18,6 +18,17 @@ namespace PhpSerializerNET.Test
 			public CircularTest Bar { get; set; }
 		}
 
+		public class MappedClass {
+			[PhpProperty("en")]
+			public string English {get;set;}
+
+			[PhpProperty("de")]
+			public string German {get;set;}
+
+			[PhpIgnore]
+			public string it {get;set;}
+		}
+
 		[TestMethod]
 		public void SerializesObject()
 		{
@@ -32,6 +43,22 @@ namespace PhpSerializerNET.Test
 
 			Assert.AreEqual(
 				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}",
+				PhpSerializer.Serialize(testObject)
+			);
+		}
+
+
+		[TestMethod]
+		public void DeserializesObjectWithMappingInfo()
+		{
+			var testObject = new MappedClass(){
+				English = "Hello world!",
+				German = "Hallo Welt!",
+				it = "Ciao mondo!"
+			};
+
+			Assert.AreEqual(
+				"a:2:{s:2:\"en\";s:12:\"Hello world!\";s:2:\"de\";s:11:\"Hallo Welt!\";}",
 				PhpSerializer.Serialize(testObject)
 			);
 		}

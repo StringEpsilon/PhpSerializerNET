@@ -31,6 +31,17 @@ namespace PhpSerializerNET.Test
 			public bool False { get; set; }
 		}
 
+		public class MappedClass {
+			[PhpProperty("en")]
+			public string English {get;set;}
+
+			[PhpProperty("de")]
+			public string German {get;set;}
+
+			[PhpIgnore]
+			public string it {get;set;}
+		}
+
 		[TestMethod]
 		public void DeserializesObject()
 		{
@@ -42,6 +53,20 @@ namespace PhpSerializerNET.Test
 			Assert.AreEqual(1.2345, deserializedObject.ADouble);
 			Assert.AreEqual(true, deserializedObject.True);
 			Assert.AreEqual(false, deserializedObject.False);
+		}
+
+		[TestMethod]
+		public void DeserializesObjectWithMappingInfo()
+		{
+			var deserializedObject = PhpSerializer.Deserialize<MappedClass>(
+				"a:3:{s:2:\"en\";s:12:\"Hello World!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:2:\"it\";s:11:\"Ciao mondo!\";}"
+			);
+
+			// en and de mapped to differently named property:
+			Assert.AreEqual("Hello World!", deserializedObject.English);
+			Assert.AreEqual("Hallo Welt!", deserializedObject.German);
+			// "it" correctly ignored:
+			Assert.AreEqual(null, deserializedObject.it);
 		}
 
 		[TestMethod]
@@ -151,7 +176,6 @@ namespace PhpSerializerNET.Test
 			);
 			
 			Assert.AreEqual("Array at position 5 should be of length 2, but actual length is 3.", exception.Message);
-			Assert.AreEqual(5, exception.Position);
 		}
 
 		[TestMethod]

@@ -12,7 +12,6 @@ namespace PhpSerializerNET
 	public class DeserializationException : Exception
 	{
 		public string Input {get; private set;}
-		public long Position {get; private set;}
 
 		public DeserializationException()
 		{
@@ -20,16 +19,6 @@ namespace PhpSerializerNET
 
 		public DeserializationException(string message) : base(message)
 		{
-		}
-
-		public DeserializationException(string message, string input, long position) : base(message)
-		{
-			this.Input = input;
-			this.Position = position;
-		}
-		public DeserializationException(string message, long position) : base(message)
-		{
-			this.Position = position;
 		}
 
 		public DeserializationException(string message, Exception innerException) : base(message, innerException)

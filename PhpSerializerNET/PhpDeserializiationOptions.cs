@@ -6,28 +6,57 @@
 
 namespace PhpSerializerNET
 {
-	public enum ListOptions {
+	/// <summary>
+	/// Available behaviors for dealing with associative arrays and their conversion to Lists.
+	/// </summary>
+	public enum ListOptions
+	{
 		/// <summary>
-		/// Convert associative array to list when all keys are consequetive integers
+		/// Convert associative array to list when all keys are consecutive integers
 		/// </summary>
 		Default,
+
 		/// <summary>
-		/// Convert associative array to list when all keys are integers, consequetive or not.
+		/// Convert associative array to list when all keys are integers, consecutive or not.
 		/// </summary>
 		OnAllIntegerKeys,
+
 		/// <summary>
 		/// Always use dictionaries.
 		/// </summary>
 		Never
 	}
 
-	public class PhpDeserializationOptions 
+	/// <summary>
+	/// Options for deserializing PHP data.
+	/// </summary>
+	public class PhpDeserializationOptions
 	{
-		public bool CaseSensitiveProperties = true;
-		public bool AllowExcessKeys = false;
-		public ListOptions UseLists = ListOptions.Default;
+		/// <summary>
+		/// Whether or not properties are matched case sensitive. Default true.
+		/// </summary>
+		public bool CaseSensitiveProperties { get; set; } = true;
 
-		internal static PhpDeserializationOptions DefaultOptions = new(){
+		/// <summary>
+		/// If true, keys present in the array but not on the target class will be ignored.
+		/// Otherwise an exception will be thrown.
+		/// Default is false.
+		/// </summary>
+		public bool AllowExcessKeys { get; set; } = false;
+
+		/// <summary>
+		/// Determines how and when associative arrays are deserialized into <see cref="System.Collections.Generic.List{object}"/>
+		/// instead of a dictionary. Defaults to <see cref="ListOptions.Default"/>.
+		/// </summary>
+		public ListOptions UseLists { get; set; } = ListOptions.Default;
+
+		/// <summary>
+		/// Whether or not to convert strings "1"` and "0" to boolean. Default is false.
+		/// </summary>
+		public bool NumberStringToBool { get; set; } = false;
+
+		internal static PhpDeserializationOptions DefaultOptions = new()
+		{
 			CaseSensitiveProperties = true,
 			AllowExcessKeys = false,
 			UseLists = ListOptions.Default,

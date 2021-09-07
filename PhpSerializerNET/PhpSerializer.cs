@@ -35,7 +35,8 @@ namespace PhpSerializerNET
 		/// </returns>
 		public static object Deserialize(string input, PhpDeserializationOptions options = null)
 		{
-			if (options == null){
+			if (options == null)
+			{
 				options = PhpDeserializationOptions.DefaultOptions;
 			}
 			var tokens = new PhpTokenizer(input, options).Tokenize();
@@ -62,7 +63,8 @@ namespace PhpSerializerNET
 		/// </returns>
 		public static T Deserialize<T>(string input, PhpDeserializationOptions options = null)
 		{
-			if (options == null){
+			if (options == null)
+			{
 				options = PhpDeserializationOptions.DefaultOptions;
 			}
 			var tokens = new PhpTokenizer(input, options).Tokenize();
@@ -242,7 +244,7 @@ namespace PhpSerializerNET
 				if (entry.Key is string propertyName && entry.Value != null)
 				{
 					// TODO: This really should be an option. Plus it might create conflicts.
-					var property = options.CaseSensitiveProperties 
+					var property = options.CaseSensitiveProperties
 						? targetProperties.FirstOrDefault(y => y.Name == propertyName)
 						: targetProperties.FirstOrDefault(y => y.Name.ToLower() == propertyName.ToLower());
 
@@ -252,11 +254,24 @@ namespace PhpSerializerNET
 						{
 							property.SetValue(result, entry.Value);
 						}
+						else if (property.PropertyType == typeof(bool) && entry.Value is string value && (value == "1" || value == "0"))
+						{
+							if (options.NumberStringToBool)
+							{
+								property.SetValue(result, (string)value == "1" ? true : false);
+							}
+							else
+							{
+								throw new Exception(
+									$"Can not assign '{entry.Value.ToString()}' to property '{property.Name}' of type '{property.PropertyType.Name}'"
+								);
+							}
+						}
 						else if (property.PropertyType.IsIConvertible())
 						{
 							if (entry.Value is IConvertible convertible)
 							{
-								property.SetValue(result, convertible.ToType(property.PropertyType, CultureInfo.InvariantCulture));
+								property.SetValue(result, property.PropertyType.Convert(entry.Value));
 							}
 							else
 							{
@@ -284,8 +299,11 @@ namespace PhpSerializerNET
 								}
 							}
 						}
-					}else{
-						if (!options.AllowExcessKeys){
+					}
+					else
+					{
+						if (!options.AllowExcessKeys)
+						{
 							throw new Exception($"Error: Could not bind the key {entry.Key} to object of type {targetType.Name}: No such property.");
 						}
 					}

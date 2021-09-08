@@ -1,3 +1,10 @@
+<center>
+
+[![Nuget](https://img.shields.io/nuget/v/PhpSerializerNET?style=flat-square)](https://www.nuget.org/packages/PhpSerializerNET/) [![GitHub](https://img.shields.io/github/license/StringEpsilon/PhpSerializerNET?style=flat-square)](https://github.com/StringEpsilon/PhpSerializerNET/blob/main/LICENSE) [![Azure DevOps builds](https://img.shields.io/azure-devops/build/StringEpsilon/StringEpsilon/4?style=flat-square)](https://dev.azure.com/StringEpsilon/StringEpsilon/_build/latest?definitionId=4&branchName=main) ![Build Status](https://img.shields.io/azure-devops/coverage/StringEpsilon/StringEpsilon/4/main?style=flat-square)
+</center>
+
+-----
+
 # PhpSerializerNET
 
 This is a .NET library for working with the [PHP serialization format](https://en.wikipedia.org/wiki/PHP_serialization_format).

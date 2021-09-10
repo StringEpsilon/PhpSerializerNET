@@ -57,6 +57,15 @@ namespace PhpSerializerNET.Test
 
 			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("s:1:\"a"));
 			Assert.AreEqual("Malformed string at position 0", ex.Message);
+
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("s:30:\"\";"));
+			Assert.AreEqual("Unexpected end of data at position. The string at position 0 pointed to out of bounds index 36.", ex.Message);
+
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("s:1:\"\";"));
+			Assert.AreEqual("String at position 0 has an incorrect length.", ex.Message);
+
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("s:a:\"\";"));
+			Assert.AreEqual("Malformed string at position 0", ex.Message);
 		}
 
 		[TestMethod]

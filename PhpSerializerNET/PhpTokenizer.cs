@@ -165,9 +165,22 @@ namespace PhpSerializerNET
 							var lengthClose = Array.IndexOf(_utf8Input, (byte)':', lengthStart + 1);
 							var valueStart = Array.IndexOf(_utf8Input, (byte)'"', lengthClose) + 1;
 
-							var length = int.Parse(
-								_utf8Input.Utf8Substring(lengthStart, lengthClose - lengthStart)
-							);
+							var length = int.Parse(_utf8Input.Utf8Substring(lengthStart, lengthClose - lengthStart));
+
+							var value = _utf8Input.Utf8Substring(valueStart, length);
+
+							if (valueStart + length >= _utf8Input.Length)
+							{
+								throw new DeserializationException(
+									$"Unexpected end of data at position. The string at position {_position} pointed to out of bounds index {valueStart + length}."
+								);
+							}
+							if (_utf8Input[valueStart + length] != '"')
+							{
+								throw new DeserializationException(
+									$"String at position {_position} has an incorrect length."
+								);
+							}
 
 							tokens.Add(new PhpSerializeToken()
 							{

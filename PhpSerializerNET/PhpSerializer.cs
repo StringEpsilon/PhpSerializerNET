@@ -253,7 +253,9 @@ namespace PhpSerializerNET
 					{
 						if (!options.AllowExcessKeys)
 						{
-							throw new Exception($"Error: Could not bind the key {entry.Key} to object of type {targetType.Name}: No such property.");
+							throw new DeserializationException(
+								$"Error: Could not bind the key {entry.Key} to object of type {targetType.Name}: No such property."
+							);
 						}
 						break;
 					}
@@ -274,7 +276,7 @@ namespace PhpSerializerNET
 						}
 						else
 						{
-							throw new Exception(
+							throw new DeserializationException(
 								$"Can not assign '{entry.Value.ToString()}' to property '{property.Name}' of type '{property.PropertyType.Name}'"
 							);
 						}
@@ -287,7 +289,7 @@ namespace PhpSerializerNET
 						}
 						else
 						{
-							throw new Exception(
+							throw new DeserializationException(
 								$"Can not assign '{entry.Value.ToString()}' to property '{property.Name}' of type '{property.PropertyType.Name}'"
 							);
 						}
@@ -311,7 +313,6 @@ namespace PhpSerializerNET
 							}
 						}
 					}
-
 				}
 			}
 			return result;

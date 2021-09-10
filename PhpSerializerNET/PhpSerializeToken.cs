@@ -26,26 +26,37 @@ namespace PhpSerializerNET
 
 		internal object ToObject(PhpDeserializationOptions options)
 		{
-			return this.Type switch
+			switch (this.Type)
 			{
-				PhpSerializerType.Null => null,
-				PhpSerializerType.Boolean => this.Value == "1" ? true : false,
-				PhpSerializerType.Integer => long.Parse(this.Value),
-				PhpSerializerType.Floating => this.ParseFloat(this.Value),
-				PhpSerializerType.String => this.Value,
-				PhpSerializerType.Array => this.ToCollection(options),
-				_ => throw new Exception("Unsupported datatype.")
-			};
+				case PhpSerializerType.Null:
+					return null;
+				case PhpSerializerType.Boolean:
+					return this.Value == "1" ? true : false;
+				case PhpSerializerType.Integer:
+					return long.Parse(this.Value);
+				case PhpSerializerType.Floating:
+					return this.ParseFloat(this.Value);
+				case PhpSerializerType.String:
+					return this.Value;
+				case PhpSerializerType.Array:
+					return this.ToCollection(options);
+				default:
+					throw new Exception("Unsupported datatype.");
+			}
 		}
 
 		private double ParseFloat(string input)
 		{
-			return input switch
+			switch (input)
 			{
-				"INF" => double.PositiveInfinity,
-				"-INF" => double.NegativeInfinity,
-				"NAN" => double.NaN,
-				_ => double.Parse(input, CultureInfo.InvariantCulture)
+				case "INF":
+					return double.PositiveInfinity;
+				case "-INF":
+					return double.NegativeInfinity;
+				case "NAN":
+					return double.NaN;
+				default:
+					return double.Parse(input, CultureInfo.InvariantCulture);
 			};
 		}
 
@@ -56,7 +67,8 @@ namespace PhpSerializerNET
 			{
 				result.Add(this.Children[i].ToObject(options), this.Children[i + 1].ToObject(options));
 			}
-			if (this.Length != result.Count()){
+			if (this.Length != result.Count())
+			{
 				throw new DeserializationException(
 					$"Array at position {this.Position} should be of length {this.Length}, but actual length is {result.Count}."
 				);
@@ -64,20 +76,25 @@ namespace PhpSerializerNET
 
 			if (options.UseLists != ListOptions.Never)
 			{
-				if (result.Any(x => x.Key is not long)){
+				if (result.Any(x => x.Key is not long))
+				{
 					return result;
 				}
 
 				if (options.UseLists == ListOptions.Default)
 				{
 					var orderedEntries = result.OrderBy(x => (long)x.Key);
-					var previousKey = ((long)orderedEntries.First().Key)-1;
+					var previousKey = ((long)orderedEntries.First().Key) - 1;
 					var resultList = new List<object>();
-					foreach(var entry in orderedEntries){
-						if ((long)entry.Key == previousKey + 1){
+					foreach (var entry in orderedEntries)
+					{
+						if ((long)entry.Key == previousKey + 1)
+						{
 							previousKey = (long)entry.Key;
 							resultList.Add(entry.Value);
-						}else{
+						}
+						else
+						{
 							return result;
 						}
 					}

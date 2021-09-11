@@ -45,6 +45,9 @@ namespace PhpSerializerNET {
 				case PhpSerializerType.Floating:
 					return token.ToDouble();
 				case PhpSerializerType.String:
+					if (_options.NumberStringToBool && (token.Value == "0" || token.Value == "1")) {
+						return token.ToBool();
+					}
 					return token.Value;
 				case PhpSerializerType.Array:
 					return token.ToCollection(_options);
@@ -78,6 +81,11 @@ namespace PhpSerializerNET {
 				case PhpSerializerType.Floating:
 				case PhpSerializerType.String:
 					if (targetType.IsIConvertible()) {
+						if (targetType == typeof(bool)) {
+							if (_options.NumberStringToBool && (token.Value == "0" || token.Value == "1")) {
+								return token.ToBool();
+							}
+						}
 						return ((IConvertible)token.Value).ToType(targetType, CultureInfo.InvariantCulture);
 					} else {
 						throw new DeserializationException(

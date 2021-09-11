@@ -151,5 +151,22 @@ namespace PhpSerializerNET.Test {
 				PhpSerializer.Deserialize("s:4:\"👻\";")
 			);
 		}
+
+		[TestMethod]
+		public void DeserializeStringToBool() {
+			var options = new PhpDeserializationOptions() { NumberStringToBool = true };
+
+			var value = PhpSerializer.Deserialize<bool>("s:1:\"1\";", options);
+			Assert.AreEqual(true, value);
+
+			value = PhpSerializer.Deserialize<bool>("s:1:\"0\";", options);
+			Assert.AreEqual(false, value);
+
+			value = (bool)PhpSerializer.Deserialize("s:1:\"1\";", options);
+			Assert.AreEqual(true, value);
+
+			value = (bool)PhpSerializer.Deserialize("s:1:\"0\";", options);
+			Assert.AreEqual(false, value);
+		}
 	}
 }

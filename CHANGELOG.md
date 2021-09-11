@@ -1,3 +1,9 @@
+# Future
+
+- Support for structs.
+- Fixed performance drop due to over-checking the input string.
+- Refactored deserializer to work in less steps and with cleaner code.
+
 # 0.3.0
 
 - Added InputEncoding option.

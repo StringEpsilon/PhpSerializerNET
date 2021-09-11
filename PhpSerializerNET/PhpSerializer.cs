@@ -72,10 +72,6 @@ namespace PhpSerializerNET {
 				throw new DeserializationException("Can not deserialize loose collection of values into object");
 			}
 
-			if (tokens[0].Type == PhpSerializerType.Null) {
-				return default(T);
-			}
-
 			return new PhpDeserializer(options, tokens).Deserialize<T>();
 		}
 

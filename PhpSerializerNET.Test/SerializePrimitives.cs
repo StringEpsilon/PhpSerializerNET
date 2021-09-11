@@ -7,14 +7,11 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PhpSerializerNET;
 
-namespace PhpSerializerNET.Test
-{
+namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class SerializePrimitives
-	{
+	public class SerializePrimitives {
 		[TestMethod]
-		public void SerializesNull()
-		{
+		public void SerializesNull() {
 			Assert.AreEqual(
 				"N;",
 				PhpSerializer.Serialize(null)
@@ -22,8 +19,7 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void SerializesBool()
-		{
+		public void SerializesBool() {
 			Assert.AreEqual(
 				"b:1;",
 				PhpSerializer.Serialize(true)
@@ -36,24 +32,21 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void StringNReturnsNull()
-		{
+		public void StringNReturnsNull() {
 			var result = PhpSerializer.Deserialize<string>("N;");
 
 			Assert.IsNull(result);
 		}
 
 		[TestMethod]
-		public void LongNReturnsZero()
-		{
+		public void LongNReturnsZero() {
 			var result = PhpSerializer.Deserialize<long>("N;");
 
 			Assert.AreEqual(0, result);
 		}
 
 		[TestMethod]
-		public void ConvertsProperly()
-		{
+		public void ConvertsProperly() {
 			var result = PhpSerializer.Deserialize<long>("b:0;");
 
 			Assert.AreEqual(0, result);
@@ -69,8 +62,7 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void SerializeInteger()
-		{
+		public void SerializeInteger() {
 			Assert.AreEqual(
 				"i:0;",
 				PhpSerializer.Serialize(0)
@@ -90,8 +82,7 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void SerializeLong()
-		{
+		public void SerializeLong() {
 			Assert.AreEqual(
 				"i:9223372036854775807;",
 				PhpSerializer.Serialize(long.MaxValue)
@@ -103,8 +94,7 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void SerializesDouble()
-		{
+		public void SerializesDouble() {
 			Assert.AreEqual(
 				"d:1.23456789;",
 				PhpSerializer.Serialize(1.23456789)
@@ -135,25 +125,5 @@ namespace PhpSerializerNET.Test
 			);
 		}
 
-		[TestMethod]
-		public void SerializesString()
-		{
-			Assert.AreEqual(
-				"s:12:\"Hello World!\";",
-				PhpSerializer.Serialize("Hello World!")
-			);
-			Assert.AreEqual(
-				"s:0:\"\";",
-				PhpSerializer.Serialize("")
-			);
-			Assert.AreEqual(
-				"s:14:\"äöüßÄÖÜ\";",
-				PhpSerializer.Serialize("äöüßÄÖÜ")
-			);
-			Assert.AreEqual(
-				"s:4:\"👻\";",
-				PhpSerializer.Serialize("👻")
-			);
-		}
 	}
 }

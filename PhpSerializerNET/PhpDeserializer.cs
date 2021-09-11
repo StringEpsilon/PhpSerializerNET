@@ -22,11 +22,7 @@ namespace PhpSerializerNET {
 		}
 
 		public object Deserialize() {
-			if (this._tokens.Count == 1) {
-				return this.DeserializeToken(_tokens[0]);
-			} else {
-				return this._tokens.Select(x => this.DeserializeToken(x)).ToList();
-			}
+			return this.DeserializeToken(_tokens[0]);
 		}
 
 		public T Deserialize<T>() {
@@ -61,20 +57,15 @@ namespace PhpSerializerNET {
 				case PhpSerializerType.Null:
 					if (targetType.IsValueType) {
 						return Activator.CreateInstance(targetType);
-					}
-					if (targetType.IsClass) {
-						return null;
 					} else {
-						throw new DeserializationException(
-							$"Can not assign null (at position {token.Position}) to target type of {targetType.Name}."
-						);
+						return null;
 					}
 				case PhpSerializerType.Boolean:
 					if (targetType.IsIConvertible()) {
 						return ((IConvertible)token.ToBool()).ToType(targetType, CultureInfo.InvariantCulture);
 					} else {
 						throw new DeserializationException(
-							$"Can not assign value {token.Value} (at position {token.Position}) to target type of {targetType.Name}."
+							$"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}."
 						);
 					}
 				case PhpSerializerType.Integer:
@@ -89,7 +80,7 @@ namespace PhpSerializerNET {
 						return ((IConvertible)token.Value).ToType(targetType, CultureInfo.InvariantCulture);
 					} else {
 						throw new DeserializationException(
-							$"Can not assign value {token.Value} (at position {token.Position}) to target type of {targetType.Name}."
+							$"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}."
 						);
 					}
 				case PhpSerializerType.Array:

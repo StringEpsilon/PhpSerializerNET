@@ -5,28 +5,10 @@
 **/
 
 using System;
-using System.Runtime.Serialization;
 
-namespace PhpSerializerNET
-{
-	public class DeserializationException : Exception
-	{
-		public string Input {get; private set;}
-
-		public DeserializationException()
-		{
-		}
-
-		public DeserializationException(string message) : base(message)
-		{
-		}
-
-		public DeserializationException(string message, Exception innerException) : base(message, innerException)
-		{
-		}
-
-		protected DeserializationException(SerializationInfo info, StreamingContext context) : base(info, context)
-		{
+namespace PhpSerializerNET {
+	public class DeserializationException : Exception {
+		public DeserializationException(string message) : base(message) {
 		}
 	}
 }

@@ -42,7 +42,7 @@ namespace PhpSerializerNET {
 				throw new DeserializationException("Can not deserialize loose collection of values into object");
 			}
 
-			return tokens[0].ToObject(options);
+			return new PhpDeserializer(options, tokens).Deserialize();
 		}
 
 		/// <summary>
@@ -181,8 +181,6 @@ namespace PhpSerializerNET {
 						return output.ToString();
 					}
 			}
-
 		}
-
 	}
 }

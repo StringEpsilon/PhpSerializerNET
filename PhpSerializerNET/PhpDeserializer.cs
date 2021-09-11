@@ -22,10 +22,10 @@ namespace PhpSerializerNET {
 		}
 
 		public object Deserialize() {
-			if (this._tokens.Count == 0) {
+			if (this._tokens.Count == 1) {
 				return this.DeserializeToken(_tokens[0]);
 			} else {
-				return this._tokens.Select(x => this.DeserializeToken(x));
+				return this._tokens.Select(x => this.DeserializeToken(x)).ToList();
 			}
 		}
 

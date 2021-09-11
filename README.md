@@ -28,7 +28,6 @@ string serializedData = PhpSerializer.Serialize(myObject);
 * [ ] General polish.
 * [ ] Cover all features and most error handlinng with unit tests.
 	- AllowExcessKeys needs testing (both ways) (and on structs too.)
-	- CaseSensitiveProperties needs testing (props and structs)
 * [ ] Reorganize unit tests.
 
 ## Non-TODO:

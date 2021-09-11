@@ -12,6 +12,13 @@ namespace PhpSerializerNET.Test {
 	[TestClass]
 	public class TestStrings {
 		[TestMethod]
+		public void DeserializesNull() {
+			var result = PhpSerializer.Deserialize<string>("N;");
+
+			Assert.IsNull(result);
+		}
+
+		[TestMethod]
 		public void SerializeHelloWorld() {
 			Assert.AreEqual(
 				"s:12:\"Hello World!\";",

@@ -57,6 +57,23 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
+		public void DeserializeStructCaseInsensitive() {
+			var value = PhpSerializer.Deserialize<MyStruct>(
+				"a:2:{s:3:\"FOO\";s:3:\"Foo\";s:3:\"BAR\";s:3:\"Bar\";}",
+				new PhpDeserializationOptions() { CaseSensitiveProperties = false }
+			);
+
+			Assert.AreEqual(
+				"Foo",
+				value.foo
+			);
+			Assert.AreEqual(
+				"Bar",
+				value.bar
+			);
+		}
+
+		[TestMethod]
 		public void DeserializeIgnoreField() {
 			var value = PhpSerializer.Deserialize<MyStructIgnoreBar>(
 				"a:2:{s:3:\"foo\";s:3:\"Foo\";s:3:\"bar\";s:3:\"Bar\";}"

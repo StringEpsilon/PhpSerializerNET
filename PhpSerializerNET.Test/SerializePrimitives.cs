@@ -32,20 +32,6 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void StringNReturnsNull() {
-			var result = PhpSerializer.Deserialize<string>("N;");
-
-			Assert.IsNull(result);
-		}
-
-		[TestMethod]
-		public void LongNReturnsZero() {
-			var result = PhpSerializer.Deserialize<long>("N;");
-
-			Assert.AreEqual(0, result);
-		}
-
-		[TestMethod]
 		public void ConvertsProperly() {
 			var result = PhpSerializer.Deserialize<long>("b:0;");
 
@@ -55,42 +41,9 @@ namespace PhpSerializerNET.Test {
 
 			Assert.AreEqual(1, result);
 
-
 			double number = PhpSerializer.Deserialize<double>("i:10;");
 
 			Assert.AreEqual(10.00, number);
-		}
-
-		[TestMethod]
-		public void SerializeInteger() {
-			Assert.AreEqual(
-				"i:0;",
-				PhpSerializer.Serialize(0)
-			);
-			Assert.AreEqual(
-				"i:1;",
-				PhpSerializer.Serialize(1)
-			);
-			Assert.AreEqual(
-				"i:2147483647;",
-				PhpSerializer.Serialize(int.MaxValue)
-			);
-			Assert.AreEqual(
-				"i:-2147483648;",
-				PhpSerializer.Serialize(int.MinValue)
-			);
-		}
-
-		[TestMethod]
-		public void SerializeLong() {
-			Assert.AreEqual(
-				"i:9223372036854775807;",
-				PhpSerializer.Serialize(long.MaxValue)
-			);
-			Assert.AreEqual(
-				"i:-9223372036854775808;", // Note: PHP 8 serializes this to a double, but it works fine on deserialization.
-				PhpSerializer.Serialize(long.MinValue)
-			);
 		}
 
 		[TestMethod]

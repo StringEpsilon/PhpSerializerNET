@@ -159,22 +159,37 @@ namespace PhpSerializerNET {
 						return output.ToString();
 					}
 				default: {
+
 						if (seenObjects.Contains(input)) {
 							return "N;"; // See above.
 						}
-
-						seenObjects.Add(input);
-						var properties = input.GetType().GetProperties().Where(y => y.CanRead && y.GetCustomAttribute<PhpIgnoreAttribute>() == null);
-						output.Append($"a:{properties.Count()}:");
-						output.Append("{");
-						foreach (var property in properties) {
-							var propertyName = property.GetCustomAttribute<PhpPropertyAttribute>() != null
-								? property.GetCustomAttribute<PhpPropertyAttribute>().Name
-								: property.Name;
-							output.Append($"{Serialize(propertyName)}{Serialize(property.GetValue(input), seenObjects)}");
+						if (input.GetType().IsValueType) {
+							seenObjects.Add(input);
+							var fields = input.GetType().GetFields().Where(y => y.IsPublic && y.GetCustomAttribute<PhpIgnoreAttribute>() == null);
+							output.Append($"a:{fields.Count()}:");
+							output.Append("{");
+							foreach (var field in fields) {
+								var fieldName = field.GetCustomAttribute<PhpPropertyAttribute>() != null
+									? field.GetCustomAttribute<PhpPropertyAttribute>().Name
+									: field.Name;
+								output.Append($"{Serialize(fieldName)}{Serialize(field.GetValue(input), seenObjects)}");
+							}
+							output.Append("}");
+							return output.ToString();
+						} else {
+							seenObjects.Add(input);
+							var properties = input.GetType().GetProperties().Where(y => y.CanRead && y.GetCustomAttribute<PhpIgnoreAttribute>() == null);
+							output.Append($"a:{properties.Count()}:");
+							output.Append("{");
+							foreach (var property in properties) {
+								var propertyName = property.GetCustomAttribute<PhpPropertyAttribute>() != null
+									? property.GetCustomAttribute<PhpPropertyAttribute>().Name
+									: property.Name;
+								output.Append($"{Serialize(propertyName)}{Serialize(property.GetValue(input), seenObjects)}");
+							}
+							output.Append("}");
+							return output.ToString();
 						}
-						output.Append("}");
-						return output.ToString();
 					}
 			}
 		}

@@ -91,14 +91,39 @@ namespace PhpSerializerNET {
 					} else if (targetType.IsClass) {
 						return this.MakeObject(targetType, token);
 					} else {
-						throw new DeserializationException(
-							$"Can not assign array (at position {token.Position}) to target type of {targetType.Name}."
-						);
+						return this.MakeStruct(targetType, token);
 					}
 				default:
 					throw new Exception("Unsupported datatype.");
 			}
 		}
+
+		private object MakeStruct(Type targetType, PhpSerializeToken token) {
+			var result = Activator.CreateInstance(targetType);
+			var targetFields = targetType.GetFields();
+
+			for (int i = 0; i < token.Children.Count; i += 2) {
+				var fieldName = token.Children[i].Value;
+				var valueToken = token.Children[i + 1];
+
+				var field = targetFields.FindField(fieldName, _options) as FieldInfo;
+
+				if (field == null) {
+					if (!_options.AllowExcessKeys) {
+						throw new DeserializationException(
+							$"Error: Could not bind the key {fieldName} to struct of type {targetType.Name}: No such property."
+						);
+					}
+					break;
+				}
+				if (field.GetCustomAttribute<PhpIgnoreAttribute>() != null) {
+					break;
+				}
+				field.SetValue(result, this.DeserializeToken(field.FieldType, valueToken));
+			}
+			return result;
+		}
+
 
 		private object MakeObject(Type targetType, PhpSerializeToken token) {
 			var result = targetType.GetConstructor(new Type[0]).Invoke(null);
@@ -108,7 +133,7 @@ namespace PhpSerializerNET {
 				var propertyName = token.Children[i].Value;
 				var valueToken = token.Children[i + 1];
 
-				var property = targetProperties.FindProperty(propertyName, _options);
+				var property = targetProperties.FindProperty(propertyName, _options) as PropertyInfo;
 
 				if (property == null) {
 					if (!_options.AllowExcessKeys) {

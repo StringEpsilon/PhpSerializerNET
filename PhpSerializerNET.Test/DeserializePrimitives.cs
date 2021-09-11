@@ -128,7 +128,5 @@ namespace PhpSerializerNET.Test {
 				PhpSerializer.Deserialize("d:NAN;")
 			);
 		}
-
-
 	}
 }

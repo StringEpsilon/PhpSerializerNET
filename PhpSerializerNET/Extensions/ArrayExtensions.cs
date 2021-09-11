@@ -13,30 +13,24 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace PhpSerializerNET
-{
-	internal static class ArrayExtensions
-	{
-		public static string Utf8Substring(this byte[] array, int start, int length, Encoding encoding)
-		{
-			if (encoding == Encoding.UTF8)
-			{
+namespace PhpSerializerNET {
+	internal static class ArrayExtensions {
+		public static string Utf8Substring(this byte[] array, int start, int length, Encoding encoding) {
+			if (encoding == Encoding.UTF8) {
 				return Encoding.UTF8.GetString(array.Skip(start).Take(length).ToArray());
-			}
-			else
-			{
+			} else {
 				return Encoding.UTF8.GetString(
 					Encoding.Convert(encoding, Encoding.UTF8, array.Skip(start).Take(length).ToArray())
 				);
 			}
 		}
 
-		public static PropertyInfo FindProperty(this PropertyInfo[] array, string name, PhpDeserializationOptions options)
-		{
-			PropertyInfo property = null;
+
+		public static MemberInfo FindField(this FieldInfo[] array, string name, PhpDeserializationOptions options) {
+			FieldInfo field = null;
 
 			// Explicetly named properties have priority:
-			property = array
+			field = array
 				.Where(y => y.GetCustomAttribute<PhpPropertyAttribute>() != null)
 				.FirstOrDefault(y =>
 					options.CaseSensitiveProperties
@@ -44,14 +38,34 @@ namespace PhpSerializerNET
 						: y.GetCustomAttribute<PhpPropertyAttribute>().Name.ToLower() == name.ToLower()
 				);
 
-			if (property == null)
-			{
-				property = options.CaseSensitiveProperties
+			if (field == null) {
+				field = options.CaseSensitiveProperties
 					? array.FirstOrDefault(y => y.Name == name)
 					: array.FirstOrDefault(y => y.Name.ToLower() == name.ToLower());
 			}
 
-			return property;
+			return field;
+		}
+
+		public static MemberInfo FindProperty(this PropertyInfo[] array, string name, PhpDeserializationOptions options) {
+			PropertyInfo member = null;
+
+			// Explicetly named properties have priority:
+			member = array
+				.Where(y => y.GetCustomAttribute<PhpPropertyAttribute>() != null)
+				.FirstOrDefault(y =>
+					options.CaseSensitiveProperties
+						? y.GetCustomAttribute<PhpPropertyAttribute>().Name == name
+						: y.GetCustomAttribute<PhpPropertyAttribute>().Name.ToLower() == name.ToLower()
+				);
+
+			if (member == null) {
+				member = options.CaseSensitiveProperties
+					? array.FirstOrDefault(y => y.Name == name)
+					: array.FirstOrDefault(y => y.Name.ToLower() == name.ToLower());
+			}
+
+			return member;
 		}
 	}
 }

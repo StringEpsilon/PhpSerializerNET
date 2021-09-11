@@ -22,14 +22,12 @@ string serializedData = PhpSerializer.Serialize(myObject);
 
 ## TODOs
 
-
-* [ ] Support structs.
 * [ ] Documentation.
 * [ ] Write better exceptions.
 	- Partially done.
 * [ ] General polish.
 * [ ] Cover all features and most error handlinng with unit tests.
-	- AllowExcessKeys needs testing (both ways)
+	- AllowExcessKeys needs testing (both ways) (and on structs too.)
 * [ ] Reorganize unit tests.
 
 ## Non-TODO:

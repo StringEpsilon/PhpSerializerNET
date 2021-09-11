@@ -20,7 +20,8 @@ namespace PhpSerializerNET {
 			this._input = input;
 			this._position = 0;
 			this._options = options;
-
+			int position = 0;
+			this.ValidateFormat(ref position);
 			this._inputBytes = Encoding.Convert(Encoding.Default, options.InputEncoding, Encoding.Default.GetBytes(input));
 		}
 
@@ -94,8 +95,7 @@ namespace PhpSerializerNET {
 		}
 
 		internal List<PhpSerializeToken> Tokenize() {
-			int position = 0;
-			this.ValidateFormat(ref position);
+
 			List<PhpSerializeToken> tokens = new();
 
 			for (; _position < _inputBytes.Length; _position++) {

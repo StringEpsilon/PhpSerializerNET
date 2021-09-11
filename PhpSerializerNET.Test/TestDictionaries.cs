@@ -14,7 +14,7 @@ namespace PhpSerializerNET.Test {
 	[TestClass]
 	public class TestDictionaries {
 		[TestMethod]
-		public void DeserializesDistionary() {
+		public void DeserializesDictionary() {
 			var result = PhpSerializer.Deserialize(
 				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}"
 			);
@@ -30,11 +30,28 @@ namespace PhpSerializerNET.Test {
 			Assert.AreEqual(false, dictionary["False"]);
 		}
 
-		public void SerializesDistionary() {
+		[TestMethod]
+		public void SerializesDictionary() {
 			var dictionary = new Dictionary<object, object>(){
-				{"this is a string value", "AString"},
-				{(long)10, "AnInteger"},
-				{1.2345, "ADouble"},
+				{ "AString", "this is a string value" },
+				{ "AnInteger", (long)10 },
+				{ "ADouble", 1.2345 },
+				{ "True", true },
+				{ "False", false }
+			};
+
+			var result = PhpSerializer.Serialize(
+				dictionary
+			);
+			Assert.AreEqual(
+				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}",
+				result
+			);
+		}
+
+		[TestMethod]
+		public void SerializesBoolDictionary() {
+			var dictionary = new Dictionary<bool, object>(){
 				{true, "True"},
 				{false, "False"}
 			};
@@ -43,9 +60,8 @@ namespace PhpSerializerNET.Test {
 				dictionary
 			);
 
-			Assert.IsInstanceOfType(result, typeof(Dictionary<object, object>));
 			Assert.AreEqual(
-				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}",
+				"a:2:{b:1;s:4:\"True\";b:0;s:5:\"False\";}",
 				result
 			);
 		}

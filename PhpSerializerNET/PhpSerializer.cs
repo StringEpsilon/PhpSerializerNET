@@ -133,13 +133,19 @@ namespace PhpSerializerNET {
 							// throw an exception, from what I can tell
 							return "N;";
 						}
+						if (dictionary.GetType().GenericTypeArguments.Count() > 0) {
+							var keyType = dictionary.GetType().GenericTypeArguments[0];
+							if (!keyType.IsIConvertible() && keyType != typeof(object)) {
+								throw new Exception($"Can not serialize associative array with key type {keyType.FullName}");
+							}
+						}
 						seenObjects.Add(input);
 						output.Append($"a:{dictionary.Count}:");
 						output.Append("{");
+
+
 						foreach (DictionaryEntry entry in dictionary) {
-							if (entry.Key is not string && entry.Key is not int) {
-								throw new Exception($"Can not serialize associative array with key type {entry.Key.GetType().FullName}");
-							}
+
 							output.Append($"{Serialize(entry.Key)}{Serialize(entry.Value, seenObjects)}");
 						}
 						output.Append("}");

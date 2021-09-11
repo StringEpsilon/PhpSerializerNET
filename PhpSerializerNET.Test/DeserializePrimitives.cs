@@ -6,23 +6,35 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PhpSerializerNET.Test
-{
+namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class DeserializePrimitives
-	{
+	public class DeserializePrimitives {
 		[TestMethod]
-		public void DeserializesNull()
-		{
+		public void DeserializesNull() {
 			Assert.AreEqual(
 				null,
 				PhpSerializer.Deserialize("N;")
 			);
+			Assert.AreEqual(
+				0,
+				PhpSerializer.Deserialize<long>("N;")
+			);
+			Assert.AreEqual(
+				false,
+				PhpSerializer.Deserialize<bool>("N;")
+			);
+			Assert.AreEqual(
+				0,
+				PhpSerializer.Deserialize<double>("N;")
+			);
+			Assert.AreEqual(
+				null,
+				PhpSerializer.Deserialize<string>("N;")
+			);
 		}
 
 		[TestMethod]
-		public void DeserializesBool()
-		{
+		public void DeserializesBool() {
 			Assert.AreEqual(
 				true,
 				PhpSerializer.Deserialize("b:1;")
@@ -46,8 +58,7 @@ namespace PhpSerializerNET.Test
 
 
 		[TestMethod]
-		public void DeserializeInteger()
-		{
+		public void DeserializeInteger() {
 			Assert.AreEqual(
 				0,
 				PhpSerializer.Deserialize<int>("i:0;")
@@ -67,8 +78,7 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void DeserializeLong()
-		{
+		public void DeserializeLong() {
 			Assert.AreEqual(
 				123456789,
 				PhpSerializer.Deserialize<long>("i:123456789;")
@@ -84,8 +94,7 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void DeserializesDouble()
-		{
+		public void DeserializesDouble() {
 			Assert.AreEqual(
 				1.23456789,
 				PhpSerializer.Deserialize<double>("d:1.23456789;")
@@ -121,8 +130,7 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void DeserializesString()
-		{
+		public void DeserializesString() {
 			var greeting = PhpSerializer.Deserialize<string>("s:12:\"Hello World!\";");
 			Assert.AreEqual("Hello World!", greeting);
 

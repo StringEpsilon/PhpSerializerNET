@@ -50,7 +50,7 @@ namespace PhpSerializerNET {
 					}
 					return token.Value;
 				case PhpSerializerType.Array:
-					return token.ToCollection(_options);
+					return this.MakeCollection(token);
 				default:
 					throw new Exception("Unsupported datatype.");
 			}
@@ -153,7 +153,11 @@ namespace PhpSerializerNET {
 			}
 
 			for (int i = 1; i < token.Children.Count; i += 2) {
-				result.Add(this.DeserializeToken(itemType, token.Children[i]));
+				result.Add(
+					itemType == typeof(object)
+						? this.DeserializeToken(token.Children[i])
+						: this.DeserializeToken(itemType, token.Children[i])
+				);
 			}
 			return result;
 		}
@@ -187,6 +191,32 @@ namespace PhpSerializerNET {
 				);
 			}
 			return result;
+		}
+
+		private object MakeCollection(PhpSerializeToken token) {
+			if (_options.UseLists == ListOptions.Never) {
+				return this.MakeDictionary(typeof(Dictionary<object, object>), token);
+			}
+			long previousKey = -1;
+			bool isList = true;
+			bool consecutive = true;
+			for (int i = 0; i < token.Children.Count; i += 2) {
+				if (token.Children[i].Type != PhpSerializerType.Integer) {
+					isList = false;
+					break;
+				} else {
+					var key = token.Children[i].ToLong();
+					if (i == 0 || key == previousKey + 1) {
+						previousKey = key;
+					} else {
+						consecutive = false;
+					}
+				}
+			}
+			if (!isList || (_options.UseLists == ListOptions.Default && consecutive == false)) {
+				return this.MakeDictionary(typeof(Dictionary<object, object>), token);
+			}
+			return this.MakeList(typeof(List<object>), token);
 		}
 	}
 }

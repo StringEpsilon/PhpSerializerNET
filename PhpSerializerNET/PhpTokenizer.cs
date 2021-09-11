@@ -14,7 +14,7 @@ namespace PhpSerializerNET
 	public class PhpTokenizer
 	{
 		private string _input;
-		private byte[] _utf8Input;
+		private byte[] _inputBytes;
 		private int _position;
 		private PhpDeserializationOptions _options;
 
@@ -23,7 +23,8 @@ namespace PhpSerializerNET
 			this._input = input;
 			this._position = 0;
 			this._options = options;
-			this._utf8Input = Encoding.Convert(Encoding.Default, Encoding.UTF8, Encoding.Default.GetBytes(input));
+
+			this._inputBytes = Encoding.Convert(Encoding.Default, options.InputEncoding, Encoding.Default.GetBytes(input));
 		}
 
 		internal bool ValidateFormat(ref int position, bool inArray = false)
@@ -121,17 +122,17 @@ namespace PhpSerializerNET
 			this.ValidateFormat(ref position);
 			List<PhpSerializeToken> tokens = new();
 
-			for (; _position < _utf8Input.Length; _position++)
+			for (; _position < _inputBytes.Length; _position++)
 			{
-				if ((char)_utf8Input[_position] == '}')
+				if ((char)_inputBytes[_position] == '}')
 				{
 					return tokens;
 				}
-				if (_utf8Input.Length - 1 <= _position)
+				if (_inputBytes.Length - 1 <= _position)
 				{
 					throw new DeserializationException($"Unexpected end of data at position { _position + 1}");
 				}
-				switch ((char)_utf8Input[_position])
+				switch ((char)_inputBytes[_position])
 				{
 					case 'N':
 						{
@@ -143,17 +144,21 @@ namespace PhpSerializerNET
 					case 'i':
 					case 'd':
 						{
-							var tokenClose = Array.IndexOf(_utf8Input, (byte)';', _position + 1);
+							var tokenClose = Array.IndexOf(_inputBytes, (byte)';', _position + 1);
 							var token = new PhpSerializeToken()
 							{
-								Type = (char)_utf8Input[_position] switch
+								Type = (char)_inputBytes[_position] switch
 								{
 									'b' => PhpSerializerType.Boolean,
 									'i' => PhpSerializerType.Integer,
 									'd' => PhpSerializerType.Floating,
 									_ => throw new Exception("This branch should be impossible to hit.")
 								},
-								Value = _utf8Input.Utf8Substring(_position + 2, tokenClose - (_position + 2))
+								Value = _inputBytes.Utf8Substring(
+									_position + 2,
+									tokenClose - (_position + 2),
+									_options.InputEncoding
+								)
 							};
 							tokens.Add(token);
 							_position = tokenClose;
@@ -162,20 +167,30 @@ namespace PhpSerializerNET
 					case 's':
 						{
 							var lengthStart = _position + 2;
-							var lengthClose = Array.IndexOf(_utf8Input, (byte)':', lengthStart + 1);
-							var valueStart = Array.IndexOf(_utf8Input, (byte)'"', lengthClose) + 1;
+							var lengthClose = Array.IndexOf(_inputBytes, (byte)':', lengthStart + 1);
+							var valueStart = Array.IndexOf(_inputBytes, (byte)'"', lengthClose) + 1;
 
-							var length = int.Parse(_utf8Input.Utf8Substring(lengthStart, lengthClose - lengthStart));
+							var length = int.Parse(
+								_inputBytes.Utf8Substring(
+									lengthStart,
+									lengthClose - lengthStart,
+									_options.InputEncoding
+								)
+							);
 
-							var value = _utf8Input.Utf8Substring(valueStart, length);
+							var value = _inputBytes.Utf8Substring(
+								valueStart,
+								length,
+								_options.InputEncoding
+							);
 
-							if (valueStart + length >= _utf8Input.Length)
+							if (valueStart + length >= _inputBytes.Length)
 							{
 								throw new DeserializationException(
 									$"Unexpected end of data at position. The string at position {_position} pointed to out of bounds index {valueStart + length}."
 								);
 							}
-							if (_utf8Input[valueStart + length] != '"')
+							if (_inputBytes[valueStart + length] != '"')
 							{
 								throw new DeserializationException(
 									$"String at position {_position} has an incorrect length."
@@ -186,7 +201,7 @@ namespace PhpSerializerNET
 							{
 								Type = PhpSerializerType.String,
 								Length = length,
-								Value = _utf8Input.Utf8Substring(valueStart, length)
+								Value = _inputBytes.Utf8Substring(valueStart, length, _options.InputEncoding)
 							});
 							_position = valueStart + length + 1;
 							break;
@@ -194,12 +209,12 @@ namespace PhpSerializerNET
 					case 'a':
 						{
 							var lengthStart = _position + 2;
-							var lengthClose = Array.IndexOf(_utf8Input, (byte)':', lengthStart + 1);
+							var lengthClose = Array.IndexOf(_inputBytes, (byte)':', lengthStart + 1);
 							var length = int.Parse(
-								_utf8Input.Utf8Substring(lengthStart, lengthClose - lengthStart)
+								_inputBytes.Utf8Substring(lengthStart, lengthClose - lengthStart, _options.InputEncoding)
 							);
 
-							_position = Array.IndexOf(_utf8Input, (byte)'{', lengthStart + 1) + 1;
+							_position = Array.IndexOf(_inputBytes, (byte)'{', lengthStart + 1) + 1;
 							tokens.Add(new()
 							{
 								Type = PhpSerializerType.Array,
@@ -207,8 +222,6 @@ namespace PhpSerializerNET
 								Length = length,
 								Children = this.Tokenize()
 							});
-							_position++;
-							_position++;
 							break;
 						}
 				}

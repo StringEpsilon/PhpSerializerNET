@@ -62,7 +62,10 @@ namespace PhpSerializerNET
 		/// <returns>
 		/// The deserialized object.
 		/// </returns>
-		public static T Deserialize<T>(string input, PhpDeserializationOptions options = null)
+		public static T Deserialize<T>(
+			string input,
+			PhpDeserializationOptions options = null
+		)
 		{
 			if (options == null)
 			{
@@ -89,7 +92,7 @@ namespace PhpSerializerNET
 				}
 				else
 				{
-					return (T)ConstructList(typeof(T), (List<object>)collection);
+					return (T)ConstructList(typeof(T), (List<object>)collection, options);
 				}
 			}
 			else
@@ -241,12 +244,24 @@ namespace PhpSerializerNET
 
 			if (result is IDictionary resultDictionary)
 			{
-				return ConstructDictionary(targetType, sourceDictionary);
+				return ConstructDictionary(targetType, sourceDictionary, options);
+			}
+			if (result is IList)
+			{
+				return ConstructList(
+					targetType,
+					sourceDictionary.Values.ToList(),
+					options
+				);
 			}
 			foreach (var entry in sourceDictionary)
 			{
-				if (entry.Key is string propertyName && entry.Value != null)
+				if (entry.Value != null)
 				{
+					string propertyName = entry.Key is string
+						? entry.Key as string
+						: entry.Key.ToString();
+
 					var property = targetProperties.FindProperty(propertyName, options);
 
 					if (property == null)
@@ -254,7 +269,7 @@ namespace PhpSerializerNET
 						if (!options.AllowExcessKeys)
 						{
 							throw new DeserializationException(
-								$"Error: Could not bind the key {entry.Key} to object of type {targetType.Name}: No such property."
+								$"Error: Could not bind the key {propertyName} to object of type {targetType.Name}: No such property."
 							);
 						}
 						break;
@@ -294,23 +309,18 @@ namespace PhpSerializerNET
 							);
 						}
 					}
-					else
+					else if (property.PropertyType.IsClass)
 					{
-						if (property.PropertyType.IsClass)
+						if (entry.Value is Dictionary<object, object>)
 						{
-							// TODO: handle lists, handle dictionaries.
-
-							if (entry.Value is Dictionary<object, object>)
-							{
-								property.SetValue(
-									result,
-									ConstructObject(
-										property.PropertyType,
-										entry.Value as Dictionary<object, object>,
-										options
-									)
-								);
-							}
+							property.SetValue(
+								result,
+								ConstructObject(
+									property.PropertyType,
+									entry.Value as Dictionary<object, object>,
+									options
+								)
+							);
 						}
 					}
 				}
@@ -318,7 +328,7 @@ namespace PhpSerializerNET
 			return result;
 		}
 
-		private static object ConstructList(Type targetType, List<object> sourceList)
+		private static object ConstructList(Type targetType, IList sourceList, PhpDeserializationOptions options)
 		{
 			IList result = (IList)targetType.GetConstructor(new Type[0]).Invoke(null);
 
@@ -330,12 +340,24 @@ namespace PhpSerializerNET
 
 			foreach (var item in sourceList)
 			{
-				result.Add(itemType.Convert(item, true));
+				if (item is Dictionary<object, object> dictionary)
+				{
+					result.Add(ConstructObject(itemType, dictionary, options));
+				}
+				else
+				{
+					result.Add(itemType.Convert(item, true));
+
+				}
 			}
 			return result;
 		}
 
-		private static object ConstructDictionary(Type targetType, Dictionary<object, object> dictionary)
+		private static object ConstructDictionary(
+			Type targetType,
+			Dictionary<object, object> dictionary,
+			PhpDeserializationOptions options
+		)
 		{
 			IDictionary resultDictionary = (IDictionary)targetType.GetConstructor(new Type[0]).Invoke(null);
 			if (targetType.GenericTypeArguments.Count() == 2)
@@ -346,7 +368,15 @@ namespace PhpSerializerNET
 				{
 					object key = keyType.Convert(entry.Key, true);
 					object value = valueType.Convert(entry.Value, true);
-					resultDictionary.Add(key, value);
+					if (entry.Value is Dictionary<object, object> entryDictionary)
+					{
+						resultDictionary.Add(key, ConstructObject(valueType, entryDictionary, options));
+					}
+					else
+					{
+						resultDictionary.Add(key, value);
+					}
+
 				}
 				return resultDictionary;
 			}

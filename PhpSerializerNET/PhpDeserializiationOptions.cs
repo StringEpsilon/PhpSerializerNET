@@ -4,6 +4,8 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System.Text;
+
 namespace PhpSerializerNET
 {
 	/// <summary>
@@ -55,11 +57,14 @@ namespace PhpSerializerNET
 		/// </summary>
 		public bool NumberStringToBool { get; set; } = false;
 
+		public Encoding InputEncoding { get; set; } = Encoding.UTF8;
+
 		internal static PhpDeserializationOptions DefaultOptions = new()
 		{
 			CaseSensitiveProperties = true,
 			AllowExcessKeys = false,
 			UseLists = ListOptions.Default,
+			InputEncoding = Encoding.UTF8,
 		};
 	}
 }

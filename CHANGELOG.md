@@ -3,6 +3,7 @@
 - Support for structs.
 - Fixed performance drop due to over-checking the input string.
 - Refactored deserializer to work in less steps and with cleaner code.
+- Slight tweaks of some error messages.
 
 # 0.3.0
 

@@ -111,7 +111,7 @@ namespace PhpSerializerNET {
 				if (field == null) {
 					if (!_options.AllowExcessKeys) {
 						throw new DeserializationException(
-							$"Error: Could not bind the key {fieldName} to struct of type {targetType.Name}: No such property."
+							$"Could not bind the key \"{fieldName}\" to struct of type {targetType.Name}: No such field."
 						);
 					}
 					break;
@@ -138,7 +138,7 @@ namespace PhpSerializerNET {
 				if (property == null) {
 					if (!_options.AllowExcessKeys) {
 						throw new DeserializationException(
-							$"Error: Could not bind the key {propertyName} to object of type {targetType.Name}: No such property."
+							$"Could not bind the key \"{propertyName}\" to object of type {targetType.Name}: No such property."
 						);
 					}
 					break;

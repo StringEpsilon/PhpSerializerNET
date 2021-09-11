@@ -53,6 +53,24 @@ namespace PhpSerializerNET.Test {
 			Assert.AreEqual("Hallo Welt!", deserializedObject.German);
 		}
 
+		[TestMethod]
+		public void DeserializeObjectWithExcessKeys() {
+			var deserializedObject = PhpSerializer.Deserialize<MappedClass>(
+				"a:3:{s:2:\"en\";s:12:\"Hello World!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:2:\"es\";s:11:\"Hola Mundo!\";}",
+				new PhpDeserializationOptions() { AllowExcessKeys = true }
+			);
+			Assert.IsNotNull(deserializedObject);
+		}
+
+		[TestMethod]
+		public void ThrowsOnExcessKeys() {
+			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize<MappedClass>(
+				"a:3:{s:2:\"en\";s:12:\"Hello World!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:2:\"es\";s:11:\"Hola Mundo!\";}",
+				new PhpDeserializationOptions() { AllowExcessKeys = false }
+			));
+			Assert.AreEqual("Could not bind the key \"es\" to object of type MappedClass: No such property.", ex.Message);
+		}
+
 
 		[TestMethod]
 		public void DeserializeList() {

@@ -57,6 +57,32 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
+		public void DeserializeStructWithExcessKeys() {
+			var value = PhpSerializer.Deserialize<MyStruct>(
+				"a:3:{s:3:\"foo\";s:3:\"Foo\";s:3:\"bar\";s:3:\"Bar\";s:6:\"foobar\";s:6:\"FooBar\";}",
+				new PhpDeserializationOptions() { AllowExcessKeys = true }
+			);
+
+			Assert.AreEqual(
+				"Foo",
+				value.foo
+			);
+			Assert.AreEqual(
+				"Bar",
+				value.bar
+			);
+		}
+
+		[TestMethod]
+		public void ThrowsOnStructWithExcessKeys() {
+			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize<MyStruct>(
+				"a:3:{s:3:\"foo\";s:3:\"Foo\";s:3:\"bar\";s:3:\"Bar\";s:6:\"foobar\";s:6:\"FooBar\";}",
+				new PhpDeserializationOptions() { AllowExcessKeys = false }
+			));
+			Assert.AreEqual("Could not bind the key \"foobar\" to struct of type MyStruct: No such field.", ex.Message);
+		}
+
+		[TestMethod]
 		public void DeserializeStructCaseInsensitive() {
 			var value = PhpSerializer.Deserialize<MyStruct>(
 				"a:2:{s:3:\"FOO\";s:3:\"Foo\";s:3:\"BAR\";s:3:\"Bar\";}",

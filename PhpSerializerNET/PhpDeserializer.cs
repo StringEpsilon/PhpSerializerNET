@@ -16,9 +16,19 @@ namespace PhpSerializerNET {
 		private PhpDeserializationOptions _options;
 		private List<PhpSerializeToken> _tokens;
 
-		public PhpDeserializer(PhpDeserializationOptions options, List<PhpSerializeToken> tokens) {
+		public PhpDeserializer(string input, PhpDeserializationOptions options) {
 			this._options = options;
-			this._tokens = tokens;
+			if (this._options == null) {
+				this._options = PhpDeserializationOptions.DefaultOptions;
+			}
+			this._tokens = new PhpTokenizer(input, _options).Tokenize();
+
+			if (_tokens.Count > 1) {
+				throw new DeserializationException("Can not deserialize loose collection of values into object");
+			}
+			if (_tokens.Count == 0) {
+				throw new DeserializationException("No PHP serialization data found.");
+			}
 		}
 
 		public object Deserialize() {

@@ -33,16 +33,7 @@ namespace PhpSerializerNET {
 		/// <see cref="Dictionary{object,object}"/>
 		/// </returns>
 		public static object Deserialize(string input, PhpDeserializationOptions options = null) {
-			if (options == null) {
-				options = PhpDeserializationOptions.DefaultOptions;
-			}
-			var tokens = new PhpTokenizer(input, options).Tokenize();
-			if (tokens.Count > 1) // TODO: maybe have an option to return a List<> in this case.
-			{
-				throw new DeserializationException("Can not deserialize loose collection of values into object");
-			}
-
-			return new PhpDeserializer(options, tokens).Deserialize();
+			return new PhpDeserializer(input, options).Deserialize();
 		}
 
 		/// <summary>
@@ -62,17 +53,7 @@ namespace PhpSerializerNET {
 			string input,
 			PhpDeserializationOptions options = null
 		) {
-			if (options == null) {
-				options = PhpDeserializationOptions.DefaultOptions;
-			}
-			var tokens = new PhpTokenizer(input, options).Tokenize();
-
-			if (tokens.Count > 1) // TODO: maybe have an option to return a List<> in this case.
-			{
-				throw new DeserializationException("Can not deserialize loose collection of values into object");
-			}
-
-			return new PhpDeserializer(options, tokens).Deserialize<T>();
+			return new PhpDeserializer(input, options).Deserialize<T>();
 		}
 
 		/// <summary>

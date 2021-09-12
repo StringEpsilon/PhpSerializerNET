@@ -19,19 +19,6 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void SerializesBool() {
-			Assert.AreEqual(
-				"b:1;",
-				PhpSerializer.Serialize(true)
-			);
-
-			Assert.AreEqual(
-				"b:0;",
-				PhpSerializer.Serialize(false)
-			);
-		}
-
-		[TestMethod]
 		public void ConvertsProperly() {
 			var result = PhpSerializer.Deserialize<long>("b:0;");
 
@@ -45,38 +32,5 @@ namespace PhpSerializerNET.Test {
 
 			Assert.AreEqual(10.00, number);
 		}
-
-		[TestMethod]
-		public void SerializesDouble() {
-			Assert.AreEqual(
-				"d:1.23456789;",
-				PhpSerializer.Serialize(1.23456789)
-			);
-			Assert.AreEqual(
-				"d:1;",
-				PhpSerializer.Serialize((double)1)
-			);
-			Assert.AreEqual(
-				"d:-1.7976931348623157E+308;",
-				PhpSerializer.Serialize(double.MinValue)
-			);
-			Assert.AreEqual(
-				"d:1.7976931348623157E+308;",
-				PhpSerializer.Serialize(double.MaxValue)
-			);
-			Assert.AreEqual(
-				"d:INF;",
-				PhpSerializer.Serialize(double.PositiveInfinity)
-			);
-			Assert.AreEqual(
-				"d:-INF;",
-				PhpSerializer.Serialize(double.NegativeInfinity)
-			);
-			Assert.AreEqual(
-				"d:NAN;",
-				PhpSerializer.Serialize(double.NaN)
-			);
-		}
-
 	}
 }

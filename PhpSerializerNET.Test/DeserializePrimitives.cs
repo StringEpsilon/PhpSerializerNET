@@ -34,30 +34,6 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void DeserializesBool() {
-			Assert.AreEqual(
-				true,
-				PhpSerializer.Deserialize("b:1;")
-			);
-
-			Assert.AreEqual(
-				false,
-				PhpSerializer.Deserialize("b:0;")
-			);
-
-			Assert.AreEqual(
-				true,
-				PhpSerializer.Deserialize<bool>("b:1;")
-			);
-
-			Assert.AreEqual(
-				false,
-				PhpSerializer.Deserialize<bool>("b:0;")
-			);
-		}
-
-
-		[TestMethod]
 		public void DeserializeInteger() {
 			Assert.AreEqual(
 				0,

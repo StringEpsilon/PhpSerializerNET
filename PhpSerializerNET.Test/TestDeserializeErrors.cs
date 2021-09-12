@@ -6,14 +6,11 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PhpSerializerNET.Test
-{
+namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class DeserializeErrors
-	{
+	public class DeserializeErrors {
 		[TestMethod]
-		public void ThrowsOnMalformedNull()
-		{
+		public void ThrowsOnMalformedNull() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("N"));
 			Assert.AreEqual("Malformed null at position 0", ex.Message);
 
@@ -22,8 +19,7 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void ThrowsOnMalformedBool()
-		{
+		public void ThrowsOnMalformedBool() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("b"));
 			Assert.IsNotNull(ex);
 			Assert.AreEqual("Malformed boolean at position 0", ex.Message);
@@ -38,8 +34,7 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void DeserializeMalformedString()
-		{
+		public void DeserializeMalformedString() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("s"));
 			Assert.AreEqual("Malformed string at position 0", ex.Message);
 
@@ -69,8 +64,7 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void ThrowsOnMalformedInteger()
-		{
+		public void ThrowsOnMalformedInteger() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("i"));
 			Assert.AreEqual("Malformed integer at position 0", ex.Message);
 
@@ -83,8 +77,7 @@ namespace PhpSerializerNET.Test
 
 
 		[TestMethod]
-		public void ThrowsOnMalformedDouble()
-		{
+		public void ThrowsOnMalformedDouble() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("d"));
 			Assert.AreEqual("Malformed double at position 0", ex.Message);
 
@@ -96,8 +89,7 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void ThrowsOnMalformedArray()
-		{
+		public void ThrowsOnMalformedArray() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("a"));
 			Assert.AreEqual("Malformed array at position 0", ex.Message);
 
@@ -110,8 +102,7 @@ namespace PhpSerializerNET.Test
 
 
 		[TestMethod]
-		public void ThrowsOnUnexpectedToken()
-		{
+		public void ThrowsOnUnexpectedToken() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize("_"));
 			Assert.AreEqual("Unexpected token '_' at position 0.", ex.Message);
 

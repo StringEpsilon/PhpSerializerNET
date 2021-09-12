@@ -7,51 +7,25 @@
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PhpSerializerNET.Test
-{
+namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class SerializeObjects
-	{
-		public class CircularTest
-		{
-			public string Foo { get; set; }
-			public CircularTest Bar { get; set; }
-		}
+	public class SerializeObjects {
+
 
 		public class MappedClass {
 			[PhpProperty("en")]
-			public string English {get;set;}
+			public string English { get; set; }
 
 			[PhpProperty("de")]
-			public string German {get;set;}
+			public string German { get; set; }
 
 			[PhpIgnore]
-			public string it {get;set;}
+			public string it { get; set; }
 		}
 
 		[TestMethod]
-		public void SerializesObject()
-		{
-			var testObject = new
-			{
-				AString = "this is a string value",
-				AnInteger = 10,
-				ADouble = 1.2345,
-				True = true,
-				False = false,
-			};
-
-			Assert.AreEqual(
-				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}",
-				PhpSerializer.Serialize(testObject)
-			);
-		}
-
-
-		[TestMethod]
-		public void DeserializesObjectWithMappingInfo()
-		{
-			var testObject = new MappedClass(){
+		public void DeserializesObjectWithMappingInfo() {
+			var testObject = new MappedClass() {
 				English = "Hello world!",
 				German = "Hallo Welt!",
 				it = "Ciao mondo!"
@@ -63,29 +37,10 @@ namespace PhpSerializerNET.Test
 			);
 		}
 
-		[TestMethod]
-		public void SerializeCircularObject()
-		{
-			var testObject = new CircularTest()
-			{
-				Foo = "First"
-			};
-			testObject.Bar = new CircularTest()
-			{
-				Foo = "Second",
-				Bar = testObject
-			};
 
-			Assert.AreEqual(
-				"a:2:{s:3:\"Foo\";s:5:\"First\";s:3:\"Bar\";a:2:{s:3:\"Foo\";s:6:\"Second\";s:3:\"Bar\";N;}}",
-				PhpSerializer.Serialize(testObject)
-			);
-		}
 
 		[TestMethod]
-		public void SerializeList()
-		{
-
+		public void SerializeList() {
 			Assert.AreEqual( // strings:
 				"a:2:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";}",
 				PhpSerializer.Serialize(new List<string>() { "Hello", "World" })

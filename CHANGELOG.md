@@ -1,4 +1,4 @@
-# Future
+# 0.4.0
 
 - Support for structs.
 - Fixed performance drop due to over-checking the input string.

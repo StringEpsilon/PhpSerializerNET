@@ -15,6 +15,12 @@ namespace PhpSerializerNET.Test {
 			public double Jane {get;set;}
 		}
 
+		[PhpClass("myClass")]
+		public class NamedClass{
+			public double John {get;set;}
+			public double Jane {get;set;}
+		}
+
 		[TestMethod]
 		public void SerializesToObject(){
 			var testObject = new MyPhpObject(){
@@ -26,6 +32,39 @@ namespace PhpSerializerNET.Test {
 				PhpSerializer.Serialize(testObject)
 			);
 		}
+
+		[TestMethod]
+		public void SerializesNamedClassToObject(){
+			var testObject = new NamedClass(){
+				John = 3.14,
+				Jane = 2.718,
+			};
+			Assert.AreEqual(
+				"O:7:\"myClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
+				PhpSerializer.Serialize(testObject)
+			);
+		}
+
+
+		[TestMethod]
+		public void DeserializesClass(){
+			var result = (NamedClass)PhpSerializer.Deserialize(
+				"O:10:\"NamedClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}"
+			);
+			Assert.AreEqual(3.14, result.John);
+			Assert.AreEqual(2.718, result.Jane);
+		}
+
+		[TestMethod]
+		public void DeserializesNamedClass(){
+			var result = (NamedClass)PhpSerializer.Deserialize(
+				"O:7:\"myClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}"
+			);
+			Assert.AreEqual(3.14, result.John);
+			Assert.AreEqual(2.718, result.Jane);
+		}
+
+
 
 		[TestMethod]
 		public void DeserializesStdClassToDynamic(){

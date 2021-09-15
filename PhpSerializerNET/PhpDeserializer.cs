@@ -59,29 +59,45 @@ namespace PhpSerializerNET {
 				case PhpSerializerType.Array:
 					return this.MakeCollection(token);
 				case PhpSerializerType.Object: {
-					return MakeClass(token);
-				}
+						return MakeClass(token);
+					}
 				default:
 					throw new Exception("Unsupported datatype.");
 			}
 		}
 
-		private object MakeClass(PhpSerializeToken token){
-			if (token.Value == "stdClass"){ 
+		private object MakeClass(PhpSerializeToken token) {
+			var targetClass = token.Value;
+			Type targetType = null;
+			if (targetClass != "sdtClass") { // TODO: Option to disable the lookup.
+				// TODO: Cache the lookup.
+				foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic)) {
+					targetType = assembly.GetExportedTypes()
+						.Where(y => y.Name == targetClass || y.GetCustomAttribute<PhpClass>()?.Name == targetClass)
+						.FirstOrDefault();
+					if (targetType != null) {
+						break;
+					}
+				}
+			}
+ 			if (targetType != null || token.Value != "stdClass") {
+				return DeserializeToken(targetType, token);
+			} else { // TODO: Maybe have an option to throw instead of returning either dynamic or dictionary.
 				IDictionary<string, object> result;
 				if (this._options.StdClass == StdClassOption.Dynamic) {
 					result = new ExpandoObject();
-				}else{
+				} else {
 					result = new Dictionary<string, object>();
 				}
 				for (int i = 0; i < token.Children.Count; i += 2) {
 					result.TryAdd(
 						(string)DeserializeToken(typeof(string), token.Children[i]),
-						DeserializeToken(token.Children[i+1])
+						DeserializeToken(token.Children[i + 1])
 					);
 				}
 				return result;
 			}
+
 			// TODO.
 			return new();
 		}

@@ -26,10 +26,6 @@ string serializedData = PhpSerializer.Serialize(myObject);
 * [ ] General polish.
 * [ ] Reorganize unit tests.
 
-## Non-TODO:
-
-- Support for the object notation PHP has for the format. I simply don't need it. But if you do, please submit a PR.
-
 ## Why?
 
 I'm working with some legacy project that uses the format and the only other implementation of a serializer/deserializer I found had no license attached and I needed something GPL compatible. So wrote this one from scratch.

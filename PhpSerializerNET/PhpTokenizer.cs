@@ -79,6 +79,16 @@ namespace PhpSerializerNET {
 
 							break;
 						}
+					case 'O': {
+							var match = new Regex(@"O:\d+:""\w+"":\d+:{").Match(_input, position);
+							if (!match.Success || match.Index != position) {
+								throw new DeserializationException($"Malformed array at position {position}");
+							}
+							position += match.Length;
+							ValidateFormat(ref position, true);
+
+							break;
+					}
 					case '}': {
 							if (inArray) {
 								return true;
@@ -168,6 +178,33 @@ namespace PhpSerializerNET {
 								Value = _inputBytes.Utf8Substring(valueStart, length, _options.InputEncoding)
 							});
 							_position = valueStart + length + 1;
+							break;
+						}
+					case 'O': {
+							var typeLenghtStart = _position + 2;
+							var typeLengthClose = Array.IndexOf(_inputBytes, (byte)':', typeLenghtStart + 1);
+							var typeLength = int.Parse(
+								_inputBytes.Utf8Substring(typeLenghtStart, typeLengthClose - typeLenghtStart, _options.InputEncoding)
+							);
+							_position = typeLengthClose;
+
+							var typename = _inputBytes.Utf8Substring(_position+2, typeLength, _options.InputEncoding);
+							_position += typeLength +2;
+
+							var lengthStart = _position + 2;
+							var lengthClose = Array.IndexOf(_inputBytes, (byte)':', lengthStart + 1);
+							var length = int.Parse(
+								_inputBytes.Utf8Substring(lengthStart, lengthClose - lengthStart, _options.InputEncoding)
+							);
+
+							var objectToken = new PhpSerializeToken() {
+								Type = PhpSerializerType.Object,
+								Position = _position,
+								Value = typename,
+								Length = length,
+								Children = this.Tokenize()
+							};
+							tokens.Add(objectToken);
 							break;
 						}
 					case 'a': {

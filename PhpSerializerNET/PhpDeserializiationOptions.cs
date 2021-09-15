@@ -29,6 +29,11 @@ namespace PhpSerializerNET
 		Never
 	}
 
+	public enum StdClassOption {
+		Dictionary,
+		Dynamic
+	}
+
 	/// <summary>
 	/// Options for deserializing PHP data.
 	/// </summary>
@@ -57,7 +62,16 @@ namespace PhpSerializerNET
 		/// </summary>
 		public bool NumberStringToBool { get; set; } = false;
 
+		/// <summary>
+		/// Encoding of the input. Default is UTF-8. Encoding can make a difference in string lenghts and selecting the wrong 
+		/// encoding for a given input can cause the deserialization to fail.
+		/// </summary>
 		public Encoding InputEncoding { get; set; } = Encoding.UTF8;
+
+		/// <summary>
+		/// Target datatype for objects of type "stdClass". Default: Dictionary<string, object>.
+		/// </summary>
+		public StdClassOption StdClass {get;set;} = StdClassOption.Dictionary;
 
 		internal static PhpDeserializationOptions DefaultOptions = new()
 		{

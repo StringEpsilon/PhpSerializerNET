@@ -12,8 +12,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace PhpSerializerNET {
-	public static class PhpSerializer {
+namespace PhpSerializerNET
+{
+	public static class PhpSerializer
+	{
 
 		/// <summary>
 		/// Deserialize the given string into an object.
@@ -32,7 +34,8 @@ namespace PhpSerializerNET {
 		/// <see cref="List{object}"/>, or
 		/// <see cref="Dictionary{object,object}"/>
 		/// </returns>
-		public static object Deserialize(string input, PhpDeserializationOptions options = null) {
+		public static object Deserialize(string input, PhpDeserializationOptions options = null)
+		{
 			return new PhpDeserializer(input, options).Deserialize();
 		}
 
@@ -52,7 +55,8 @@ namespace PhpSerializerNET {
 		public static T Deserialize<T>(
 			string input,
 			PhpDeserializationOptions options = null
-		) {
+		)
+		{
 			return new PhpDeserializer(input, options).Deserialize<T>();
 		}
 
@@ -71,52 +75,114 @@ namespace PhpSerializerNET {
 		/// Note that circular references are terminated with "N;"
 		/// and that all classes are serialized as associative arrays.
 		/// </returns>
-		public static string Serialize(object input) {
+		public static string Serialize(object input)
+		{
 			var seenObjects = new List<object>();
 			return Serialize(input, seenObjects);
 		}
 
-		private static string Serialize(object input, List<Object> seenObjects) {
+		internal static object GetValue(this MemberInfo member, object input)
+		{
+			if (member is PropertyInfo property)
+			{
+				return property.GetValue(input);
+			}
+			if (member is FieldInfo field)
+			{
+				return field.GetValue(input);
+			}
+			return null;
+		}
+
+		private static string SerializeMember(MemberInfo member, object input, List<object> seenObjects)
+		{
+			var propertyName = member.GetCustomAttribute<PhpPropertyAttribute>() != null
+				? member.GetCustomAttribute<PhpPropertyAttribute>().Name
+				: member.Name;
+			return $"{Serialize(propertyName)}{Serialize(member.GetValue(input), seenObjects)}";
+		}
+
+		private static string SerializeToObject(object input, List<object> seenObjects)
+		{
+			var className = input.GetType().GetCustomAttribute<PhpClass>().Name;
+			if (string.IsNullOrEmpty(className))
+			{
+				className = "stdClass";
+			}
 			StringBuilder output = new StringBuilder();
-			switch (input) {
-				case long longValue: {
+			var properties = input.GetType().GetProperties().Where(y => y.CanRead && y.GetCustomAttribute<PhpIgnoreAttribute>() == null);
+
+			output.Append("O:");
+			output.Append(className.Length);
+			output.Append(":\"");
+			output.Append(className);
+			output.Append("\":");
+			output.Append(properties.Count());
+			output.Append(":{");
+			foreach (PropertyInfo property in properties)
+			{
+				output.Append(SerializeMember(property, input, seenObjects));
+			}
+			output.Append("}");
+			return output.ToString();
+		}
+
+		private static string Serialize(object input, List<object> seenObjects)
+		{
+			StringBuilder output = new StringBuilder();
+			switch (input)
+			{
+				case long longValue:
+					{
 						return $"i:{longValue.ToString()};";
 					}
-				case int integerValue: {
+				case int integerValue:
+					{
 						return $"i:{integerValue.ToString()};";
 					}
-				case double floatValue: {
-						if (double.IsPositiveInfinity(floatValue)) {
+				case double floatValue:
+					{
+						if (double.IsPositiveInfinity(floatValue))
+						{
 							return $"d:INF;";
 						}
-						if (double.IsNegativeInfinity(floatValue)) {
+						if (double.IsNegativeInfinity(floatValue))
+						{
 							return $"d:-INF;";
 						}
-						if (double.IsNaN(floatValue)) {
+						if (double.IsNaN(floatValue))
+						{
 							return $"d:NAN;";
 						}
 						return $"d:{floatValue.ToString(CultureInfo.InvariantCulture)};";
 					}
-				case string stringValue: {
+				case string stringValue:
+					{
 						// Use the UTF8 byte count, because that's what the PHP implementation does:
 						return $"s:{ASCIIEncoding.UTF8.GetByteCount(stringValue)}:\"{stringValue}\";";
 					}
-				case bool boolValue: {
+				case bool boolValue:
+					{
 						return boolValue ? "b:1;" : "b:0;";
 					}
-				case null: {
+				case null:
+					{
 						return "N;";
 					}
-				case IDictionary dictionary: {
-						if (seenObjects.Contains(input)) {
+				case IDictionary dictionary:
+					{
+						if (seenObjects.Contains(input))
+						{
 							// Terminate circular reference:
 							// It might be better to make this optional. The PHP implementation seems to
 							// throw an exception, from what I can tell
 							return "N;";
 						}
-						if (dictionary.GetType().GenericTypeArguments.Count() > 0) {
+						if (dictionary.GetType().GenericTypeArguments.Count() > 0)
+						{
 							var keyType = dictionary.GetType().GenericTypeArguments[0];
-							if (!keyType.IsIConvertible() && keyType != typeof(object)) {
+							if (!keyType.IsIConvertible() && keyType != typeof(object))
+							{
 								throw new Exception($"Can not serialize associative array with key type {keyType.FullName}");
 							}
 						}
@@ -125,58 +191,54 @@ namespace PhpSerializerNET {
 						output.Append("{");
 
 
-						foreach (DictionaryEntry entry in dictionary) {
+						foreach (DictionaryEntry entry in dictionary)
+						{
 
 							output.Append($"{Serialize(entry.Key)}{Serialize(entry.Value, seenObjects)}");
 						}
 						output.Append("}");
 						return output.ToString();
 					}
-				case IList collection: {
-						if (seenObjects.Contains(input)) {
+				case IList collection:
+					{
+						if (seenObjects.Contains(input))
+						{
 							return "N;"; // See above.
 						}
 						seenObjects.Add(input);
 						output.Append($"a:{collection.Count}:");
 						output.Append("{");
-						for (int i = 0; i < collection.Count; i++) {
+						for (int i = 0; i < collection.Count; i++)
+						{
 							output.Append($"{Serialize(i, seenObjects)}{Serialize(collection[i], seenObjects)}");
 						}
 						output.Append("}");
 						return output.ToString();
 					}
-				default: {
-
-						if (seenObjects.Contains(input)) {
+				default:
+					{
+						if (seenObjects.Contains(input))
+						{
 							return "N;"; // See above.
 						}
-						if (input.GetType().IsValueType) {
-							seenObjects.Add(input);
-							var fields = input.GetType().GetFields().Where(y => y.IsPublic && y.GetCustomAttribute<PhpIgnoreAttribute>() == null);
-							output.Append($"a:{fields.Count()}:");
-							output.Append("{");
-							foreach (var field in fields) {
-								var fieldName = field.GetCustomAttribute<PhpPropertyAttribute>() != null
-									? field.GetCustomAttribute<PhpPropertyAttribute>().Name
-									: field.Name;
-								output.Append($"{Serialize(fieldName)}{Serialize(field.GetValue(input), seenObjects)}");
-							}
-							output.Append("}");
-							return output.ToString();
-						} else {
-							seenObjects.Add(input);
-							var properties = input.GetType().GetProperties().Where(y => y.CanRead && y.GetCustomAttribute<PhpIgnoreAttribute>() == null);
-							output.Append($"a:{properties.Count()}:");
-							output.Append("{");
-							foreach (var property in properties) {
-								var propertyName = property.GetCustomAttribute<PhpPropertyAttribute>() != null
-									? property.GetCustomAttribute<PhpPropertyAttribute>().Name
-									: property.Name;
-								output.Append($"{Serialize(propertyName)}{Serialize(property.GetValue(input), seenObjects)}");
-							}
-							output.Append("}");
-							return output.ToString();
+						seenObjects.Add(input);
+						if (input.GetType().GetCustomAttribute<PhpClass>() != null) // TODO: add option.
+						{
+							return SerializeToObject(input, seenObjects);
 						}
+
+						IEnumerable<MemberInfo> members = input.GetType().IsValueType
+							? input.GetType().GetFields().Where(y => y.IsPublic && y.GetCustomAttribute<PhpIgnoreAttribute>() == null)
+							: input.GetType().GetProperties().Where(y => y.CanRead && y.GetCustomAttribute<PhpIgnoreAttribute>() == null);
+						
+						output.Append($"a:{members.Count()}:");
+						output.Append("{");
+						foreach (var member in members)
+						{
+							output.Append(SerializeMember(member, input, seenObjects));
+						}
+						output.Append("}");
+						return output.ToString();
 					}
 			}
 		}

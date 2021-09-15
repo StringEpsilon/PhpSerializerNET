@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -57,9 +58,32 @@ namespace PhpSerializerNET {
 					return token.Value;
 				case PhpSerializerType.Array:
 					return this.MakeCollection(token);
+				case PhpSerializerType.Object: {
+					return MakeClass(token);
+				}
 				default:
 					throw new Exception("Unsupported datatype.");
 			}
+		}
+
+		private object MakeClass(PhpSerializeToken token){
+			if (token.Value == "stdClass"){ 
+				IDictionary<string, object> result;
+				if (this._options.StdClass == StdClassOption.Dynamic) {
+					result = new ExpandoObject();
+				}else{
+					result = new Dictionary<string, object>();
+				}
+				for (int i = 0; i < token.Children.Count; i += 2) {
+					result.TryAdd(
+						(string)DeserializeToken(typeof(string), token.Children[i]),
+						DeserializeToken(token.Children[i+1])
+					);
+				}
+				return result;
+			}
+			// TODO.
+			return new();
 		}
 
 		private object DeserializeToken(Type targetType, PhpSerializeToken token) {
@@ -93,6 +117,7 @@ namespace PhpSerializerNET {
 							$"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}."
 						);
 					}
+				case PhpSerializerType.Object:
 				case PhpSerializerType.Array:
 					if (typeof(IList).IsAssignableFrom(targetType)) {
 						return this.MakeList(targetType, token);

@@ -17,7 +17,7 @@ You can adjust this behavior via the `PhpDeserializationOptions.UseLists` option
 `OnAllIntegerKeys` => Return list if all keys are integers, consecutive or not.
 `Never` => Always return a dictionary.
 
-# Deserialize<T>()
+# Deserialize\<T\>()
 
 ```c#
 var greeting = PhpSerializer.Deserialize<string>("s:12:\"Hello World!\"");

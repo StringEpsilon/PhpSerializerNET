@@ -16,6 +16,7 @@ namespace PhpSerializerNET {
 	internal class PhpDeserializer {
 		private PhpDeserializationOptions _options;
 		private List<PhpSerializeToken> _tokens;
+		private static Dictionary<string, Type> TypeLookupCache = new();
 
 		public PhpDeserializer(string input, PhpDeserializationOptions options) {
 			this._options = options;
@@ -67,27 +68,34 @@ namespace PhpSerializerNET {
 		}
 
 		private object MakeClass(PhpSerializeToken token) {
-			var targetClass = token.Value;
+			var typeName = token.Value;
 			Type targetType = null;
-			if (targetClass != "sdtClass") { // TODO: Option to disable the lookup.
-				// TODO: Cache the lookup.
-				foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic)) {
-					targetType = assembly.GetExportedTypes()
-						.Where(y => y.Name == targetClass || y.GetCustomAttribute<PhpClass>()?.Name == targetClass)
-						.FirstOrDefault();
-					if (targetType != null) {
-						break;
+			if (typeName != "sdtClass" && _options.EnableTypeLookup) {
+				if (TypeLookupCache.ContainsKey(typeName)){
+					targetType = TypeLookupCache[typeName];
+				} else {
+					foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic)) {
+						// TODO: PhpClass attribute should win over classes who happen to have the name...?
+						targetType = assembly.GetExportedTypes()
+							.Where(y => y.Name == typeName || y.GetCustomAttribute<PhpClass>()?.Name == typeName)
+							.FirstOrDefault();
+						if (targetType != null) {
+							TypeLookupCache.Add(typeName, targetType);
+							break;
+						}
 					}
 				}
 			}
  			if (targetType != null || token.Value != "stdClass") {
 				return DeserializeToken(targetType, token);
-			} else { // TODO: Maybe have an option to throw instead of returning either dynamic or dictionary.
+			} else {
 				IDictionary<string, object> result;
 				if (this._options.StdClass == StdClassOption.Dynamic) {
 					result = new ExpandoObject();
-				} else {
+				} else if (_options.StdClass == StdClassOption.Dictionary) {
 					result = new Dictionary<string, object>();
+				} else {
+					throw new DeserializationException("Encountered 'stdClass' and the behavior 'Throw' was specified in deserialization options.");
 				}
 				for (int i = 0; i < token.Children.Count; i += 2) {
 					result.TryAdd(

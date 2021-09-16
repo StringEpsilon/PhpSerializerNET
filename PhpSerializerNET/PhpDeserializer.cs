@@ -59,9 +59,8 @@ namespace PhpSerializerNET {
 					return token.Value;
 				case PhpSerializerType.Array:
 					return this.MakeCollection(token);
-				case PhpSerializerType.Object: {
-						return MakeClass(token);
-					}
+				case PhpSerializerType.Object:
+					return MakeClass(token);
 				default:
 					throw new Exception("Unsupported datatype.");
 			}
@@ -71,7 +70,7 @@ namespace PhpSerializerNET {
 			var typeName = token.Value;
 			Type targetType = null;
 			if (typeName != "sdtClass" && _options.EnableTypeLookup) {
-				if (TypeLookupCache.ContainsKey(typeName)){
+				if (TypeLookupCache.ContainsKey(typeName)) {
 					targetType = TypeLookupCache[typeName];
 				} else {
 					foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic)) {
@@ -86,7 +85,7 @@ namespace PhpSerializerNET {
 					}
 				}
 			}
- 			if (targetType != null || token.Value != "stdClass") {
+			if (targetType != null || token.Value != "stdClass") {
 				return DeserializeToken(targetType, token);
 			} else {
 				IDictionary<string, object> result;
@@ -139,14 +138,14 @@ namespace PhpSerializerNET {
 						);
 					}
 				case PhpSerializerType.Object: {
-					if (typeof(IDictionary).IsAssignableFrom(targetType)) {
-						return this.MakeDictionary(targetType, token);
-					} else if (targetType.IsClass) {
-						return this.MakeObject(targetType, token);
-					} else {
-						return this.MakeStruct(targetType, token);
+						if (typeof(IDictionary).IsAssignableFrom(targetType)) {
+							return this.MakeDictionary(targetType, token);
+						} else if (targetType.IsClass) {
+							return this.MakeObject(targetType, token);
+						} else {
+							return this.MakeStruct(targetType, token);
+						}
 					}
-				}
 				case PhpSerializerType.Array:
 					if (typeof(IList).IsAssignableFrom(targetType)) {
 						return this.MakeList(targetType, token);

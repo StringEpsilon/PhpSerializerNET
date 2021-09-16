@@ -95,14 +95,6 @@ namespace PhpSerializerNET
 		/// </summary>
 		public bool EnableTypeLookup {get;set;} = true;
 
-		internal static PhpDeserializationOptions DefaultOptions = new()
-		{
-			CaseSensitiveProperties = true,
-			AllowExcessKeys = false,
-			UseLists = ListOptions.Default,
-			InputEncoding = Encoding.UTF8,
-			EnableTypeLookup = false,
-			StdClass = StdClassOption.Dictionary,
-		};
+		internal static PhpDeserializationOptions DefaultOptions = new();
 	}
 }

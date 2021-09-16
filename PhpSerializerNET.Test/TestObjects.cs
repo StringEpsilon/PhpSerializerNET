@@ -11,25 +11,25 @@ namespace PhpSerializerNET.Test {
 	[TestClass]
 	public class TestObjects {
 		[PhpClass]
-		public class MyPhpObject{
-			public double John {get;set;}
-			public double Jane {get;set;}
+		public class MyPhpObject {
+			public double John { get; set; }
+			public double Jane { get; set; }
 		}
 
 		[PhpClass("myClass")]
-		public class NamedClass{
-			public double John {get;set;}
-			public double Jane {get;set;}
+		public class NamedClass {
+			public double John { get; set; }
+			public double Jane { get; set; }
 		}
 
-		public struct MyStruct{
+		public struct MyStruct {
 			public double John;
 			public double Jane;
 		}
 
 		[TestMethod]
-		public void SerializesToObject(){
-			var testObject = new MyPhpObject(){
+		public void SerializesToObject() {
+			var testObject = new MyPhpObject() {
 				John = 3.14,
 				Jane = 2.718,
 			};
@@ -40,8 +40,8 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void SerializesNamedClassToObject(){
-			var testObject = new NamedClass(){
+		public void SerializesNamedClassToObject() {
+			var testObject = new NamedClass() {
 				John = 3.14,
 				Jane = 2.718,
 			};
@@ -53,7 +53,7 @@ namespace PhpSerializerNET.Test {
 
 
 		[TestMethod]
-		public void DeserializesClass(){
+		public void DeserializesClass() {
 			var result = (NamedClass)PhpSerializer.Deserialize(
 				"O:10:\"NamedClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}"
 			);
@@ -62,7 +62,7 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void DeserializesNamedClass(){
+		public void DeserializesNamedClass() {
 			var result = (NamedClass)PhpSerializer.Deserialize(
 				"O:7:\"myClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}"
 			);
@@ -70,11 +70,9 @@ namespace PhpSerializerNET.Test {
 			Assert.AreEqual(2.718, result.Jane);
 		}
 
-
-
 		[TestMethod]
-		public void DeserializesStdClassToDynamic(){
-			var anonymous = new { foo= "foo"};
+		public void DeserializesStdClassToDynamic() {
+			var anonymous = new { foo = "foo" };
 			System.Console.WriteLine(anonymous.GetType().Name);
 			var result = (dynamic)PhpSerializer.Deserialize(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}"
@@ -85,12 +83,12 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void DeserializesStdClassToDictionary(){
-			var anonymous = new { foo= "foo"};
+		public void DeserializesStdClassToDictionary() {
+			var anonymous = new { foo = "foo" };
 			System.Console.WriteLine(anonymous.GetType().Name);
 			var result = (dynamic)PhpSerializer.Deserialize(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
-				new PhpDeserializationOptions() {StdClass = StdClassOption.Dynamic}
+				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
 			);
 
 			Assert.AreEqual(3.14, result.John);
@@ -98,12 +96,12 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void DeserializesToSpecificClass(){
-			var anonymous = new { foo= "foo"};
+		public void DeserializesToSpecificClass() {
+			var anonymous = new { foo = "foo" };
 			System.Console.WriteLine(anonymous.GetType().Name);
 			var result = PhpSerializer.Deserialize<NamedClass>(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
-				new PhpDeserializationOptions() {StdClass = StdClassOption.Dynamic}
+				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
 			);
 
 			Assert.AreEqual(3.14, result.John);
@@ -111,12 +109,12 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void DeserializesToSpecificStruct(){
-			var anonymous = new { foo= "foo"};
+		public void DeserializesToSpecificStruct() {
+			var anonymous = new { foo = "foo" };
 			System.Console.WriteLine(anonymous.GetType().Name);
 			var result = PhpSerializer.Deserialize<MyStruct>(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
-				new PhpDeserializationOptions() {StdClass = StdClassOption.Dynamic}
+				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
 			);
 
 			Assert.AreEqual(3.14, result.John);
@@ -124,12 +122,12 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void DeserializesToSpecifiedDictionary(){
-			var anonymous = new { foo= "foo"};
+		public void DeserializesToSpecifiedDictionary() {
+			var anonymous = new { foo = "foo" };
 			System.Console.WriteLine(anonymous.GetType().Name);
 			var result = PhpSerializer.Deserialize<Dictionary<string, object>>(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
-				new PhpDeserializationOptions() {StdClass = StdClassOption.Dynamic}
+				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
 			);
 
 			Assert.AreEqual(3.14, result["John"]);

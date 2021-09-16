@@ -7,9 +7,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 
 namespace PhpSerializerNET {
+	/// <summary>
+	/// PHP Serialization format token. Holds type, length, position (of the token in the input string) and child information.
+	/// </summary>
 	internal class PhpSerializeToken {
 		internal PhpSerializerType Type { get; set; }
 		internal int Length { get; set; }
@@ -18,13 +20,27 @@ namespace PhpSerializerNET {
 		internal List<PhpSerializeToken> Children { get; set; }
 		internal int Position { get; set; }
 
-		internal PhpSerializeToken() {
-		}
+		/// <summary>
+		/// Default constructor.
+		/// </summary>
+		internal PhpSerializeToken() { }
 
+		/// <summary>
+		/// Convert the token value to a <see cref="long"/>.
+		/// </summary>
+		/// <returns>
+		/// The token value as a <see cref="long"/>.
+		/// </returns>
 		internal long ToLong() {
 			return long.Parse(this.Value, CultureInfo.InvariantCulture);
 		}
 
+		/// <summary>
+		/// Convert the token value to a <see cref="double"/>.
+		/// </summary>
+		/// <returns>
+		/// The token value as a <see cref="double"/>.
+		/// </returns>
 		internal double ToDouble() {
 			switch (this.Value) {
 				case "INF":
@@ -38,7 +54,13 @@ namespace PhpSerializerNET {
 			};
 		}
 
-		internal IConvertible ToBool() {
+		/// <summary>
+		/// Convert the token value to a <see cref="bool"/>
+		/// </summary>
+		/// <returns>
+		/// The token value as a <see cref="bool"/>
+		/// </returns>
+		internal bool ToBool() {
 			return this.Value == "1" ? true : false;
 		}
 	}

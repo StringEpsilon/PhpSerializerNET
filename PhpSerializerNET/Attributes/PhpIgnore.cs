@@ -8,8 +8,7 @@
 using System;
 
 namespace PhpSerializerNET {
-	public class PhpIgnoreAttribute : Attribute
-	{
-		public PhpIgnoreAttribute() {}
+	public class PhpIgnoreAttribute : Attribute {
+		public PhpIgnoreAttribute() { }
 	}
 }

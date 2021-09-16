@@ -10,8 +10,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace PhpSerializerNET.Test {
 	[TestClass]
 	public class SerializeObjects {
-
-
 		public class MappedClass {
 			[PhpProperty("en")]
 			public string English { get; set; }
@@ -36,8 +34,6 @@ namespace PhpSerializerNET.Test {
 				PhpSerializer.Serialize(testObject)
 			);
 		}
-
-
 
 		[TestMethod]
 		public void SerializeList() {

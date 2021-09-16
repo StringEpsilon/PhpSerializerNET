@@ -15,7 +15,6 @@ namespace PhpSerializerNET.Test {
 			public CircularClass Bar { get; set; }
 		}
 
-
 		[TestMethod]
 		public void SerializeCircularObject() {
 			var testObject = new CircularClass() {

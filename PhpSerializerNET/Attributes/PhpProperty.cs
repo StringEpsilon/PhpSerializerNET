@@ -8,9 +8,8 @@
 using System;
 
 namespace PhpSerializerNET {
-	public class PhpPropertyAttribute : Attribute
-	{
-		public string Name {get;set;}
+	public class PhpPropertyAttribute : Attribute {
+		public string Name { get; set; }
 
 		public PhpPropertyAttribute(string name) {
 			this.Name = name;

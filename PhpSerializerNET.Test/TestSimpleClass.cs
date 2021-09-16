@@ -8,8 +8,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PhpSerializerNET.Test {
-
-
 	[TestClass]
 	public class TestSimpleClass {
 		public class SimpleClass {

@@ -11,19 +11,15 @@ using System.Text.Json;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PhpSerializerNET;
 
-namespace PhpSerializerNET.Test
-{
+namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class DeserializeListOptions
-	{
+	public class DeserializeListOptions {
 
 		[TestMethod]
-		public void ListOptionNever()
-		{
+		public void ListOptionNever() {
 			var test = PhpSerializer.Deserialize(
 				"a:2:{i:0;s:1:\"a\";i:1;s:1:\"b\";}",
-				new PhpDeserializationOptions()
-				{
+				new PhpDeserializationOptions() {
 					UseLists = ListOptions.Never
 				}
 			);
@@ -36,12 +32,10 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void ListOptionDefault()
-		{
+		public void ListOptionDefault() {
 			var test = PhpSerializer.Deserialize(
 				"a:2:{i:0;s:1:\"a\";i:1;s:1:\"b\";}",
-				new PhpDeserializationOptions()
-				{
+				new PhpDeserializationOptions() {
 					UseLists = ListOptions.Default
 				}
 			);
@@ -55,8 +49,7 @@ namespace PhpSerializerNET.Test
 			// Same option, non-consecutive integer keys:
 			test = PhpSerializer.Deserialize(
 				"a:2:{i:2;s:1:\"a\";i:4;s:1:\"b\";}",
-				new PhpDeserializationOptions()
-				{
+				new PhpDeserializationOptions() {
 					UseLists = ListOptions.Default
 				}
 			);
@@ -69,12 +62,10 @@ namespace PhpSerializerNET.Test
 		}
 
 		[TestMethod]
-		public void ListOptionAllIntegers()
-		{
+		public void ListOptionAllIntegers() {
 			var test = PhpSerializer.Deserialize(
 				"a:2:{i:0;s:1:\"a\";i:1;s:1:\"b\";}",
-				new PhpDeserializationOptions()
-				{
+				new PhpDeserializationOptions() {
 					UseLists = ListOptions.OnAllIntegerKeys
 				}
 			);
@@ -88,8 +79,7 @@ namespace PhpSerializerNET.Test
 			// Same option, non-consecutive integer keys:
 			test = PhpSerializer.Deserialize(
 				"a:2:{i:2;s:1:\"a\";i:4;s:1:\"b\";}",
-				new PhpDeserializationOptions()
-				{
+				new PhpDeserializationOptions() {
 					UseLists = ListOptions.OnAllIntegerKeys
 				}
 			);

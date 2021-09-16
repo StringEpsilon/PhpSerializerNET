@@ -5,7 +5,6 @@
 **/
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PhpSerializerNET;
 
 namespace PhpSerializerNET.Test {
 	[TestClass]

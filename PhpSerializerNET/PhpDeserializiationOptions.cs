@@ -6,13 +6,11 @@
 
 using System.Text;
 
-namespace PhpSerializerNET
-{
+namespace PhpSerializerNET {
 	/// <summary>
 	/// Available behaviors for dealing with associative arrays and their conversion to Lists.
 	/// </summary>
-	public enum ListOptions
-	{
+	public enum ListOptions {
 		/// <summary>
 		/// Convert associative array to list when all keys are consecutive integers
 		/// </summary>
@@ -49,8 +47,7 @@ namespace PhpSerializerNET
 	/// <summary>
 	/// Options for deserializing PHP data.
 	/// </summary>
-	public class PhpDeserializationOptions
-	{
+	public class PhpDeserializationOptions {
 		/// <summary>
 		/// Whether or not properties are matched case sensitive. Default true.
 		/// </summary>
@@ -86,14 +83,14 @@ namespace PhpSerializerNET
 		/// Default: Dictionary<string, object>.
 		/// Note: This does not affect use of PhpSerializer.Deserialize<T>()
 		/// </summary>
-		public StdClassOption StdClass {get;set;} = StdClassOption.Dictionary;
+		public StdClassOption StdClass { get; set; } = StdClassOption.Dictionary;
 
 		/// <summary>
 		/// Enable or disable lookup in currently loaded assemblies for target classes and structs to deserialize objects into.
 		/// i.E. `o:8:"UserInfo":...` being mapped to a UserInfo class.
 		/// Note: This does not affect use of PhpSerializer.Deserialize<T>()
 		/// </summary>
-		public bool EnableTypeLookup {get;set;} = true;
+		public bool EnableTypeLookup { get; set; } = true;
 
 		internal static PhpDeserializationOptions DefaultOptions = new();
 	}

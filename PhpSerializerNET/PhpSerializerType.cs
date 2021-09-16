@@ -4,10 +4,8 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-namespace PhpSerializerNET
-{
-	internal enum PhpSerializerType
-	{
+namespace PhpSerializerNET {
+	internal enum PhpSerializerType {
 		Null,
 		Boolean,
 		Integer,

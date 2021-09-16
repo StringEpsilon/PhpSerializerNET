@@ -8,9 +8,13 @@
 using System;
 
 namespace PhpSerializerNET {
-	public class PhpClass : Attribute
-	{
-		public string Name {get;set;}
+	/// <summary>
+	/// Indicates that instances of the decorated class or struct should be serialized into objects.
+	/// 
+	/// Will also be used to find the proper deserialization target on deserialization, see the <see cref="PhpDeserializationOptions"/>
+	/// </summary>
+	public class PhpClass : Attribute {
+		public string Name { get; set; }
 
 		public PhpClass(string name = null) {
 			this.Name = name;

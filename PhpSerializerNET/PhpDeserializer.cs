@@ -97,9 +97,6 @@ namespace PhpSerializerNET {
 				}
 				return result;
 			}
-
-			// TODO.
-			return new();
 		}
 
 		private object DeserializeToken(Type targetType, PhpSerializeToken token) {
@@ -133,7 +130,15 @@ namespace PhpSerializerNET {
 							$"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}."
 						);
 					}
-				case PhpSerializerType.Object:
+				case PhpSerializerType.Object: {
+					if (typeof(IDictionary).IsAssignableFrom(targetType)) {
+						return this.MakeDictionary(targetType, token);
+					} else if (targetType.IsClass) {
+						return this.MakeObject(targetType, token);
+					} else {
+						return this.MakeStruct(targetType, token);
+					}
+				}
 				case PhpSerializerType.Array:
 					if (typeof(IList).IsAssignableFrom(targetType)) {
 						return this.MakeList(targetType, token);

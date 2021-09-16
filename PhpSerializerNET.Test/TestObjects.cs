@@ -4,6 +4,7 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PhpSerializerNET.Test {
@@ -19,6 +20,11 @@ namespace PhpSerializerNET.Test {
 		public class NamedClass{
 			public double John {get;set;}
 			public double Jane {get;set;}
+		}
+
+		public struct MyStruct{
+			public double John;
+			public double Jane;
 		}
 
 		[TestMethod]
@@ -89,6 +95,45 @@ namespace PhpSerializerNET.Test {
 
 			Assert.AreEqual(3.14, result.John);
 			Assert.AreEqual(2.718, result.Jane);
+		}
+
+		[TestMethod]
+		public void DeserializesToSpecificClass(){
+			var anonymous = new { foo= "foo"};
+			System.Console.WriteLine(anonymous.GetType().Name);
+			var result = PhpSerializer.Deserialize<NamedClass>(
+				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
+				new PhpDeserializationOptions() {StdClass = StdClassOption.Dynamic}
+			);
+
+			Assert.AreEqual(3.14, result.John);
+			Assert.AreEqual(2.718, result.Jane);
+		}
+
+		[TestMethod]
+		public void DeserializesToSpecificStruct(){
+			var anonymous = new { foo= "foo"};
+			System.Console.WriteLine(anonymous.GetType().Name);
+			var result = PhpSerializer.Deserialize<MyStruct>(
+				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
+				new PhpDeserializationOptions() {StdClass = StdClassOption.Dynamic}
+			);
+
+			Assert.AreEqual(3.14, result.John);
+			Assert.AreEqual(2.718, result.Jane);
+		}
+
+		[TestMethod]
+		public void DeserializesToSpecifiedDictionary(){
+			var anonymous = new { foo= "foo"};
+			System.Console.WriteLine(anonymous.GetType().Name);
+			var result = PhpSerializer.Deserialize<Dictionary<string, object>>(
+				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
+				new PhpDeserializationOptions() {StdClass = StdClassOption.Dynamic}
+			);
+
+			Assert.AreEqual(3.14, result["John"]);
+			Assert.AreEqual(2.718, result["Jane"]);
 		}
 	}
 }

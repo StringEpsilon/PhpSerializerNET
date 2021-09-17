@@ -4,6 +4,7 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -28,6 +29,25 @@ namespace PhpSerializerNET.Test {
 			Assert.AreEqual(
 				"a:2:{s:3:\"Foo\";s:5:\"First\";s:3:\"Bar\";a:2:{s:3:\"Foo\";s:6:\"Second\";s:3:\"Bar\";N;}}",
 				PhpSerialization.Serialize(testObject)
+			);
+		}
+
+		[TestMethod]
+		public void ThrowOnCircularReferencesOption() {
+			var testObject = new CircularClass() {
+				Foo = "First"
+			};
+			testObject.Bar = new CircularClass() {
+				Foo = "Second",
+				Bar = testObject
+			};
+
+			var ex = Assert.ThrowsException<ArgumentException>(
+				() => PhpSerialization.Serialize(testObject, new PhpSerializiationOptions(){ ThrowOnCircularReferences = true})
+			);
+			Assert.AreEqual(
+				"Input object has a circular reference.",
+				ex.Message
 			);
 		}
 

@@ -69,8 +69,8 @@ namespace PhpSerializerNET {
 		/// Arrays, lists and dictionaries are serialized into arrays.
 		/// Objects may also be serialized into arrays, if their respective struct or class does not have the <see cref="PhpClass"/> attribute.
 		/// </returns>
-		public static string Serialize(object input) {
-			return new PhpSerializer().Serialize(input);
+		public static string Serialize(object input, PhpSerializiationOptions options = null) {
+			return new PhpSerializer(options).Serialize(input);
 		}
 	}
 }

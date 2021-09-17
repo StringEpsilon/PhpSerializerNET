@@ -8,7 +8,7 @@ Other changes:
 - Added `[PhpClass()]` attribute.
 - Added `StdClass` and `EnableTypeLookup` to deserialization options
 - Added options for `PhpSerialization.Serialize()`.
-	- `ThrowOnCircularReferences` - whether or not to throw on ciruclar references, defaults to false (this might change in the future.)
+	- `ThrowOnCircularReferences` - whether or not to throw on circular references, defaults to false (this might change in the future.)
 - Updated and adjusted some of the XML documentation.
 
 # 0.4.0

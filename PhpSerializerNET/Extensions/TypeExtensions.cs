@@ -4,9 +4,10 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 using System;
+using System.Reflection;
 
 namespace PhpSerializerNET {
-	public static class TypeExtensions {
+	internal static class TypeExtensions {
 		/// <summary>
 		/// Check if a given <see cref="System.Type"> implements IConvertible
 		/// </summary>
@@ -14,6 +15,16 @@ namespace PhpSerializerNET {
 		/// <returns></returns>
 		public static bool IsIConvertible(this Type type) {
 			return typeof(IConvertible).IsAssignableFrom(type);
+		}
+
+		internal static object GetValue(this MemberInfo member, object input) {
+			if (member is PropertyInfo property) {
+				return property.GetValue(input);
+			}
+			if (member is FieldInfo field) {
+				return field.GetValue(input);
+			}
+			return null;
 		}
 	}
 }

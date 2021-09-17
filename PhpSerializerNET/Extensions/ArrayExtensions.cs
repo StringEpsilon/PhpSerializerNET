@@ -4,11 +4,6 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;

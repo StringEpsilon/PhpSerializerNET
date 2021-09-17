@@ -1,3 +1,14 @@
+# Future
+
+**BREAKING**
+- Renamed the static class `PhpSerializer` to `PhpSerialization`
+
+Other changes:
+- Added support for object de/serialization (`O:4:"name":n:{...}`).
+- Added `[PhpClass()]` attribute.
+- Added `StdClass` and `EnableTypeLookup` to deserialization options
+- Updated and adjusted some of the XML documentation.
+
 # 0.4.0
 
 - Support for structs.

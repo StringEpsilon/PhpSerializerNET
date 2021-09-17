@@ -19,7 +19,7 @@ namespace PhpSerializerNET {
 
 		public PhpSerializer(PhpSerializiationOptions options = null) {
 			_options = options ?? PhpSerializiationOptions.DefaultOptions;
-			
+
 			_seenObjects = new();
 		}
 
@@ -54,22 +54,31 @@ namespace PhpSerializerNET {
 				case null: {
 						return "N;";
 					}
-				// TODO: There's enough shared code here to warrant refactoring.
-				// Probably doing this in a default and then have another method for serializing the 3 options.
-				case IDictionary dictionary: { 
-						if (_seenObjects.Contains(input)) {
-							if (_options.ThrowOnCircularReferences){
-								throw new ArgumentException("Input object has a circular reference.");
-							}
-							return "N;";
-						}
-						if (dictionary.GetType().GenericTypeArguments.Count() > 0) {
-							var keyType = dictionary.GetType().GenericTypeArguments[0];
+				default: {
+						return this.SerializeComplex(input);
+					}
+			}
+		}
+
+		private string SerializeComplex(object input) {
+			if (_seenObjects.Contains(input)) {
+				if (_options.ThrowOnCircularReferences) {
+					throw new ArgumentException("Input object has a circular reference.");
+				}
+				return "N;";
+			}
+			_seenObjects.Add(input);
+
+			StringBuilder output = new StringBuilder();
+			switch (input) {
+				case IDictionary dictionary: {
+						var dictionaryType = dictionary.GetType();
+						if (dictionaryType.GenericTypeArguments.Count() > 0) {
+							var keyType = dictionaryType.GenericTypeArguments[0];
 							if (!keyType.IsIConvertible() && keyType != typeof(object)) {
 								throw new Exception($"Can not serialize into associative array with key type {keyType.FullName}");
 							}
 						}
-						_seenObjects.Add(input);
 						output.Append($"a:{dictionary.Count}:");
 						output.Append("{");
 
@@ -82,13 +91,6 @@ namespace PhpSerializerNET {
 						return output.ToString();
 					}
 				case IList collection: {
-						if (_seenObjects.Contains(input)) {
-							if (_options.ThrowOnCircularReferences){
-								throw new ArgumentException("Input object has a circular reference.");
-							}
-							return "N;";
-						}
-						_seenObjects.Add(input);
 						output.Append($"a:{collection.Count}:");
 						output.Append("{");
 						for (int i = 0; i < collection.Count; i++) {
@@ -99,15 +101,8 @@ namespace PhpSerializerNET {
 						return output.ToString();
 					}
 				default: {
-						if (_seenObjects.Contains(input)) {
-							if (_options.ThrowOnCircularReferences){
-								throw new ArgumentException("Input object has a circular reference.");
-							}
-							return "N;"; // See above.
-						}
-						_seenObjects.Add(input);
 						var inputType = input.GetType();
-						
+
 						if (inputType.GetCustomAttribute<PhpClass>() != null) // TODO: add option.
 						{
 							return this.SerializeToObject(input);

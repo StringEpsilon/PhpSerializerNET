@@ -20,7 +20,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void DeserializeSimpleClass() {
-			var deserializedObject = PhpSerializer.Deserialize<SimpleClass>(
+			var deserializedObject = PhpSerialization.Deserialize<SimpleClass>(
 				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}"
 			);
 			Assert.AreEqual("this is a string value", deserializedObject.AString);
@@ -32,7 +32,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void SerializeSimpleClass() {
-			var deserializedObject = PhpSerializer.Deserialize<SimpleClass>(
+			var deserializedObject = PhpSerialization.Deserialize<SimpleClass>(
 				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}"
 			);
 			var value = new SimpleClass() {
@@ -44,14 +44,14 @@ namespace PhpSerializerNET.Test {
 			};
 			Assert.AreEqual(
 				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}",
-				PhpSerializer.Serialize(value)
+				PhpSerialization.Serialize(value)
 			);
 		}
 
 		[TestMethod]
 		public void ErrorOnFlatValue() {
 			var ex = Assert.ThrowsException<DeserializationException>(
-				() => PhpSerializer.Deserialize<SimpleClass>("s:7:\"AString\";s:7:\"AString\";")
+				() => PhpSerialization.Deserialize<SimpleClass>("s:7:\"AString\";s:7:\"AString\";")
 			);
 
 			Assert.AreEqual("Can not deserialize loose collection of values into object", ex.Message);
@@ -59,20 +59,20 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void ReturnsNull() {
-			var result = PhpSerializer.Deserialize<SimpleClass>("N;");
+			var result = PhpSerialization.Deserialize<SimpleClass>("N;");
 
 			Assert.IsNull(result);
 		}
 
 		[TestMethod]
 		public void DeserializesBracketJunk() {
-			var deserializedObject = PhpSerializer.Deserialize<SimpleClass>(
+			var deserializedObject = PhpSerialization.Deserialize<SimpleClass>(
 				"a:2:{s:7:\"AString\";s:12:\"\"\"\"\"}}}}{{{{\";s:9:\"AnInteger\";i:10;}"
 			);
 			Assert.AreEqual("\"\"\"\"}}}}{{{{", deserializedObject.AString);
 			Assert.AreEqual(10, deserializedObject.AnInteger);
 
-			deserializedObject = PhpSerializer.Deserialize<SimpleClass>(
+			deserializedObject = PhpSerialization.Deserialize<SimpleClass>(
 				"a:2:{s:7:\"AString\";s:12:\";;};};};::::\";s:9:\"AnInteger\";i:10;}"
 			);
 			Assert.AreEqual(";;};};};::::", deserializedObject.AString);

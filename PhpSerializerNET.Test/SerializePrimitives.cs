@@ -13,21 +13,21 @@ namespace PhpSerializerNET.Test {
 		public void SerializesNull() {
 			Assert.AreEqual(
 				"N;",
-				PhpSerializer.Serialize(null)
+				PhpSerialization.Serialize(null)
 			);
 		}
 
 		[TestMethod]
 		public void ConvertsProperly() {
-			var result = PhpSerializer.Deserialize<long>("b:0;");
+			var result = PhpSerialization.Deserialize<long>("b:0;");
 
 			Assert.AreEqual(0, result);
 
-			result = PhpSerializer.Deserialize<long>("b:1;");
+			result = PhpSerialization.Deserialize<long>("b:1;");
 
 			Assert.AreEqual(1, result);
 
-			double number = PhpSerializer.Deserialize<double>("i:10;");
+			double number = PhpSerialization.Deserialize<double>("i:10;");
 
 			Assert.AreEqual(10.00, number);
 		}

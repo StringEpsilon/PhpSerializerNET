@@ -13,7 +13,7 @@ namespace PhpSerializerNET.Test {
 	public class TestStrings {
 		[TestMethod]
 		public void DeserializesNull() {
-			var result = PhpSerializer.Deserialize<string>("N;");
+			var result = PhpSerialization.Deserialize<string>("N;");
 
 			Assert.IsNull(result);
 		}
@@ -22,7 +22,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializeHelloWorld() {
 			Assert.AreEqual(
 				"s:12:\"Hello World!\";",
-				PhpSerializer.Serialize("Hello World!")
+				PhpSerialization.Serialize("Hello World!")
 			);
 		}
 
@@ -30,21 +30,21 @@ namespace PhpSerializerNET.Test {
 		public void SerializeEmptyString() {
 			Assert.AreEqual(
 				"s:0:\"\";",
-				PhpSerializer.Serialize("")
+				PhpSerialization.Serialize("")
 			);
 		}
 		[TestMethod]
 		public void SerializeUmlauts() {
 			Assert.AreEqual(
 				"s:14:\"äöüßÄÖÜ\";",
-				PhpSerializer.Serialize("äöüßÄÖÜ")
+				PhpSerialization.Serialize("äöüßÄÖÜ")
 			);
 		}
 		[TestMethod]
 		public void SerializeEmoji() {
 			Assert.AreEqual(
 				"s:4:\"👻\";",
-				PhpSerializer.Serialize("👻")
+				PhpSerialization.Serialize("👻")
 			);
 		}
 
@@ -53,7 +53,7 @@ namespace PhpSerializerNET.Test {
 		public void DeserializeHelloWorld() {
 			Assert.AreEqual(
 				"Hello World!",
-				PhpSerializer.Deserialize("s:12:\"Hello World!\";")
+				PhpSerialization.Deserialize("s:12:\"Hello World!\";")
 			);
 		}
 
@@ -61,7 +61,7 @@ namespace PhpSerializerNET.Test {
 		public void DeserializeEmptyString() {
 			Assert.AreEqual(
 				"",
-				PhpSerializer.Deserialize("s:0:\"\";")
+				PhpSerialization.Deserialize("s:0:\"\";")
 			);
 		}
 
@@ -69,7 +69,7 @@ namespace PhpSerializerNET.Test {
 		public void DeserializeUmlauts() {
 			Assert.AreEqual(
 				"äöüßÄÖÜ",
-				PhpSerializer.Deserialize("s:14:\"äöüßÄÖÜ\";")
+				PhpSerialization.Deserialize("s:14:\"äöüßÄÖÜ\";")
 			);
 		}
 
@@ -77,7 +77,7 @@ namespace PhpSerializerNET.Test {
 		public void DeserializeEmoji() {
 			Assert.AreEqual(
 				"👻",
-				PhpSerializer.Deserialize("s:4:\"👻\";")
+				PhpSerialization.Deserialize("s:4:\"👻\";")
 			);
 		}
 
@@ -86,7 +86,7 @@ namespace PhpSerializerNET.Test {
 			// This is really how the PHP implementation behaves.
 			Assert.AreEqual(
 				"_\";s:1:\"_",
-				PhpSerializer.Deserialize("s:9:\"_\";s:1:\"_\";")
+				PhpSerialization.Deserialize("s:9:\"_\";s:1:\"_\";")
 			);
 		}
 
@@ -94,16 +94,16 @@ namespace PhpSerializerNET.Test {
 		public void DeserializeStringToBool() {
 			var options = new PhpDeserializationOptions() { NumberStringToBool = true };
 
-			var value = PhpSerializer.Deserialize<bool>("s:1:\"1\";", options);
+			var value = PhpSerialization.Deserialize<bool>("s:1:\"1\";", options);
 			Assert.AreEqual(true, value);
 
-			value = PhpSerializer.Deserialize<bool>("s:1:\"0\";", options);
+			value = PhpSerialization.Deserialize<bool>("s:1:\"0\";", options);
 			Assert.AreEqual(false, value);
 
-			value = (bool)PhpSerializer.Deserialize("s:1:\"1\";", options);
+			value = (bool)PhpSerialization.Deserialize("s:1:\"1\";", options);
 			Assert.AreEqual(true, value);
 
-			value = (bool)PhpSerializer.Deserialize("s:1:\"0\";", options);
+			value = (bool)PhpSerialization.Deserialize("s:1:\"0\";", options);
 			Assert.AreEqual(false, value);
 		}
 	}

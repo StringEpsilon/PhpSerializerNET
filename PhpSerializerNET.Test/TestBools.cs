@@ -14,7 +14,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializesTrue() {
 			Assert.AreEqual(
 				"b:1;",
-				PhpSerializer.Serialize(true)
+				PhpSerialization.Serialize(true)
 			);
 		}
 
@@ -22,7 +22,7 @@ namespace PhpSerializerNET.Test {
 		public void DeserializesTrue() {
 			Assert.AreEqual(
 				true,
-				PhpSerializer.Deserialize("b:1;")
+				PhpSerialization.Deserialize("b:1;")
 			);
 		}
 
@@ -31,7 +31,7 @@ namespace PhpSerializerNET.Test {
 
 			Assert.AreEqual(
 				true,
-				PhpSerializer.Deserialize<bool>("b:1;")
+				PhpSerialization.Deserialize<bool>("b:1;")
 			);
 		}
 
@@ -39,7 +39,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializesFalse() {
 			Assert.AreEqual(
 				"b:0;",
-				PhpSerializer.Serialize(false)
+				PhpSerialization.Serialize(false)
 			);
 		}
 
@@ -47,7 +47,7 @@ namespace PhpSerializerNET.Test {
 		public void DeserializesFalse() {
 			Assert.AreEqual(
 				false,
-				PhpSerializer.Deserialize("b:0;")
+				PhpSerialization.Deserialize("b:0;")
 			);
 		}
 
@@ -55,7 +55,7 @@ namespace PhpSerializerNET.Test {
 		public void DeserializesFalseExplicit() {
 			Assert.AreEqual(
 				false,
-				PhpSerializer.Deserialize<bool>("b:0;")
+				PhpSerialization.Deserialize<bool>("b:0;")
 			);
 		}
 	}

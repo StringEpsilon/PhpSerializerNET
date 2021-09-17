@@ -17,7 +17,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void ListOptionNever() {
-			var test = PhpSerializer.Deserialize(
+			var test = PhpSerialization.Deserialize(
 				"a:2:{i:0;s:1:\"a\";i:1;s:1:\"b\";}",
 				new PhpDeserializationOptions() {
 					UseLists = ListOptions.Never
@@ -33,7 +33,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void ListOptionDefault() {
-			var test = PhpSerializer.Deserialize(
+			var test = PhpSerialization.Deserialize(
 				"a:2:{i:0;s:1:\"a\";i:1;s:1:\"b\";}",
 				new PhpDeserializationOptions() {
 					UseLists = ListOptions.Default
@@ -47,7 +47,7 @@ namespace PhpSerializerNET.Test {
 			Assert.AreEqual("b", list[1]);
 
 			// Same option, non-consecutive integer keys:
-			test = PhpSerializer.Deserialize(
+			test = PhpSerialization.Deserialize(
 				"a:2:{i:2;s:1:\"a\";i:4;s:1:\"b\";}",
 				new PhpDeserializationOptions() {
 					UseLists = ListOptions.Default
@@ -63,7 +63,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void ListOptionAllIntegers() {
-			var test = PhpSerializer.Deserialize(
+			var test = PhpSerialization.Deserialize(
 				"a:2:{i:0;s:1:\"a\";i:1;s:1:\"b\";}",
 				new PhpDeserializationOptions() {
 					UseLists = ListOptions.OnAllIntegerKeys
@@ -77,7 +77,7 @@ namespace PhpSerializerNET.Test {
 			Assert.AreEqual("b", list[1]);
 
 			// Same option, non-consecutive integer keys:
-			test = PhpSerializer.Deserialize(
+			test = PhpSerialization.Deserialize(
 				"a:2:{i:2;s:1:\"a\";i:4;s:1:\"b\";}",
 				new PhpDeserializationOptions() {
 					UseLists = ListOptions.OnAllIntegerKeys

@@ -14,7 +14,7 @@ namespace PhpSerializerNET.Test {
 	public class TestDictionaries {
 		[TestMethod]
 		public void DeserializesDictionary() {
-			var result = PhpSerializer.Deserialize(
+			var result = PhpSerialization.Deserialize(
 				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}"
 			);
 
@@ -39,7 +39,7 @@ namespace PhpSerializerNET.Test {
 				{ "False", false }
 			};
 
-			var result = PhpSerializer.Serialize(
+			var result = PhpSerialization.Serialize(
 				dictionary
 			);
 			Assert.AreEqual(
@@ -55,7 +55,7 @@ namespace PhpSerializerNET.Test {
 				{false, "False"}
 			};
 
-			var result = PhpSerializer.Serialize(
+			var result = PhpSerialization.Serialize(
 				dictionary
 			);
 
@@ -67,7 +67,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void DeserializesDictionaryExplicitly() {
-			var result = PhpSerializer.Deserialize<Dictionary<string, object>>(
+			var result = PhpSerialization.Deserialize<Dictionary<string, object>>(
 				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}"
 			);
 
@@ -83,7 +83,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void DeserializesDictionaryStringKey() {
-			var result = PhpSerializer.Deserialize<Dictionary<string, object>>(
+			var result = PhpSerialization.Deserialize<Dictionary<string, object>>(
 				"a:5:{i:0;s:22:\"this is a string value\";i:1;i:10;i:2;d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}"
 			);
 
@@ -99,7 +99,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void DeserializeHashtable() {
-			var result = PhpSerializer.Deserialize<Hashtable>(
+			var result = PhpSerialization.Deserialize<Hashtable>(
 				"a:5:{i:0;s:22:\"this is a string value\";i:1;i:10;i:2;d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}"
 			);
 

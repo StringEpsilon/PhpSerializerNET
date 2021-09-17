@@ -31,7 +31,7 @@ namespace PhpSerializerNET.Test {
 
 			Assert.AreEqual(
 				"a:2:{s:2:\"en\";s:12:\"Hello world!\";s:2:\"de\";s:11:\"Hallo Welt!\";}",
-				PhpSerializer.Serialize(testObject)
+				PhpSerialization.Serialize(testObject)
 			);
 		}
 
@@ -39,15 +39,15 @@ namespace PhpSerializerNET.Test {
 		public void SerializeList() {
 			Assert.AreEqual( // strings:
 				"a:2:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";}",
-				PhpSerializer.Serialize(new List<string>() { "Hello", "World" })
+				PhpSerialization.Serialize(new List<string>() { "Hello", "World" })
 			);
 			Assert.AreEqual( // booleans:
 				"a:2:{i:0;b:1;i:1;b:0;}",
-				PhpSerializer.Serialize(new List<object>() { true, false })
+				PhpSerialization.Serialize(new List<object>() { true, false })
 			);
 			Assert.AreEqual( // mixed types:
 				"a:5:{i:0;b:1;i:1;i:1;i:2;d:1.23;i:3;s:3:\"end\";i:4;N;}",
-				PhpSerializer.Serialize(new List<object>() { true, 1, 1.23, "end", null })
+				PhpSerialization.Serialize(new List<object>() { true, 1, 1.23, "end", null })
 			);
 		}
 	}

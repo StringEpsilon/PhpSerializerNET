@@ -14,7 +14,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializesDecimalValue() {
 			Assert.AreEqual(
 				"d:1.23456789;",
-				PhpSerializer.Serialize(1.23456789)
+				PhpSerialization.Serialize(1.23456789)
 			);
 		}
 
@@ -22,7 +22,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializesOne() {
 			Assert.AreEqual(
 				"d:1;",
-				PhpSerializer.Serialize((double)1)
+				PhpSerialization.Serialize((double)1)
 			);
 		}
 
@@ -30,7 +30,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializesMinValue() {
 			Assert.AreEqual(
 				"d:-1.7976931348623157E+308;",
-				PhpSerializer.Serialize(double.MinValue)
+				PhpSerialization.Serialize(double.MinValue)
 			);
 		}
 
@@ -38,7 +38,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializesMaxValue() {
 			Assert.AreEqual(
 				"d:1.7976931348623157E+308;",
-				PhpSerializer.Serialize(double.MaxValue)
+				PhpSerialization.Serialize(double.MaxValue)
 			);
 		}
 
@@ -46,7 +46,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializesInfinity() {
 			Assert.AreEqual(
 				"d:INF;",
-				PhpSerializer.Serialize(double.PositiveInfinity)
+				PhpSerialization.Serialize(double.PositiveInfinity)
 			);
 		}
 
@@ -54,7 +54,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializesNegativeInfinity() {
 			Assert.AreEqual(
 				"d:-INF;",
-				PhpSerializer.Serialize(double.NegativeInfinity)
+				PhpSerialization.Serialize(double.NegativeInfinity)
 			);
 		}
 
@@ -62,7 +62,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializesNaN() {
 			Assert.AreEqual(
 				"d:NAN;",
-				PhpSerializer.Serialize(double.NaN)
+				PhpSerialization.Serialize(double.NaN)
 			);
 		}
 	}

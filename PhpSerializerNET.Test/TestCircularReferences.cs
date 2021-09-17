@@ -27,7 +27,7 @@ namespace PhpSerializerNET.Test {
 
 			Assert.AreEqual(
 				"a:2:{s:3:\"Foo\";s:5:\"First\";s:3:\"Bar\";a:2:{s:3:\"Foo\";s:6:\"Second\";s:3:\"Bar\";N;}}",
-				PhpSerializer.Serialize(testObject)
+				PhpSerialization.Serialize(testObject)
 			);
 		}
 
@@ -39,7 +39,7 @@ namespace PhpSerializerNET.Test {
 
 			Assert.AreEqual( // strings:
 				"a:3:{i:0;s:1:\"A\";i:1;s:1:\"B\";i:2;a:3:{i:0;s:1:\"C\";i:1;s:1:\"D\";i:2;N;}}",
-				PhpSerializer.Serialize(listA)
+				PhpSerialization.Serialize(listA)
 			);
 		}
 	}

@@ -14,7 +14,7 @@ Usage is rather simple:
 ```c#
 using PhpSerializerNET;
 
-string serializedData = PhpSerializer.Serialize(myObject);
+string serializedData = PhpSerialization.Serialize(myObject);
 ```
 
 [and for deserializing, see here](./docs/Deserializing.md)

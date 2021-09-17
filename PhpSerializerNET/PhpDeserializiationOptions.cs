@@ -81,14 +81,14 @@ namespace PhpSerializerNET {
 		/// <summary>
 		/// Target datatype for objects of type "stdClass". 
 		/// Default: Dictionary<string, object>.
-		/// Note: This does not affect use of PhpSerializer.Deserialize<T>()
+		/// Note: This does not affect use of PhpSerialization.Deserialize<T>()
 		/// </summary>
 		public StdClassOption StdClass { get; set; } = StdClassOption.Dictionary;
 
 		/// <summary>
 		/// Enable or disable lookup in currently loaded assemblies for target classes and structs to deserialize objects into.
 		/// i.E. `o:8:"UserInfo":...` being mapped to a UserInfo class.
-		/// Note: This does not affect use of PhpSerializer.Deserialize<T>()
+		/// Note: This does not affect use of PhpSerialization.Deserialize<T>()
 		/// </summary>
 		public bool EnableTypeLookup { get; set; } = true;
 

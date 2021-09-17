@@ -14,7 +14,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializeZero() {
 			Assert.AreEqual(
 				"i:0;",
-				PhpSerializer.Serialize(0)
+				PhpSerialization.Serialize(0)
 			);
 		}
 
@@ -22,7 +22,7 @@ namespace PhpSerializerNET.Test {
 		public void DeserializeZero() {
 			Assert.AreEqual(
 				0,
-				PhpSerializer.Deserialize<int>("i:0;")
+				PhpSerialization.Deserialize<int>("i:0;")
 			);
 		}
 
@@ -30,7 +30,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializeOne() {
 			Assert.AreEqual(
 				"i:1;",
-				PhpSerializer.Serialize(1)
+				PhpSerialization.Serialize(1)
 			);
 		}
 
@@ -38,7 +38,7 @@ namespace PhpSerializerNET.Test {
 		public void DeserializeOne() {
 			Assert.AreEqual(
 				1,
-				PhpSerializer.Deserialize<int>("i:1;")
+				PhpSerialization.Deserialize<int>("i:1;")
 			);
 		}
 
@@ -46,7 +46,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializeIntMaxValue() {
 			Assert.AreEqual(
 				"i:2147483647;",
-				PhpSerializer.Serialize(int.MaxValue)
+				PhpSerialization.Serialize(int.MaxValue)
 			);
 		}
 
@@ -54,7 +54,7 @@ namespace PhpSerializerNET.Test {
 		public void DeserializeIntMaxValue() {
 			Assert.AreEqual(
 				int.MaxValue,
-				PhpSerializer.Deserialize<int>("i:2147483647;")
+				PhpSerialization.Deserialize<int>("i:2147483647;")
 			);
 		}
 
@@ -62,7 +62,7 @@ namespace PhpSerializerNET.Test {
 		public void SerializeIntMinValue() {
 			Assert.AreEqual(
 				"i:-2147483648;",
-				PhpSerializer.Serialize(int.MinValue)
+				PhpSerialization.Serialize(int.MinValue)
 			);
 		}
 
@@ -70,7 +70,7 @@ namespace PhpSerializerNET.Test {
 		public void DeserializeIntMinValue() {
 			Assert.AreEqual(
 				int.MinValue,
-				PhpSerializer.Deserialize<int>("i:-2147483648;")
+				PhpSerialization.Deserialize<int>("i:-2147483648;")
 			);
 		}
 	}

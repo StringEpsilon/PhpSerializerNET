@@ -30,7 +30,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void DeserializesObjectWithMappingInfo() {
-			var deserializedObject = PhpSerializer.Deserialize<MappedClass>(
+			var deserializedObject = PhpSerialization.Deserialize<MappedClass>(
 				"a:3:{s:2:\"en\";s:12:\"Hello World!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:2:\"it\";s:11:\"Ciao mondo!\";}"
 			);
 
@@ -43,7 +43,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void DeserializeObjectCaseInsenstiveProps() {
-			var deserializedObject = PhpSerializer.Deserialize<MappedClass>(
+			var deserializedObject = PhpSerialization.Deserialize<MappedClass>(
 				"a:2:{s:2:\"EN\";s:12:\"Hello World!\";s:2:\"DE\";s:11:\"Hallo Welt!\";}",
 				new PhpDeserializationOptions() { CaseSensitiveProperties = false }
 			);
@@ -55,7 +55,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void DeserializeObjectWithExcessKeys() {
-			var deserializedObject = PhpSerializer.Deserialize<MappedClass>(
+			var deserializedObject = PhpSerialization.Deserialize<MappedClass>(
 				"a:3:{s:2:\"en\";s:12:\"Hello World!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:2:\"es\";s:11:\"Hola Mundo!\";}",
 				new PhpDeserializationOptions() { AllowExcessKeys = true }
 			);
@@ -64,7 +64,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void ThrowsOnExcessKeys() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerializer.Deserialize<MappedClass>(
+			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize<MappedClass>(
 				"a:3:{s:2:\"en\";s:12:\"Hello World!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:2:\"es\";s:11:\"Hola Mundo!\";}",
 				new PhpDeserializationOptions() { AllowExcessKeys = false }
 			));
@@ -74,7 +74,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void DeserializeList() {
-			var result = PhpSerializer.Deserialize<List<String>>("a:3:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}");
+			var result = PhpSerialization.Deserialize<List<String>>("a:3:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}");
 
 			Assert.AreEqual(3, result.Count);
 			Assert.AreEqual("Hello", result[0]);
@@ -85,7 +85,7 @@ namespace PhpSerializerNET.Test {
 		[TestMethod]
 		public void DeserializeListInvalidLength() {
 			var exception = Assert.ThrowsException<DeserializationException>(
-				() => PhpSerializer.Deserialize<List<String>>("a:2:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}")
+				() => PhpSerialization.Deserialize<List<String>>("a:2:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}")
 			);
 
 			Assert.AreEqual("Array at position 5 should be of length 2, but actual length is 3.", exception.Message);
@@ -93,7 +93,7 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void DeserializeNestedObject() {
-			var result = PhpSerializer.Deserialize<CircularTest>("a:2:{s:3:\"Foo\";s:5:\"First\";s:3:\"Bar\";a:2:{s:3:\"Foo\";s:6:\"Second\";s:3:\"Bar\";N;}}");
+			var result = PhpSerialization.Deserialize<CircularTest>("a:2:{s:3:\"Foo\";s:5:\"First\";s:3:\"Bar\";a:2:{s:3:\"Foo\";s:6:\"Second\";s:3:\"Bar\";N;}}");
 
 			Assert.AreEqual(
 				"First",

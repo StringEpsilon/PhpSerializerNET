@@ -3,7 +3,7 @@
 ```c#
 using PhpSerializerNET;
 
-object deserializedObject = PhpSerializer.Deserialize("s:12:\"Hello World!\"");
+object deserializedObject = PhpSerialization.Deserialize("s:12:\"Hello World!\"");
 ```
 
 `Deserialize()`  will return one of the follow object types:
@@ -20,7 +20,7 @@ You can adjust this behavior via the `PhpDeserializationOptions.UseLists` option
 # Deserialize\<T\>()
 
 ```c#
-var greeting = PhpSerializer.Deserialize<string>("s:12:\"Hello World!\"");
+var greeting = PhpSerialization.Deserialize<string>("s:12:\"Hello World!\"");
 ```
 
 Tested and supported are:
@@ -58,7 +58,7 @@ public class ExampleClass {
 }
 
 
-var myObject = PhpSerializer.Deserialize<ExampleClass>(
+var myObject = PhpSerialization.Deserialize<ExampleClass>(
 	"a:3:{s:2:\"en\";s:12:\"Hello World!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:2:\"it\";s:11:\"Ciao mondo!\";}"
 );
 
@@ -73,7 +73,7 @@ You can provide an instance of `PhpDeserializationOptions` as an argument for th
 Example with all the default values:
 
 ```c#
-var foo = hpSerializer.Deserialize(
+var foo = PhpSerialization.Deserialize(
 	myData, 
 	new PhpDeserializationOptions() {
 		// Whether or not properties are matched case sensitive.
@@ -95,4 +95,4 @@ var foo = hpSerializer.Deserialize(
 
 # Deserializing php objects
 
-The serialization format has a syntax for objects as well. This is currently unsupported. I currently do not have plans for or need for this feature, but I'm happy to accept pull requests.
+TODO.

@@ -60,7 +60,7 @@ namespace PhpSerializerNET {
 				case PhpSerializerType.Array:
 					return this.MakeCollection(token);
 				case PhpSerializerType.Object:
-					return MakeClass(token);
+					return this.MakeClass(token);
 				default:
 					throw new Exception("Unsupported datatype.");
 			}
@@ -189,7 +189,7 @@ namespace PhpSerializerNET {
 
 
 		private object MakeObject(Type targetType, PhpSerializeToken token) {
-			var result = targetType.GetConstructor(new Type[0]).Invoke(null);
+			var result = Activator.CreateInstance(targetType);
 			var targetProperties = targetType.GetProperties();
 
 			for (int i = 0; i < token.Children.Count; i += 2) {
@@ -215,7 +215,7 @@ namespace PhpSerializerNET {
 		}
 
 		private object MakeList(Type targetType, PhpSerializeToken token) {
-			var result = targetType.GetConstructor(new Type[0]).Invoke(null) as IList;
+			var result = (IList)Activator.CreateInstance(targetType);
 			Type itemType = typeof(object);
 			if (targetType.GenericTypeArguments.Length >= 1) {
 				itemType = targetType.GenericTypeArguments[0];
@@ -242,7 +242,7 @@ namespace PhpSerializerNET {
 		}
 
 		private object MakeDictionary(Type targetType, PhpSerializeToken token) {
-			var result = targetType.GetConstructor(new Type[0]).Invoke(null) as IDictionary;
+			var result = (IDictionary)Activator.CreateInstance(targetType);
 			if (targetType.GenericTypeArguments.Count() == 0) {
 				for (int i = 0; i < token.Children.Count; i += 2) {
 					var keyToken = token.Children[i];

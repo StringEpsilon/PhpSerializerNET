@@ -1,4 +1,4 @@
-# Future
+# 0.5.0
 
 **BREAKING**
 - Renamed the static class `PhpSerializer` to `PhpSerialization`

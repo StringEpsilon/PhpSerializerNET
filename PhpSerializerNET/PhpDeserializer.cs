@@ -47,7 +47,7 @@ namespace PhpSerializerNET {
 				case PhpSerializerType.Null:
 					return null;
 				case PhpSerializerType.Boolean:
-					return token.Value == "1" ? true : false;
+					return token.ToBool();
 				case PhpSerializerType.Integer:
 					return token.ToLong();
 				case PhpSerializerType.Floating:

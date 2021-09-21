@@ -80,9 +80,9 @@ namespace PhpSerializerNET {
 							break;
 						}
 					case 'O': {
-							var match = new Regex(@"O:\d+:""\w+"":\d+:{").Match(_input, position);
+							var match = new Regex(@"O:\d+:""[a-zA-Z_\\\-0-9]+"":\d+:{").Match(_input, position);
 							if (!match.Success || match.Index != position) {
-								throw new DeserializationException($"Malformed array at position {position}");
+								throw new DeserializationException($"Malformed object at position {position}");
 							}
 							position += match.Length;
 							ValidateFormat(ref position, true);

@@ -85,7 +85,7 @@ namespace PhpSerializerNET {
 					}
 				}
 			}
-			if (targetType != null || token.Value != "stdClass") {
+			if (targetType != null && token.Value != "stdClass") {
 				return DeserializeToken(targetType, token);
 			} else {
 				IDictionary<string, object> result;

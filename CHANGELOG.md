@@ -1,3 +1,12 @@
+# 0.5.1
+
+- Fixed misleading exception message on malformed objects.
+- Fixed valid classnames being rejected as malformed.
+- Fixed type-lookup logic trying to deserialize with `null` Type information.
+
+Known issues:
+- Objects with classname `DateTime` will fail to deserialize, unless the option `EnableTypeLookup` is set to `false`.
+
 # 0.5.0
 
 **BREAKING**

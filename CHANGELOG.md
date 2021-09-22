@@ -1,3 +1,12 @@
+# Future:
+
+- Allow more (valid) characters in object class names.
+- Added public interface IPhpObject
+- Added public class PhpObjectDictionary (implementing IPhpObject).
+- Added public class PhpDynamicObject (implementing IPhpObject)
+ 
+With IPhpObjects, you can get the class name specified in the serialized data via `GetClassName()`.
+
 # 0.5.1
 
 - Fixed misleading exception message on malformed objects.

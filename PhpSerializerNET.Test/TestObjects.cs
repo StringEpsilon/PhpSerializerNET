@@ -134,17 +134,27 @@ namespace PhpSerializerNET.Test {
 			Assert.AreEqual(2.718, result["Jane"]);
 		}
 
-		
-
 		[TestMethod]
 		public void DeserializeNesting(){
-			var result = (List<dynamic>)PhpSerialization.Deserialize(
-				"a:1:{i:0;O:14:\"ABC\\Epsilon\\42\":3:{s:4:\"date\";O:8:\"DateTime\":3:{s:4:\"date\";s:26:\"2021-08-18 09:10:23.441055\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}}}",
-				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic}
+			var result = (List<object>)PhpSerialization.Deserialize(
+				"a:1:{i:0;O:14:\"ABC\\Epsilon\\42\":1:{s:6:\"People\";O:6:\"people\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}}}"
 			);
+			var firstEntry = (PhpObjectDictionary)result[0];
 			Assert.AreEqual(1, result.Count);
-			Assert.AreEqual("ABC\\Epsilon\\42", result[0].GetClassName());
-			Assert.AreEqual("2021-08-18 09:10:23.441055", result[0].date.Date);
+			Assert.AreEqual("ABC\\Epsilon\\42", firstEntry.GetClassName());
+			Assert.AreEqual(
+				3.14, 
+				((PhpObjectDictionary)firstEntry["People"])["John"]
+			);
+			Assert.AreEqual(
+				2.718, 
+				((PhpObjectDictionary)firstEntry["People"])["Jane"]
+			);
+
+			Assert.AreEqual(
+				"a:1:{i:0;O:14:\"ABC\\Epsilon\\42\":1:{s:6:\"People\";O:6:\"people\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}}}",
+				PhpSerialization.Serialize(result)
+			);
 		}
 	}
 }

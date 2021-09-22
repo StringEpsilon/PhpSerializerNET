@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -72,19 +73,28 @@ namespace PhpSerializerNET {
 			StringBuilder output = new StringBuilder();
 			switch (input) {
 				case IDictionary dictionary: {
-						var dictionaryType = dictionary.GetType();
-						if (dictionaryType.GenericTypeArguments.Count() > 0) {
-							var keyType = dictionaryType.GenericTypeArguments[0];
-							if (!keyType.IsIConvertible() && keyType != typeof(object)) {
-								throw new Exception($"Can not serialize into associative array with key type {keyType.FullName}");
+						if (input is IPhpObject phpObject){
+							output.Append("O:");
+							output.Append(phpObject.GetClassName().Length);
+							output.Append(":\"");
+							output.Append(phpObject.GetClassName());
+							output.Append("\":");
+							output.Append(dictionary.Count);
+							output.Append(":{");
+						} else {
+							var dictionaryType = dictionary.GetType();
+							if (dictionaryType.GenericTypeArguments.Count() > 0) {
+								var keyType = dictionaryType.GenericTypeArguments[0];
+								if (!keyType.IsIConvertible() && keyType != typeof(object)) {
+									throw new Exception($"Can not serialize into associative array with key type {keyType.FullName}");
+								}
 							}
-						}
-						output.Append($"a:{dictionary.Count}:");
-						output.Append("{");
-
+						
+							output.Append($"a:{dictionary.Count}:");
+							output.Append("{");
+							}
 
 						foreach (DictionaryEntry entry in dictionary) {
-
 							output.Append($"{this.Serialize(entry.Key)}{Serialize(entry.Value)}");
 						}
 						output.Append("}");
@@ -100,6 +110,8 @@ namespace PhpSerializerNET {
 						output.Append("}");
 						return output.ToString();
 					}
+				case DynamicObject:
+					throw new System.NotSupportedException("Serialization of dynamic objects isn't supported yet.");
 				default: {
 						var inputType = input.GetType();
 
@@ -124,7 +136,13 @@ namespace PhpSerializerNET {
 		}
 
 		private string SerializeToObject(object input) {
-			var className = input.GetType().GetCustomAttribute<PhpClass>().Name;
+			string className;
+			if (input is IPhpObject phpObject){
+				className = phpObject.GetClassName();
+			} else {
+				className = input.GetType().GetCustomAttribute<PhpClass>()?.Name;
+			}
+			 
 			if (string.IsNullOrEmpty(className)) {
 				className = "stdClass";
 			}

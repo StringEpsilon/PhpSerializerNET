@@ -99,7 +99,7 @@ namespace PhpSerializerNET {
 				}
 				for (int i = 0; i < token.Children.Count; i += 2) {
 					result.TryAdd(
-						(string)DeserializeToken(typeof(string), token.Children[i]),
+						token.Children[i].Value,
 						DeserializeToken(token.Children[i + 1])
 					);
 				}

@@ -8,6 +8,7 @@
 using System;
 
 namespace PhpSerializerNET {
+	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
 	public class PhpPropertyAttribute : Attribute {
 		public string Name { get; set; }
 

@@ -13,6 +13,7 @@ namespace PhpSerializerNET {
 	/// 
 	/// Will also be used to find the proper deserialization target on deserialization, see the <see cref="PhpDeserializationOptions"/>
 	/// </summary>
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface)]
 	public class PhpClass : Attribute {
 		public string Name { get; set; }
 

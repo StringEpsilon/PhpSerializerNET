@@ -4,8 +4,12 @@
 - Added public interface IPhpObject
 - Added public class PhpObjectDictionary (implementing IPhpObject).
 - Added public class PhpDynamicObject (implementing IPhpObject)
+- Added PhpDateTime to avoid conflicts with System.DateTime.
  
 With IPhpObjects, you can get the class name specified in the serialized data via `GetClassName()`.
+
+**Known issues:**
+- Can not deserialize dynamic objects.
 
 # 0.5.1
 
@@ -14,7 +18,7 @@ With IPhpObjects, you can get the class name specified in the serialized data vi
 - Fixed type-lookup logic trying to deserialize with `null` Type information.
 
 Known issues:
-- Objects with classname `DateTime` will fail to deserialize, unless the option `EnableTypeLookup` is set to `false`.
+- ~~Objects with classname `DateTime` will fail to deserialize, unless the option `EnableTypeLookup` is set to `false`.~~ (fixed since)
 
 # 0.5.0
 

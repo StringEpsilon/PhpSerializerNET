@@ -140,10 +140,11 @@ namespace PhpSerializerNET.Test {
 		public void DeserializeNesting(){
 			var result = (List<dynamic>)PhpSerialization.Deserialize(
 				"a:1:{i:0;O:14:\"ABC\\Epsilon\\42\":3:{s:4:\"date\";O:8:\"DateTime\":3:{s:4:\"date\";s:26:\"2021-08-18 09:10:23.441055\";s:13:\"timezone_type\";i:3;s:8:\"timezone\";s:3:\"UTC\";}}}",
-				new PhpDeserializationOptions() { EnableTypeLookup = false , StdClass = StdClassOption.Dynamic}
+				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic}
 			);
 			Assert.AreEqual(1, result.Count);
-			Assert.AreEqual("2021-08-18 09:10:23.441055", result[0].date.date);
+			Assert.AreEqual("ABC\\Epsilon\\42", result[0].GetClassName());
+			Assert.AreEqual("2021-08-18 09:10:23.441055", result[0].date.Date);
 		}
 	}
 }

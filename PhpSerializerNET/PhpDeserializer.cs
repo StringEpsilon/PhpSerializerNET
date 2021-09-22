@@ -7,7 +7,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -68,6 +67,7 @@ namespace PhpSerializerNET {
 
 		private object MakeClass(PhpSerializeToken token) {
 			var typeName = token.Value;
+			object constructedObject;
 			Type targetType = null;
 			if (typeName != "sdtClass" && _options.EnableTypeLookup) {
 				if (TypeLookupCache.ContainsKey(typeName)) {
@@ -85,14 +85,15 @@ namespace PhpSerializerNET {
 					}
 				}
 			}
-			if (targetType != null && token.Value != "stdClass") {
-				return DeserializeToken(targetType, token);
+			if (targetType != null && typeName != "stdClass") {
+
+				constructedObject = DeserializeToken(targetType, token);
 			} else {
-				IDictionary<string, object> result;
+				dynamic result;
 				if (this._options.StdClass == StdClassOption.Dynamic) {
-					result = new ExpandoObject();
+					result = new PhpDynamicObject();
 				} else if (_options.StdClass == StdClassOption.Dictionary) {
-					result = new Dictionary<string, object>();
+					result = new PhpObjectDictionary();
 				} else {
 					throw new DeserializationException("Encountered 'stdClass' and the behavior 'Throw' was specified in deserialization options.");
 				}
@@ -102,8 +103,12 @@ namespace PhpSerializerNET {
 						DeserializeToken(token.Children[i + 1])
 					);
 				}
-				return result;
+				constructedObject = result;
 			}
+			if (constructedObject is IPhpObject phpObject){
+				phpObject.SetClassName(typeName);
+			}
+			return constructedObject;
 		}
 
 		private object DeserializeToken(Type targetType, PhpSerializeToken token) {

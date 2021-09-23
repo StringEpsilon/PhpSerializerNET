@@ -1,8 +1,9 @@
-# Future:
+# 0.6.0:
 
 - Allow more (valid) characters in object class names.
 - Added public interface IPhpObject
 - Added public class PhpObjectDictionary (implementing IPhpObject).
+	- This replaces `IDictionary<string, object>` as the default deserialization target of objects.
 - Added public class PhpDynamicObject (implementing IPhpObject)
 - Added PhpDateTime to avoid conflicts with System.DateTime.
  

@@ -4,6 +4,7 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 using System;
+using System.Globalization;
 using System.Reflection;
 
 namespace PhpSerializerNET {
@@ -25,6 +26,12 @@ namespace PhpSerializerNET {
 				return field.GetValue(input);
 			}
 			return null;
+		}
+
+		internal static string GetNumericString(this Enum enumValue) {
+			return ((IConvertible)enumValue)
+				.ToType(enumValue.GetType().GetEnumUnderlyingType(), CultureInfo.InvariantCulture)
+				.ToString();
 		}
 	}
 }

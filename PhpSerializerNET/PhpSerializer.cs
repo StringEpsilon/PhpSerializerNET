@@ -27,6 +27,13 @@ namespace PhpSerializerNET {
 		public string Serialize(object input) {
 			StringBuilder output = new StringBuilder();
 			switch (input) {
+				case Enum enumValue: {
+					if (this._options.NumericEnums) {
+						return $"i:{enumValue.GetNumericString()};";
+					} else {
+						return $"i:{enumValue.ToString()};";
+					}
+				}
 				case long longValue: {
 						return $"i:{longValue.ToString()};";
 					}

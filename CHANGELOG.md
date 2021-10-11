@@ -1,3 +1,9 @@
+# 0.7.0:
+- Support de/serialization of enums
+- Added serialization option `NumericEnums`:
+	Whether or not to serialize enums as integer values
+	Defaults to true. If set to false, the enum.ToString() representation will be used.
+
 # 0.6.0:
 
 - Allow more (valid) characters in object class names.

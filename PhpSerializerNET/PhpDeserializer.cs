@@ -132,6 +132,16 @@ namespace PhpSerializerNET {
 				case PhpSerializerType.Integer:
 				case PhpSerializerType.Floating:
 				case PhpSerializerType.String:
+					if (targetType.IsEnum){
+						if (token.Type != PhpSerializerType.String){
+							return ((IConvertible)token.Value).ToType(targetType.GetEnumUnderlyingType(), CultureInfo.InvariantCulture);
+						} else {
+							return targetType
+								.GetFields()
+								.FirstOrDefault(y => y.Name == token.Value)
+								.GetRawConstantValue();
+						}
+					}
 					if (targetType.IsIConvertible()) {
 						if (targetType == typeof(bool)) {
 							if (_options.NumberStringToBool && (token.Value == "0" || token.Value == "1")) {

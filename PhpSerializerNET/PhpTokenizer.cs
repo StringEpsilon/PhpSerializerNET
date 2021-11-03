@@ -113,7 +113,7 @@ namespace PhpSerializerNET {
 					return tokens;
 				}
 				if (_inputBytes.Length - 1 <= _position) {
-					throw new DeserializationException($"Unexpected end of data at position { _position + 1}");
+					throw new DeserializationException($"Unexpected end of data at position { _position}");
 				}
 				switch ((char)_inputBytes[_position]) {
 					case 'N': {
@@ -163,12 +163,15 @@ namespace PhpSerializerNET {
 
 							if (valueStart + length >= _inputBytes.Length) {
 								throw new DeserializationException(
-									$"Unexpected end of data at position. The string at position {_position} pointed to out of bounds index {valueStart + length}."
+									$"Illegal length of {length}. " +
+									$"The string at position {_position} points to out of bounds index {valueStart + length}."
 								);
 							}
-							if (_inputBytes[valueStart + length] != '"') {
+							char stringEnd = (char)_inputBytes[valueStart + length];
+							if (stringEnd != '"') {
 								throw new DeserializationException(
-									$"String at position {_position} has an incorrect length."
+									$"String at position {_position} has an incorrect length of {length}: "+
+									$"Expected double quote at position {valueStart + length}, found '{stringEnd}' instead."
 								);
 							}
 
@@ -223,7 +226,8 @@ namespace PhpSerializerNET {
 							};
 							if (arrayToken.Length != arrayToken.Children.Count / 2) {
 								throw new DeserializationException(
-									$"Array at position {arrayToken.Position} should be of length {arrayToken.Length}, but actual length is {arrayToken.Children.Count / 2}."
+									$"Array at position {arrayToken.Position} should be of length {arrayToken.Length}, " +
+									$"but actual length is {arrayToken.Children.Count / 2}."
 								);
 							}
 							tokens.Add(arrayToken);

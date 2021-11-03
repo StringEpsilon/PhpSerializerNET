@@ -174,7 +174,7 @@ namespace PhpSerializerNET {
 						return this.MakeStruct(targetType, token);
 					}
 				default:
-					throw new Exception("Unsupported datatype.");
+					throw new DeserializationException($"Unsupported datatype {targetType.Name}.");
 			}
 		}
 
@@ -199,7 +199,14 @@ namespace PhpSerializerNET {
 				if (field.GetCustomAttribute<PhpIgnoreAttribute>() != null) {
 					break;
 				}
-				field.SetValue(result, this.DeserializeToken(field.FieldType, valueToken));
+				try{
+					field.SetValue(result, this.DeserializeToken(field.FieldType, valueToken));
+				} catch(Exception exception){
+					throw new DeserializationException(
+						$"Exception encountered while trying to assign '{token.Value}' to {targetType.Name}.{field.Name}. See inner exception for details.",
+						exception
+					);
+				}
 			}
 			return result;
 		}
@@ -226,7 +233,14 @@ namespace PhpSerializerNET {
 				if (property.GetCustomAttribute<PhpIgnoreAttribute>() != null) {
 					break;
 				}
-				property.SetValue(result, this.DeserializeToken(property.PropertyType, valueToken));
+				try{
+					property.SetValue(result, this.DeserializeToken(property.PropertyType, valueToken));
+				} catch(Exception exception){
+					throw new DeserializationException(
+						$"Exception encountered while trying to assign '{token.Value}' to {targetType.Name}.{property.Name}. See inner exception for details.",
+						exception
+					);
+				}
 			}
 			return result;
 		}
@@ -243,7 +257,7 @@ namespace PhpSerializerNET {
 				if (token.Children[i].Type != PhpSerializerType.Integer) {
 					throw new DeserializationException(
 						$"Can not deserialize array at position {token.Position} to list: " +
-						$"It has a non-integer key at element {i} (position {token.Children[i].Position})."
+						$"It has a non-integer key '{token.Value}' at element {i} (position {token.Children[i].Position})."
 					);
 				}
 			}

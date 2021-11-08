@@ -61,6 +61,14 @@ namespace PhpSerializerNET.Test {
 			);
 			Assert.IsNotNull(deserializedObject);
 		}
+		[TestMethod]
+
+		public void Test_Issue11() {
+			var deserializedObject = PhpSerialization.Deserialize(
+				"a:1:{i:0;a:7:{s:1:\"A\";N;s:1:\"B\";N;s:1:\"C\";s:1:\"C\";s:5:\"odSdr\";i:1;s:1:\"D\";d:1;s:1:\"E\";N;s:1:\"F\";a:3:{s:1:\"X\";i:8;s:1:\"Y\";N;s:1:\"Z\";N;}}}",
+			);
+			Assert.IsNotNull(deserializedObject);
+		}
 
 		[TestMethod]
 		public void ThrowsOnExcessKeys() {

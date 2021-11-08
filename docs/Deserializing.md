@@ -79,7 +79,7 @@ var foo = PhpSerialization.Deserialize(
 		// Whether or not properties are matched case sensitive.
 		public bool CaseSensitiveProperties = true,
 
-		// If true, keys present in the array but not on the target class will be ignored.
+		// If true, keys present in the array / object but not on the target class or struct will be ignored.
 		// Otherwise an exception will be thrown.
 		public bool AllowExcessKeys = false,
 
@@ -96,3 +96,4 @@ var foo = PhpSerialization.Deserialize(
 # Deserializing php objects
 
 TODO.
+

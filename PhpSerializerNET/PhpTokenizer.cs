@@ -76,7 +76,7 @@ namespace PhpSerializerNET {
 							}
 							position += match.Length;
 							ValidateFormat(ref position, true);
-
+							position++; // Account for the closing bracket.
 							break;
 						}
 					case 'O': {
@@ -86,6 +86,7 @@ namespace PhpSerializerNET {
 							}
 							position += match.Length;
 							ValidateFormat(ref position, true);
+							position++; // Account for the closing bracket.
 
 							break;
 					}

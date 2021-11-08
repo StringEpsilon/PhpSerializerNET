@@ -4,6 +4,7 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PhpSerializerNET.Test {
@@ -67,6 +68,12 @@ namespace PhpSerializerNET.Test {
 				long.MinValue,
 				PhpSerialization.Deserialize("i:-9223372036854775808;")
 			);
+		}
+
+		[TestMethod]
+		public void DeserializeGUID() {
+			Guid guid = PhpSerialization.Deserialize<Guid>("s:36:\"82e2ebf0-43e6-4c10-82cf-57d60383a6be\";");
+			Assert.AreEqual("82e2ebf0-43e6-4c10-82cf-57d60383a6be", guid.ToString());
 		}
 
 		[TestMethod]

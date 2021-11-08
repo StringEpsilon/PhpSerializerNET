@@ -26,6 +26,8 @@ namespace PhpSerializerNET.Test {
 
 			[PhpIgnore]
 			public string it { get; set; }
+
+			public Guid guid {get;set;}
 		}
 
 		[TestMethod]
@@ -65,7 +67,7 @@ namespace PhpSerializerNET.Test {
 
 		public void Test_Issue11() {
 			var deserializedObject = PhpSerialization.Deserialize(
-				"a:1:{i:0;a:7:{s:1:\"A\";N;s:1:\"B\";N;s:1:\"C\";s:1:\"C\";s:5:\"odSdr\";i:1;s:1:\"D\";d:1;s:1:\"E\";N;s:1:\"F\";a:3:{s:1:\"X\";i:8;s:1:\"Y\";N;s:1:\"Z\";N;}}}",
+				"a:1:{i:0;a:7:{s:1:\"A\";N;s:1:\"B\";N;s:1:\"C\";s:1:\"C\";s:5:\"odSdr\";i:1;s:1:\"D\";d:1;s:1:\"E\";N;s:1:\"F\";a:3:{s:1:\"X\";i:8;s:1:\"Y\";N;s:1:\"Z\";N;}}}"
 			);
 			Assert.IsNotNull(deserializedObject);
 		}
@@ -77,6 +79,15 @@ namespace PhpSerializerNET.Test {
 				new PhpDeserializationOptions() { AllowExcessKeys = false }
 			));
 			Assert.AreEqual("Could not bind the key \"es\" to object of type MappedClass: No such property.", ex.Message);
+		}
+
+		[TestMethod]
+		public void AssignsGuids() {
+			var result = PhpSerialization.Deserialize<MappedClass>(
+				"a:1:{s:4:\"guid\";s:36:\"82e2ebf0-43e6-4c10-82cf-57d60383a6be\";}",
+				new PhpDeserializationOptions() { AllowExcessKeys = true }
+			);
+			Assert.AreEqual(new Guid("82e2ebf0-43e6-4c10-82cf-57d60383a6be"), result.guid);
 		}
 
 

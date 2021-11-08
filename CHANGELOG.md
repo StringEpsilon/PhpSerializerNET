@@ -1,3 +1,8 @@
+# 0.7.1:
+- Fixed issue with nested array / object validation (issue #11)
+- Added support for System.Guid (issue #10)
+
+
 # 0.7.0:
 - Support de/serialization of enums
 - Added serialization option `NumericEnums`:

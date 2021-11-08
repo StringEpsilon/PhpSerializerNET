@@ -149,6 +149,8 @@ namespace PhpSerializerNET {
 							}
 						}
 						return ((IConvertible)token.Value).ToType(targetType, CultureInfo.InvariantCulture);
+					} else if(targetType == typeof(System.Guid)) {
+						return new Guid(token.Value);
 					} else {
 						throw new DeserializationException(
 							$"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}."

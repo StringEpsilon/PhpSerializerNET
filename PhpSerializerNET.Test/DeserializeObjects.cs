@@ -126,5 +126,11 @@ namespace PhpSerializerNET.Test {
 				result.Bar.Foo
 			);
 		}
+
+		[TestMethod]
+		public void Test_Issue12(){
+			var result = PhpSerialization.Deserialize("a:1:{i:0;a:4:{s:1:\"A\";s:2:\"63\";s:1:\"B\";a:2:{i:558710;s:1:\"2\";i:558709;s:1:\"2\";}s:1:\"C\";s:2:\"71\";s:1:\"G\";a:3:{s:1:\"x\";s:6:\"446368\";s:1:\"y\";s:1:\"0\";s:1:\"z\";s:5:\"1.029\";}}}");
+			Assert.IsNotNull(result);
+		}
 	}
 }

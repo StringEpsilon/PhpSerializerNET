@@ -26,6 +26,8 @@ namespace PhpSerializerNET {
 		}
 
 		internal bool ValidateFormat(ref int position, bool inArray = false) {
+			bool isTop = position == 0;
+			bool expectBracket = false;
 			for (; position < _input.Length; position++) {
 				switch (_input[position]) {
 					case 'N': {
@@ -75,8 +77,11 @@ namespace PhpSerializerNET {
 								throw new DeserializationException($"Malformed array at position {position}");
 							}
 							position += match.Length;
+							if (isTop) {
+								expectBracket = true;
+							}
 							ValidateFormat(ref position, true);
-							position++; // Account for the closing bracket.
+							
 							break;
 						}
 					case 'O': {
@@ -85,17 +90,24 @@ namespace PhpSerializerNET {
 								throw new DeserializationException($"Malformed object at position {position}");
 							}
 							position += match.Length;
+							if (isTop) {
+								expectBracket = true;
+							}
 							ValidateFormat(ref position, true);
-							position++; // Account for the closing bracket.
 
 							break;
 					}
 					case '}': {
-							if (inArray) {
-								return true;
+							if (expectBracket) {
+								expectBracket = false;
 							} else {
-								throw new DeserializationException($"Unexpected token '{_input[position]}' at position {position}.");
+								if (inArray) {
+									return true;
+								} else {
+									throw new DeserializationException($"Unexpected token '{_input[position]}' at position {position}.");
+								}
 							}
+							break;
 						}
 					default: {
 							throw new DeserializationException($"Unexpected token '{_input[position]}' at position {position}.");

@@ -3,6 +3,7 @@
 	- When true, empty strings will be deserialized into the default value of the target IConvertible.
 	  For example `s:0:"";` deserialized to an integer yields `0`.
 	See issue #13 for details.
+- Fixed a regression introduced in 0.7.1 where some data would no longer parse correctly (#12) due to improper handling of array brackets.
 
 # 0.7.1:
 - Fixed issue with nested array / object validation (issue #11)

@@ -143,6 +143,9 @@ namespace PhpSerializerNET {
 						}
 					}
 					if (targetType.IsIConvertible()) {
+						if (token.Value == "" && this._options.EmptyStringToDefault){
+							return Activator.CreateInstance(targetType);
+						}
 						if (targetType == typeof(bool)) {
 							if (_options.NumberStringToBool && (token.Value == "0" || token.Value == "1")) {
 								return token.ToBool();

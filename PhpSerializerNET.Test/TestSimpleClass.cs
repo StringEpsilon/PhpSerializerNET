@@ -31,6 +31,19 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
+		public void DeserializeEmptyStrings() {
+			var deserializedObject = PhpSerialization.Deserialize<SimpleClass>(
+				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";s:0:\"\";s:7:\"ADouble\";s:0:\"\";s:4:\"True\";b:1;s:5:\"False\";b:0;}"
+			);
+			Assert.AreEqual("this is a string value", deserializedObject.AString);
+			Assert.AreEqual(0, deserializedObject.AnInteger);
+			Assert.AreEqual(0, deserializedObject.ADouble);
+			Assert.AreEqual(true, deserializedObject.True);
+			Assert.AreEqual(false, deserializedObject.False);
+		}
+
+
+		[TestMethod]
 		public void SerializeSimpleClass() {
 			var deserializedObject = PhpSerialization.Deserialize<SimpleClass>(
 				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}"
@@ -47,6 +60,7 @@ namespace PhpSerializerNET.Test {
 				PhpSerialization.Serialize(value)
 			);
 		}
+
 
 		[TestMethod]
 		public void ErrorOnFlatValue() {

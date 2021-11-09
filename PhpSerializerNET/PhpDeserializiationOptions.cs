@@ -67,6 +67,12 @@ namespace PhpSerializerNET {
 		public ListOptions UseLists { get; set; } = ListOptions.Default;
 
 		/// <summary>
+		/// On deserializing an IConvertible from a PHP string, treat an empty string as the default value of the target type
+		/// i.e. "" => 0 for an integer.
+		/// </summary>
+		public bool EmptyStringToDefault {get;set;} = true;
+
+		/// <summary>
 		/// Whether or not to convert strings "1"` and "0" to boolean. 
 		/// Default is false.
 		/// </summary>

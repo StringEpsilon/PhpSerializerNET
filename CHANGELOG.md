@@ -1,7 +1,12 @@
+# 0.7.2:
+- Added `EmptyStringToDefault` deserialization option, defaults to true.
+	- When true, empty strings will be deserialized into the default value of the target IConvertible.
+	  For example `s:0:"";` deserialized to an integer yields `0`.
+	See issue #13 for details.
+
 # 0.7.1:
 - Fixed issue with nested array / object validation (issue #11)
 - Added support for System.Guid (issue #10)
-
 
 # 0.7.0:
 - Support de/serialization of enums

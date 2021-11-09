@@ -31,5 +31,11 @@ namespace PhpSerializerNET.Test {
 
 			Assert.AreEqual(10.00, number);
 		}
+
+		[TestMethod]
+		public void ConvertsEmptyString() {
+			var result = PhpSerialization.Deserialize<int>("s:0:\"\";");
+			Assert.AreEqual(0, result);
+		}
 	}
 }

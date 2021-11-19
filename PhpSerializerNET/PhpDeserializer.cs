@@ -132,6 +132,11 @@ namespace PhpSerializerNET {
 				case PhpSerializerType.Integer:
 				case PhpSerializerType.Floating:
 				case PhpSerializerType.String:
+					// Short-circuit strings:
+					if (targetType == typeof(string)) {
+						return token.Value;
+					}
+
 					if (targetType.IsEnum){
 						if (token.Type != PhpSerializerType.String){
 							return ((IConvertible)token.Value).ToType(targetType.GetEnumUnderlyingType(), CultureInfo.InvariantCulture);

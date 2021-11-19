@@ -33,6 +33,15 @@ namespace PhpSerializerNET.Test {
 				PhpSerialization.Serialize("")
 			);
 		}
+		
+		[TestMethod]
+		public void DeserializeEmptyStringExplicit() {
+			Assert.AreEqual(
+				"",
+				PhpSerialization.Deserialize<string>("s:0:\"\";")
+			);
+		}
+
 		[TestMethod]
 		public void SerializeUmlauts() {
 			Assert.AreEqual(

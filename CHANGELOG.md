@@ -1,3 +1,6 @@
+# 0.7.3:
+- Fixed an issue with empty string deserialization, caused by the `EmptyStringToDefault` code in 0.7.2.
+
 # 0.7.2:
 - Added `EmptyStringToDefault` deserialization option, defaults to true.
 	- When true, empty strings will be deserialized into the default value of the target IConvertible.

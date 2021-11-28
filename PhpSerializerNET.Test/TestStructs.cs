@@ -21,6 +21,7 @@ namespace PhpSerializerNET.Test {
 
 	public struct MyStructRenamedBar {
 		public string foo;
+
 		[PhpProperty("foobar")]
 		public string bar;
 	}
@@ -28,8 +29,6 @@ namespace PhpSerializerNET.Test {
 
 	[TestClass]
 	public class TestStructs {
-
-
 		[TestMethod]
 		public void SerializeStruct() {
 			Assert.AreEqual(

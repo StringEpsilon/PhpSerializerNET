@@ -6,38 +6,12 @@
 **/
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PhpSerializerNET.Test.DataTypes;
 
 namespace PhpSerializerNET.Test {
-	public enum IntEnum : int {
-		A = 1,
-		B,
-	}
-	public enum LongEnum : long {
-		A = 1,
-		B,
-	}
 
 	[TestClass]
-	public class TestEnum {
-
-		[TestMethod]
-		public void DeserializeEnums() {
-			Assert.AreEqual(
-				IntEnum.A,
-				PhpSerialization.Deserialize<IntEnum>("i:1;")
-			);
-
-			Assert.AreEqual(
-				LongEnum.A,
-				PhpSerialization.Deserialize<LongEnum>("i:1;")
-			);
-
-			Assert.AreEqual(
-				LongEnum.A,
-				PhpSerialization.Deserialize<LongEnum>("s:1:\"A\";")
-			);
-		}
-
+	public class SerializeEnumsTest {
 		[TestMethod]
 		public void SerializeOne() {
 			Assert.AreEqual(
@@ -47,7 +21,7 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void SerializeString() {
+		public void SerializeToString() {
 			Assert.AreEqual(
 				"s:1:\"A\";",
 				PhpSerialization.Serialize(IntEnum.A, new PhpSerializiationOptions{NumericEnums = false})

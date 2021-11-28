@@ -1,4 +1,3 @@
-
 /**
   This Source Code Form is subject to the terms of the Mozilla Public
   License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -6,17 +5,11 @@
 **/
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PhpSerializerNET.Test.DataTypes;
 
 namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class TestSimpleClass {
-		public class SimpleClass {
-			public string AString { get; set; }
-			public int AnInteger { get; set; }
-			public double ADouble { get; set; }
-			public bool True { get; set; }
-			public bool False { get; set; }
-		}
+	public partial class TestSimpleClass {
 
 		[TestMethod]
 		public void DeserializeSimpleClass() {
@@ -69,13 +62,6 @@ namespace PhpSerializerNET.Test {
 			);
 
 			Assert.AreEqual("Can not deserialize loose collection of values into object", ex.Message);
-		}
-
-		[TestMethod]
-		public void ReturnsNull() {
-			var result = PhpSerialization.Deserialize<SimpleClass>("N;");
-
-			Assert.IsNull(result);
 		}
 
 		[TestMethod]

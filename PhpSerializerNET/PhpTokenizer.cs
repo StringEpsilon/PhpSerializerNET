@@ -87,7 +87,9 @@ namespace PhpSerializerNET {
 									_ => false,
 								};
 								if (!valid) {
-									throw new DeserializationException($"Malformed integer at position {position}");
+									throw new DeserializationException(
+										$"Malformed double at position {position}, unexpected token '{(char)_inputBytes[position]}'"
+									);
 								}
 							}
 							if (_inputBytes[position] != ';') {
@@ -166,14 +168,16 @@ namespace PhpSerializerNET {
 									$"Array at position {position} has illegal, missing or malformed length."
 								);
 							}
-							if (_inputBytes[position] != ':') {
+							if(position+1 >= _inputBytes.Length){
 								throw new DeserializationException(
-									$"Array at position {position}: Expected token ':', found '{(char)_inputBytes[position]}'"
+									$"Array at position {position}: Unexpected end of input sequence."
 								);
 							}
 							if (_inputBytes[position+1] != '{') {
+								// Note: The colon is checked in the length validation as well, 
+								// as part of the loop condition. If the colon is missing or misplaced, the number validation will fail.
 								throw new DeserializationException(
-									$"Array at position {position}: Expected token '{{', found '{(char)_inputBytes[position]}'"
+									$"Array at position {position}: Expected token '{{', found '{(char)_inputBytes[position+1]}' instead."
 								);
 							}
 							position += 2;

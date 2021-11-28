@@ -81,33 +81,7 @@ namespace PhpSerializerNET.Test {
 			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("i:1"));
 			Assert.AreEqual("Malformed integer at position 0", ex.Message);
 		}
-
-
-		[TestMethod]
-		public void ThrowsOnMalformedDouble() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("d"));
-			Assert.AreEqual("Malformed double at position 0", ex.Message);
-
-			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("d?"));
-			Assert.AreEqual("Malformed double at position 0", ex.Message);
-
-			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("d:1"));
-			Assert.AreEqual("Malformed double at position 0", ex.Message);
-		}
-
-		[TestMethod]
-		public void ThrowsOnMalformedArray() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a"));
-			Assert.AreEqual("Malformed array at position 0", ex.Message);
-
-			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a?"));
-			Assert.AreEqual("Malformed array at position 0", ex.Message);
-
-			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a:1"));
-			Assert.AreEqual("Malformed array at position 0", ex.Message);
-		}
-
-
+		
 		[TestMethod]
 		public void ThrowsOnUnexpectedToken() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("_"));

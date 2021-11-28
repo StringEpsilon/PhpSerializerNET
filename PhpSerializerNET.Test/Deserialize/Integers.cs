@@ -11,26 +11,10 @@ namespace PhpSerializerNET.Test {
 	[TestClass]
 	public class TestIntegers {
 		[TestMethod]
-		public void SerializeZero() {
-			Assert.AreEqual(
-				"i:0;",
-				PhpSerialization.Serialize(0)
-			);
-		}
-
-		[TestMethod]
 		public void DeserializeZero() {
 			Assert.AreEqual(
 				0,
 				PhpSerialization.Deserialize<int>("i:0;")
-			);
-		}
-
-		[TestMethod]
-		public void SerializeOne() {
-			Assert.AreEqual(
-				"i:1;",
-				PhpSerialization.Serialize(1)
 			);
 		}
 
@@ -43,26 +27,10 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void SerializeIntMaxValue() {
-			Assert.AreEqual(
-				"i:2147483647;",
-				PhpSerialization.Serialize(int.MaxValue)
-			);
-		}
-
-		[TestMethod]
 		public void DeserializeIntMaxValue() {
 			Assert.AreEqual(
 				int.MaxValue,
 				PhpSerialization.Deserialize<int>("i:2147483647;")
-			);
-		}
-
-		[TestMethod]
-		public void SerializeIntMinValue() {
-			Assert.AreEqual(
-				"i:-2147483648;",
-				PhpSerialization.Serialize(int.MinValue)
 			);
 		}
 

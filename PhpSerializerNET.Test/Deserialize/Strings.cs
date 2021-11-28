@@ -6,31 +6,15 @@
 **/
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PhpSerializerNET;
 
 namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class TestStrings {
-		[TestMethod]
-		public void DeserializesNull() {
-			var result = PhpSerialization.Deserialize<string>("N;");
-
-			Assert.IsNull(result);
-		}
-
+	public class DeserializeStringsTest {
 		[TestMethod]
 		public void SerializeHelloWorld() {
 			Assert.AreEqual(
 				"s:12:\"Hello World!\";",
 				PhpSerialization.Serialize("Hello World!")
-			);
-		}
-
-		[TestMethod]
-		public void SerializeEmptyString() {
-			Assert.AreEqual(
-				"s:0:\"\";",
-				PhpSerialization.Serialize("")
 			);
 		}
 		
@@ -41,22 +25,6 @@ namespace PhpSerializerNET.Test {
 				PhpSerialization.Deserialize<string>("s:0:\"\";")
 			);
 		}
-
-		[TestMethod]
-		public void SerializeUmlauts() {
-			Assert.AreEqual(
-				"s:14:\"äöüßÄÖÜ\";",
-				PhpSerialization.Serialize("äöüßÄÖÜ")
-			);
-		}
-		[TestMethod]
-		public void SerializeEmoji() {
-			Assert.AreEqual(
-				"s:4:\"👻\";",
-				PhpSerialization.Serialize("👻")
-			);
-		}
-
 
 		[TestMethod]
 		public void DeserializeHelloWorld() {

@@ -204,21 +204,22 @@ namespace PhpSerializerNET {
 							var length = int.Parse(lengthString);
 							if (_inputBytes.Length < position + length + 2) {
 								throw new DeserializationException(
-									$"Object class name: Illegal length of {length}. The string at position {position} points to out of bounds index {position + 2 + length}."
+									$"Malformed object at position {position}: Illegal length of {length}. The specified length points to out of bounds index {position + 2 + length}."
 								);
 							}
 
-							if (_inputBytes[position + 1] != '"') {
+							if (_inputBytes[position +1] != '"') {
 								throw new DeserializationException(
-									$"String at position {position} has an incorrect length of {length}: " +
+									$"Malformed object at position {position}: " +
 									$"Expected double quote at position {position + 1}, found '{(char)_inputBytes[position + 1]}' instead."
 								);
 							} else {
 								position++;
 							}
+							
 							if (_inputBytes[position + 1 + length] != '"') {
 								throw new DeserializationException(
-									$"String at position {position} has an incorrect length of {length}: " +
+									$"Malformed object at position {position} has an incorrect length of {length}: " +
 									$"Expected double quote at position {position + 1 + length}, found '{(char)_inputBytes[position + 1 + length]}' instead."
 								);
 							} else {
@@ -234,14 +235,19 @@ namespace PhpSerializerNET {
 									_ => false,
 								};
 							}
+							if (!valid){
+								throw new DeserializationException(
+									$"Object at position {position} has illegal, missing or malformed length."
+								);
+							}
 							if (_inputBytes[position] != ':') {
 								throw new DeserializationException(
-									$"Object at position {position}: Expected token ':', found '{(char)_inputBytes[position]}'"
+									$"Object at position {position}: Expected token ':', found '{(char)_inputBytes[position]}' instead."
 								);
 							}
 							if (_inputBytes[position+1] != '{') {
 								throw new DeserializationException(
-									$"Object at position {position}: Expected token '{{', found '{(char)_inputBytes[position]}'"
+									$"Object at position {position+1}: Expected token '{{', found '{(char)_inputBytes[position+1]}' instead."
 								);
 							}
 							position += 2;

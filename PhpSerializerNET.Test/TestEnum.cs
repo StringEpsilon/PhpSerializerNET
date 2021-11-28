@@ -45,5 +45,13 @@ namespace PhpSerializerNET.Test {
 				PhpSerialization.Serialize(IntEnum.A)
 			);
 		}
+
+		[TestMethod]
+		public void SerializeString() {
+			Assert.AreEqual(
+				"s:1:\"A\";",
+				PhpSerialization.Serialize(IntEnum.A, new PhpSerializiationOptions{NumericEnums = false})
+			);
+		}
 	}
 }

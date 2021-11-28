@@ -1,5 +1,6 @@
 # Future:
 - Improved deserialization performance.
+- Fixed invalid output when using PhpSerializiationOptions.NumericEnums = false
 
 # 0.7.3:
 - Fixed an issue with empty string deserialization, caused by the `EmptyStringToDefault` code in 0.7.2.

@@ -31,7 +31,7 @@ namespace PhpSerializerNET {
 					if (this._options.NumericEnums) {
 						return $"i:{enumValue.GetNumericString()};";
 					} else {
-						return $"i:{enumValue.ToString()};";
+						return Serialize(enumValue.ToString());
 					}
 				}
 				case long longValue: {

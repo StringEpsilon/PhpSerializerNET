@@ -73,7 +73,7 @@ namespace PhpSerializerNET.Test {
 		[TestMethod]
 		public void DeserializesStdClassToDynamic() {
 			var anonymous = new { foo = "foo" };
-			System.Console.WriteLine(anonymous.GetType().Name);
+
 			var result = (dynamic)PhpSerialization.Deserialize(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}"
 			);
@@ -85,20 +85,19 @@ namespace PhpSerializerNET.Test {
 		[TestMethod]
 		public void DeserializesStdClassToDictionary() {
 			var anonymous = new { foo = "foo" };
-			System.Console.WriteLine(anonymous.GetType().Name);
-			var result = (dynamic)PhpSerialization.Deserialize(
+			dynamic result = (PhpDynamicObject)PhpSerialization.Deserialize(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
 				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
 			);
 
 			Assert.AreEqual(3.14, result.John);
 			Assert.AreEqual(2.718, result.Jane);
+			Assert.AreEqual("stdClass",result.GetClassName());
 		}
 
 		[TestMethod]
 		public void DeserializesToSpecificClass() {
 			var anonymous = new { foo = "foo" };
-			System.Console.WriteLine(anonymous.GetType().Name);
 			var result = PhpSerialization.Deserialize<NamedClass>(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
 				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
@@ -111,7 +110,6 @@ namespace PhpSerializerNET.Test {
 		[TestMethod]
 		public void DeserializesToSpecificStruct() {
 			var anonymous = new { foo = "foo" };
-			System.Console.WriteLine(anonymous.GetType().Name);
 			var result = PhpSerialization.Deserialize<MyStruct>(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
 				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
@@ -124,7 +122,6 @@ namespace PhpSerializerNET.Test {
 		[TestMethod]
 		public void DeserializesToSpecifiedDictionary() {
 			var anonymous = new { foo = "foo" };
-			System.Console.WriteLine(anonymous.GetType().Name);
 			var result = PhpSerialization.Deserialize<Dictionary<string, object>>(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
 				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }

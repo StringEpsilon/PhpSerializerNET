@@ -11,11 +11,15 @@ using System.Text;
 namespace PhpSerializerNET {
 	internal static class ArrayExtensions {
 		public static string Utf8Substring(this byte[] array, int start, int length, Encoding encoding) {
+			byte[] substring = new byte[length];
+			for(int i = start, j = 0; j < length && i < array.Length; i++, j++){
+				substring[j] = array[i];
+			}
 			if (encoding == Encoding.UTF8) {
-				return Encoding.UTF8.GetString(array.Skip(start).Take(length).ToArray());
+				return Encoding.UTF8.GetString(substring);
 			} else {
 				return Encoding.UTF8.GetString(
-					Encoding.Convert(encoding, Encoding.UTF8, array.Skip(start).Take(length).ToArray())
+					Encoding.Convert(encoding, Encoding.UTF8, substring)
 				);
 			}
 		}

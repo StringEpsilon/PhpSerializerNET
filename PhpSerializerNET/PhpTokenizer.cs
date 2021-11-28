@@ -16,6 +16,15 @@ namespace PhpSerializerNET {
 		private int _position;
 		private PhpDeserializationOptions _options;
 
+		private static Regex _NullRegex = new (@"N;", RegexOptions.Compiled);
+		private static Regex _BoolRegex = new (@"b:[10];", RegexOptions.Compiled);
+		private static Regex _IntegerRegex =  new (@"i:[+-]?\d+;", RegexOptions.Compiled);
+		private static Regex _DoubleRegex = new (@"d:.+;", RegexOptions.Compiled);
+		private static Regex _StringRegex = new Regex(@"s:\d+:"".*?"";", RegexOptions.Compiled);
+		private static Regex _ArrayRegex = new Regex(@"a:\d+:{", RegexOptions.Compiled);
+		private static Regex _ObjectRegex = new Regex(@"O:\d+:""[a-zA-Z_\\\-0-9]+"":\d+:{", RegexOptions.Compiled);
+		
+
 		public PhpTokenizer(string input, PhpDeserializationOptions options) {
 			this._input = input;
 			this._position = 0;
@@ -31,7 +40,7 @@ namespace PhpSerializerNET {
 			for (; position < _input.Length; position++) {
 				switch (_input[position]) {
 					case 'N': {
-							var match = new Regex(@"N;").Match(_input, position);
+							var match = _NullRegex.Match(_input, position);
 							if (!match.Success || match.Index != position) {
 								throw new DeserializationException($"Malformed null at position {position}");
 							}
@@ -39,7 +48,7 @@ namespace PhpSerializerNET {
 							break;
 						}
 					case 'b': {
-							var match = new Regex(@"b:[10];").Match(_input, position);
+							var match = _BoolRegex.Match(_input, position);
 							if (!match.Success || match.Index != position) {
 								throw new DeserializationException($"Malformed boolean at position {position}");
 							}
@@ -47,7 +56,7 @@ namespace PhpSerializerNET {
 							break;
 						}
 					case 'i': {
-							var match = new Regex(@"i:[+-]?\d+;").Match(_input, position);
+							var match = _IntegerRegex.Match(_input, position);
 							if (!match.Success || match.Index != position) {
 								throw new DeserializationException($"Malformed integer at position {position}");
 							}
@@ -56,7 +65,7 @@ namespace PhpSerializerNET {
 						}
 					case 'd': {
 							// Validate the correctness of the actual value in the proper parsing step:
-							var match = new Regex(@"d:.+;").Match(_input, position);
+							var match = _DoubleRegex.Match(_input, position);
 							if (!match.Success || match.Index != position) {
 								throw new DeserializationException($"Malformed double at position {position}");
 							}
@@ -64,7 +73,7 @@ namespace PhpSerializerNET {
 							break;
 						}
 					case 's': {
-							var match = new Regex(@"s:\d+:"".*?"";").Match(_input, position);
+							var match = _StringRegex.Match(_input, position);
 							if (!match.Success) {
 								throw new DeserializationException($"Malformed string at position {position}");
 							}
@@ -72,7 +81,7 @@ namespace PhpSerializerNET {
 							break;
 						}
 					case 'a': {
-							var match = new Regex(@"a:\d+:{").Match(_input, position);
+							var match = _ArrayRegex.Match(_input, position);
 							if (!match.Success || match.Index != position) {
 								throw new DeserializationException($"Malformed array at position {position}");
 							}
@@ -85,7 +94,7 @@ namespace PhpSerializerNET {
 							break;
 						}
 					case 'O': {
-							var match = new Regex(@"O:\d+:""[a-zA-Z_\\\-0-9]+"":\d+:{").Match(_input, position);
+							var match = _ObjectRegex.Match(_input, position);
 							if (!match.Success || match.Index != position) {
 								throw new DeserializationException($"Malformed object at position {position}");
 							}

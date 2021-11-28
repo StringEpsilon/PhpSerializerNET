@@ -73,5 +73,13 @@ namespace PhpSerializerNET.Test {
 				PhpSerialization.Deserialize<int>("i:-2147483648;")
 			);
 		}
+
+		[TestMethod]
+		public void ThrowsOnMissingSemicolon() {
+			var ex = Assert.ThrowsException<DeserializationException>(
+				() => PhpSerialization.Deserialize("i:100")
+			);
+			Assert.AreEqual("Malformed integer at position 4: Expected token ';', found '0' instead.", ex.Message);
+		}
 	}
 }

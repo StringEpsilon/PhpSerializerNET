@@ -7,119 +7,265 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace PhpSerializerNET {
 	public class PhpTokenizer {
-		private string _input;
+
 		private byte[] _inputBytes;
+
 		private int _position;
 		private PhpDeserializationOptions _options;
 
-		private static Regex _NullRegex = new (@"N;", RegexOptions.Compiled);
-		private static Regex _BoolRegex = new (@"b:[10];", RegexOptions.Compiled);
-		private static Regex _IntegerRegex =  new (@"i:[+-]?\d+;", RegexOptions.Compiled);
-		private static Regex _DoubleRegex = new (@"d:.+;", RegexOptions.Compiled);
-		private static Regex _StringRegex = new Regex(@"s:\d+:"".*?"";", RegexOptions.Compiled);
-		private static Regex _ArrayRegex = new Regex(@"a:\d+:{", RegexOptions.Compiled);
-		private static Regex _ObjectRegex = new Regex(@"O:\d+:""[a-zA-Z_\\\-0-9]+"":\d+:{", RegexOptions.Compiled);
-		
 
 		public PhpTokenizer(string input, PhpDeserializationOptions options) {
-			this._input = input;
 			this._position = 0;
 			this._options = options;
 			int position = 0;
-			this.ValidateFormat(ref position);
 			this._inputBytes = Encoding.Convert(Encoding.Default, options.InputEncoding, Encoding.Default.GetBytes(input));
+			this.ValidateFormat(ref position);
 		}
 
 		internal bool ValidateFormat(ref int position, bool inArray = false) {
 			bool isTop = position == 0;
-			bool expectBracket = false;
-			for (; position < _input.Length; position++) {
-				switch (_input[position]) {
-					case 'N': {
-							var match = _NullRegex.Match(_input, position);
-							if (!match.Success || match.Index != position) {
-								throw new DeserializationException($"Malformed null at position {position}");
-							}
-							position += match.Length - 1;
-							break;
+			bool expectClosingBracket = false;
+			for (; position < _inputBytes.Length; position++) {
+				switch ((char)_inputBytes[position]) {
+					case 'N':
+						if (position == _inputBytes.Length - 1 || _inputBytes[position + 1] != ';') {
+							throw new DeserializationException($"Malformed null at position {position}: Expected ';'");
 						}
-					case 'b': {
-							var match = _BoolRegex.Match(_input, position);
-							if (!match.Success || match.Index != position) {
-								throw new DeserializationException($"Malformed boolean at position {position}");
-							}
-							position += match.Length - 1;
-							break;
+						position += 1;
+						break;
+					case 'b':
+						if (position + 3 >= _inputBytes.Length) {
+							throw new DeserializationException($"Malformed boolean at position {position}: Unexpected end of input sequence.");
 						}
-					case 'i': {
-							var match = _IntegerRegex.Match(_input, position);
-							if (!match.Success || match.Index != position) {
+						if (_inputBytes[position + 2] != '0' && _inputBytes[position + 2] != '1') {
+							throw new DeserializationException($"Malformed boolean at position {position}: Only '1' and '0' are allowed.");
+						}
+						position += 3;
+						break;
+					case 'i':
+						if (position + 3 >= _inputBytes.Length || _inputBytes[position + 1] != ':') {
+							throw new DeserializationException($"Malformed integer at position {position}");
+						}
+						position += 2;
+						for (; _inputBytes[position] != ';' && position < _inputBytes.Length - 1; position++) {
+							bool valid = (char)_inputBytes[position] switch {
+								>= '0' and <= '9' => true,
+								'+' => true,
+								'-' => true,
+								_ => false,
+							};
+							if (!valid) {
 								throw new DeserializationException($"Malformed integer at position {position}");
 							}
-							position += match.Length - 1;
-							break;
 						}
+						if (_inputBytes[position] != ';') {
+							throw new DeserializationException(
+								$"Malformed integer at position {position}: Expected token ';', found '{(char)_inputBytes[position]}' instead."
+							);
+						}
+						break;
 					case 'd': {
-							// Validate the correctness of the actual value in the proper parsing step:
-							var match = _DoubleRegex.Match(_input, position);
-							if (!match.Success || match.Index != position) {
+							// smallest double: d:0;
+							if (position + 3 >= _inputBytes.Length || _inputBytes[position + 1] != ':') {
 								throw new DeserializationException($"Malformed double at position {position}");
 							}
-							position += match.Length - 1;
+							position += 2;
+							for (; _inputBytes[position] != ';' && position < _inputBytes.Length - 1; position++) {
+								bool valid = (char)_inputBytes[position] switch {
+									>= '0' and <= '9' => true,
+									'+' => true,
+									'-' => true,
+									'.' => true,
+									'E' or 'e' => true, // exponents.
+									'I' or 'N' or 'F' => true, // infinity.
+									'N' or 'A' => true, // NaN.
+									_ => false,
+								};
+								if (!valid) {
+									throw new DeserializationException($"Malformed integer at position {position}");
+								}
+							}
+							if (_inputBytes[position] != ';') {
+								throw new DeserializationException(
+									$"Malformed double at position {position}: Expected token ';', found '{(char)_inputBytes[position]}' instead."
+								);
+							}
 							break;
 						}
 					case 's': {
-							var match = _StringRegex.Match(_input, position);
-							if (!match.Success) {
+							// smallest string: s:0:"";
+							if (position + 6 >= _inputBytes.Length) {
 								throw new DeserializationException($"Malformed string at position {position}");
 							}
-							position += match.Length - 1;
+							position += 2;
+							bool valid = true;
+							string lengthString = "";
+							for (; _inputBytes[position] != ':' && position < _inputBytes.Length - 1 && valid; position++) {
+								valid = (char)_inputBytes[position] switch {
+									>= '0' and <= '9' => true,
+									_ => false,
+								};
+								lengthString += (char)_inputBytes[position];
+							}
+							if (!valid) {
+								throw new DeserializationException(
+									$"String at position {position} has illegal, missing or malformed length."
+								);
+							}
+							var length = int.Parse(lengthString);
+							if (_inputBytes.Length < position + length + 2) {
+								throw new DeserializationException(
+									$"Illegal length of {length}. The string at position {position} points to out of bounds index {position + 2 + length}."
+								);
+							}
+
+							if (_inputBytes[position + 1] != '"') {
+								throw new DeserializationException(
+									$"String at position {position} has an incorrect length of {length}: " +
+									$"Expected double quote at position {position + 1}, found '{(char)_inputBytes[position + 1]}' instead."
+								);
+							} else {
+								position++;
+							}
+							if (_inputBytes[position + 1 + length] != '"') {
+								throw new DeserializationException(
+									$"String at position {position} has an incorrect length of {length}: " +
+									$"Expected double quote at position {position + 1 + length}, found '{(char)_inputBytes[position + 1 + length]}' instead."
+								);
+							} else {
+								position += length + 2;
+							}
+							if (_inputBytes[position] != ';') {
+								throw new DeserializationException($"Malformed string at position {position}");
+							}
+
 							break;
 						}
 					case 'a': {
-							var match = _ArrayRegex.Match(_input, position);
-							if (!match.Success || match.Index != position) {
+							// smallest array: a:0:{};
+							if (position + 6 >= _inputBytes.Length) {
 								throw new DeserializationException($"Malformed array at position {position}");
 							}
-							position += match.Length;
+							position += 2;
+							bool valid = true;
+							string lengthString = "";
+							for (; _inputBytes[position] != ':' && position < _inputBytes.Length - 1 && valid; position++) {
+								valid = (char)_inputBytes[position] switch {
+									>= '0' and <= '9' => true,
+									_ => false,
+								};
+								lengthString += (char)_inputBytes[position];
+							}
+							if (!valid) {
+								throw new DeserializationException(
+									$"Array at position {position} has illegal, missing or malformed length."
+								);
+							}
+							if (_inputBytes[position] != ':') {
+								throw new DeserializationException(
+									$"Array at position {position}: Expected token ':', found '{(char)_inputBytes[position]}'"
+								);
+							}
+							if (_inputBytes[position+1] != '{') {
+								throw new DeserializationException(
+									$"Array at position {position}: Expected token '{{', found '{(char)_inputBytes[position]}'"
+								);
+							}
+							position += 2;
 							if (isTop) {
-								expectBracket = true;
+								expectClosingBracket = true;
 							}
 							ValidateFormat(ref position, true);
-							
 							break;
 						}
 					case 'O': {
-							var match = _ObjectRegex.Match(_input, position);
-							if (!match.Success || match.Index != position) {
+							// smallest object: O:1:"a":0{};
+							if (position + 12 >= _inputBytes.Length) {
 								throw new DeserializationException($"Malformed object at position {position}");
 							}
-							position += match.Length;
+							position += 2;
+							bool valid = true;
+							string lengthString = "";
+							for (; _inputBytes[position] != ':' && position < _inputBytes.Length - 1 && valid; position++) {
+								valid = (char)_inputBytes[position] switch {
+									>= '0' and <= '9' => true,
+									_ => false,
+								};
+								lengthString += (char)_inputBytes[position];
+							}
+							if (!valid) {
+								throw new DeserializationException(
+									$"Object at position {position} has illegal, missing or malformed length for classname."
+								);
+							}
+							var length = int.Parse(lengthString);
+							if (_inputBytes.Length < position + length + 2) {
+								throw new DeserializationException(
+									$"Object class name: Illegal length of {length}. The string at position {position} points to out of bounds index {position + 2 + length}."
+								);
+							}
+
+							if (_inputBytes[position + 1] != '"') {
+								throw new DeserializationException(
+									$"String at position {position} has an incorrect length of {length}: " +
+									$"Expected double quote at position {position + 1}, found '{(char)_inputBytes[position + 1]}' instead."
+								);
+							} else {
+								position++;
+							}
+							if (_inputBytes[position + 1 + length] != '"') {
+								throw new DeserializationException(
+									$"String at position {position} has an incorrect length of {length}: " +
+									$"Expected double quote at position {position + 1 + length}, found '{(char)_inputBytes[position + 1 + length]}' instead."
+								);
+							} else {
+								position += length + 2;
+							}
+							if (_inputBytes[position] != ':') {
+								throw new DeserializationException($"Malformed object at position {position}: Expected ':', found {(char)_inputBytes[position]} instead.");
+							}
+							position++;
+							for (; _inputBytes[position] != ':' && position < _inputBytes.Length - 1 && valid; position++) {
+								valid = (char)_inputBytes[position] switch {
+									>= '0' and <= '9' => true,
+									_ => false,
+								};
+							}
+							if (_inputBytes[position] != ':') {
+								throw new DeserializationException(
+									$"Object at position {position}: Expected token ':', found '{(char)_inputBytes[position]}'"
+								);
+							}
+							if (_inputBytes[position+1] != '{') {
+								throw new DeserializationException(
+									$"Object at position {position}: Expected token '{{', found '{(char)_inputBytes[position]}'"
+								);
+							}
+							position += 2;
 							if (isTop) {
-								expectBracket = true;
+								expectClosingBracket = true;
 							}
 							ValidateFormat(ref position, true);
 
 							break;
-					}
+						}
 					case '}': {
-							if (expectBracket) {
-								expectBracket = false;
+							if (expectClosingBracket) {
+								expectClosingBracket = false;
 							} else {
 								if (inArray) {
 									return true;
 								} else {
-									throw new DeserializationException($"Unexpected token '{_input[position]}' at position {position}.");
+									throw new DeserializationException($"Unexpected token '{(char)_inputBytes[position]}' at position {position}.");
 								}
 							}
 							break;
 						}
 					default: {
-							throw new DeserializationException($"Unexpected token '{_input[position]}' at position {position}.");
+							throw new DeserializationException($"Unexpected token '{(char)_inputBytes[position]}' at position {position}.");
 						}
 				}
 			}
@@ -129,7 +275,6 @@ namespace PhpSerializerNET {
 		internal List<PhpSerializeToken> Tokenize() {
 
 			List<PhpSerializeToken> tokens = new();
-
 			for (; _position < _inputBytes.Length; _position++) {
 				if ((char)_inputBytes[_position] == '}') {
 					return tokens;
@@ -190,12 +335,6 @@ namespace PhpSerializerNET {
 								);
 							}
 							char stringEnd = (char)_inputBytes[valueStart + length];
-							if (stringEnd != '"') {
-								throw new DeserializationException(
-									$"String at position {_position} has an incorrect length of {length}: "+
-									$"Expected double quote at position {valueStart + length}, found '{stringEnd}' instead."
-								);
-							}
 
 							tokens.Add(new PhpSerializeToken() {
 								Type = PhpSerializerType.String,
@@ -213,8 +352,8 @@ namespace PhpSerializerNET {
 							);
 							_position = typeLengthClose;
 
-							var typename = _inputBytes.Utf8Substring(_position+2, typeLength, _options.InputEncoding);
-							_position += typeLength +2;
+							var typename = _inputBytes.Utf8Substring(_position + 2, typeLength, _options.InputEncoding);
+							_position += typeLength + 2;
 
 							var lengthStart = _position + 2;
 							var lengthClose = Array.IndexOf(_inputBytes, (byte)':', lengthStart + 1);

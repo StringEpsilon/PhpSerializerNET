@@ -65,5 +65,13 @@ namespace PhpSerializerNET.Test {
 				PhpSerialization.Serialize(double.NaN)
 			);
 		}
+
+		[TestMethod]
+		public void ThrowsOnMissingSemicolon() {
+			var ex = Assert.ThrowsException<DeserializationException>(
+				() => PhpSerialization.Deserialize("d:100")
+			);
+			Assert.AreEqual("Malformed double at position 4: Expected token ';', found '0' instead.", ex.Message);
+		}
 	}
 }

@@ -12,9 +12,11 @@ namespace PhpSerializerNET {
 	internal static class ArrayExtensions {
 		public static string Utf8Substring(this byte[] array, int start, int length, Encoding encoding) {
 			byte[] substring = new byte[length];
-			for(int i = start, j = 0; j < length && i < array.Length; i++, j++){
-				substring[j] = array[i];
+			if (length > array.Length - start) {
+				return "";
 			}
+			System.Buffer.BlockCopy(array, start, substring, 0, length);
+
 			if (encoding == Encoding.UTF8) {
 				return Encoding.UTF8.GetString(substring);
 			} else {

@@ -28,12 +28,12 @@ namespace PhpSerializerNET {
 			StringBuilder output = new StringBuilder();
 			switch (input) {
 				case Enum enumValue: {
-					if (this._options.NumericEnums) {
-						return $"i:{enumValue.GetNumericString()};";
-					} else {
-						return Serialize(enumValue.ToString());
+						if (this._options.NumericEnums) {
+							return $"i:{enumValue.GetNumericString()};";
+						} else {
+							return Serialize(enumValue.ToString());
+						}
 					}
-				}
 				case long longValue: {
 						return $"i:{longValue.ToString()};";
 					}
@@ -80,7 +80,7 @@ namespace PhpSerializerNET {
 			StringBuilder output = new StringBuilder();
 			switch (input) {
 				case IDictionary dictionary: {
-						if (input is IPhpObject phpObject){
+						if (input is IPhpObject phpObject) {
 							output.Append("O:");
 							output.Append(phpObject.GetClassName().Length);
 							output.Append(":\"");
@@ -96,10 +96,10 @@ namespace PhpSerializerNET {
 									throw new Exception($"Can not serialize into associative array with key type {keyType.FullName}");
 								}
 							}
-						
+
 							output.Append($"a:{dictionary.Count}:");
 							output.Append("{");
-							}
+						}
 
 						foreach (DictionaryEntry entry in dictionary) {
 							output.Append($"{this.Serialize(entry.Key)}{Serialize(entry.Value)}");
@@ -127,9 +127,34 @@ namespace PhpSerializerNET {
 							return this.SerializeToObject(input);
 						}
 
-						IEnumerable<MemberInfo> members = inputType.IsValueType
-							? inputType.GetFields().Where(y => y.IsPublic && y.GetCustomAttribute<PhpIgnoreAttribute>() == null)
-							: inputType.GetProperties().Where(y => y.CanRead && y.GetCustomAttribute<PhpIgnoreAttribute>() == null);
+						List<MemberInfo> members = new();
+						if (inputType.IsValueType) {
+							foreach (FieldInfo field in inputType.GetFields()) {
+								if (field.IsPublic) {
+									PhpIgnoreAttribute ignoreAttribute = Attribute.GetCustomAttribute(
+										field,
+										typeof(PhpIgnoreAttribute),
+										false
+									) as PhpIgnoreAttribute;
+									if (ignoreAttribute == null) {
+										members.Add(field);
+									}
+								}
+							}
+						} else {
+							foreach (PropertyInfo property in inputType.GetProperties()) {
+								if (property.CanRead) {
+									PhpIgnoreAttribute ignoreAttribute = Attribute.GetCustomAttribute(
+										property,
+										typeof(PhpIgnoreAttribute),
+										false
+									) as PhpIgnoreAttribute;
+									if (ignoreAttribute == null) {
+										members.Add(property);
+									}
+								}
+							}
+						}
 
 						output.Append($"a:{members.Count()}:");
 						output.Append("{");
@@ -144,25 +169,37 @@ namespace PhpSerializerNET {
 
 		private string SerializeToObject(object input) {
 			string className;
-			if (input is IPhpObject phpObject){
+			if (input is IPhpObject phpObject) {
 				className = phpObject.GetClassName();
 			} else {
 				className = input.GetType().GetCustomAttribute<PhpClass>()?.Name;
 			}
-			 
+
 			if (string.IsNullOrEmpty(className)) {
 				className = "stdClass";
 			}
 			StringBuilder output = new StringBuilder();
-			var properties = input.GetType().GetProperties().Where(y => y.CanRead && y.GetCustomAttribute<PhpIgnoreAttribute>() == null);
+			List<PropertyInfo> properties = new();
+			foreach (var property in input.GetType().GetProperties()) {
+				if (property.CanRead) {
+					PhpIgnoreAttribute ignoreAttribute = Attribute.GetCustomAttribute(
+						property,
+						typeof(PhpIgnoreAttribute),
+						false
+					) as PhpIgnoreAttribute;
+					if (ignoreAttribute == null) {
+						properties.Add(property);
+					}
+				}
+			}
 
-			output.Append("O:");
-			output.Append(className.Length);
-			output.Append(":\"");
-			output.Append(className);
-			output.Append("\":");
-			output.Append(properties.Count());
-			output.Append(":{");
+			output.Append("O:")
+				.Append(className.Length)
+				.Append(":\"")
+				.Append(className)
+				.Append("\":")
+				.Append(properties.Count())
+				.Append(":{");
 			foreach (PropertyInfo property in properties) {
 				output.Append(this.SerializeMember(property, input));
 			}
@@ -171,8 +208,13 @@ namespace PhpSerializerNET {
 		}
 
 		private string SerializeMember(MemberInfo member, object input) {
-			var propertyName = member.GetCustomAttribute<PhpPropertyAttribute>() != null
-				? member.GetCustomAttribute<PhpPropertyAttribute>().Name
+			PhpPropertyAttribute attribute = Attribute.GetCustomAttribute(
+					member,
+					typeof(PhpPropertyAttribute),
+					false
+				) as PhpPropertyAttribute;
+			var propertyName = attribute != null
+				? attribute.Name
 				: member.Name;
 			return $"{this.Serialize(propertyName)}{this.Serialize(member.GetValue(input))}";
 		}

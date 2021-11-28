@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<Title>PhpSerializerNET</Title>
 		<TargetFramework>net5.0</TargetFramework>
-		<Version>0.7.3</Version>
+		<Version>0.7.4</Version>
 		<Authors>StringEpsilon</Authors>
 		<Summary>A library for working with the PHP serialization format.</Summary>
 		<PackageTags>php-serialization, php-serializer, php-deserializer</PackageTags>

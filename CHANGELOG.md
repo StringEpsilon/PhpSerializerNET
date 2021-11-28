@@ -1,4 +1,4 @@
-# Future:
+# 0.7.4:
 - Improved deserialization performance.
 - Fixed invalid output when using PhpSerializiationOptions.NumericEnums = false
 

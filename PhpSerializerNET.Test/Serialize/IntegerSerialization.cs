@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class TestIntegerSerialization {
+	public class IntegerSerializationTest {
 		[TestMethod]
 		public void SerializeZero() {
 			Assert.AreEqual(

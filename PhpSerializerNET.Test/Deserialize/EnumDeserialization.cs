@@ -11,7 +11,7 @@ using PhpSerializerNET.Test.DataTypes;
 namespace PhpSerializerNET.Test {
 
 	[TestClass]
-	public class DeserializeEnumsTest {
+	public class EnumDeserializationTest{
 
 		[TestMethod]
 		public void DeserializeLongBasedEnum() {

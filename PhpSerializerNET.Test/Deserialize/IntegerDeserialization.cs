@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class TestIntegers {
+	public class IntegerDeserializationTest {
 		[TestMethod]
 		public void DeserializeZero() {
 			Assert.AreEqual(
@@ -40,14 +40,6 @@ namespace PhpSerializerNET.Test {
 				int.MinValue,
 				PhpSerialization.Deserialize<int>("i:-2147483648;")
 			);
-		}
-
-		[TestMethod]
-		public void ThrowsOnMissingSemicolon() {
-			var ex = Assert.ThrowsException<DeserializationException>(
-				() => PhpSerialization.Deserialize("i:100")
-			);
-			Assert.AreEqual("Malformed integer at position 4: Expected token ';', found '0' instead.", ex.Message);
 		}
 	}
 }

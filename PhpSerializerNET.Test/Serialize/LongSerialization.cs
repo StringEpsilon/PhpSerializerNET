@@ -6,25 +6,22 @@
 **/
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PhpSerializerNET.Test.DataTypes;
 
 namespace PhpSerializerNET.Test {
-
 	[TestClass]
-	public class SerializeEnumsTest {
+	public class LongSerializationTest {
 		[TestMethod]
-		public void SerializeOne() {
+		public void SerializeIntMaxValue() {
 			Assert.AreEqual(
-				"i:1;",
-				PhpSerialization.Serialize(IntEnum.A)
+				"i:9223372036854775807;",
+				PhpSerialization.Serialize(long.MaxValue)
 			);
 		}
-
 		[TestMethod]
-		public void SerializeToString() {
+		public void SerializeMinValue() {
 			Assert.AreEqual(
-				"s:1:\"A\";",
-				PhpSerialization.Serialize(IntEnum.A, new PhpSerializiationOptions{NumericEnums = false})
+				"i:-9223372036854775808;",
+				PhpSerialization.Serialize(long.MinValue)
 			);
 		}
 	}

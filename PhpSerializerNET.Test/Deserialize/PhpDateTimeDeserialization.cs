@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class TestPhpDateTime {
+	public class PhpDateTimeDeserializationTest {
 		[TestMethod]
 		public void DeserializesCorrectly() {
 			var result = PhpSerialization.Deserialize(

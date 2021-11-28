@@ -49,7 +49,9 @@ namespace PhpSerializerNET {
 						break;
 					case 'i':
 						if (position + 3 >= _inputBytes.Length || _inputBytes[position + 1] != ':') {
-							throw new DeserializationException($"Malformed integer at position {position}");
+							throw new DeserializationException(
+								$"Malformed integer at position {position}: Unexpected end of input sequence."
+							);
 						}
 						position += 2;
 						for (; _inputBytes[position] != ';' && position < _inputBytes.Length - 1; position++) {
@@ -60,7 +62,9 @@ namespace PhpSerializerNET {
 								_ => false,
 							};
 							if (!valid) {
-								throw new DeserializationException($"Malformed integer at position {position}");
+								throw new DeserializationException(
+									$"Malformed integer at position {position}. Unexpected token '{(char)_inputBytes[position]}'."
+								);
 							}
 						}
 						if (_inputBytes[position] != ';') {

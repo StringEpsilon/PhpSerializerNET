@@ -9,7 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class TestLongs {
+	public class LongDeserializationTest {
 
 		[TestMethod]
 		public void DeserializeZero() {
@@ -27,32 +27,19 @@ namespace PhpSerializerNET.Test {
 			);
 		}
 
-		[TestMethod]
-		public void SerializeIntMaxValue() {
-			Assert.AreEqual(
-				"i:9223372036854775807;",
-				PhpSerialization.Serialize(long.MaxValue)
-			);
-		}
 
 		[TestMethod]
-		public void DeserializeIntMaxValue() {
+		public void DeserializeMaxValue() {
 			Assert.AreEqual(
 				long.MaxValue,
 				PhpSerialization.Deserialize("i:9223372036854775807;")
 			);
 		}
 
-		[TestMethod]
-		public void SerializeIntMinValue() {
-			Assert.AreEqual(
-				"i:-9223372036854775808;",
-				PhpSerialization.Serialize(long.MinValue)
-			);
-		}
+
 
 		[TestMethod]
-		public void DeserializeIntMinValue() {
+		public void DeserializeMinValue() {
 			Assert.AreEqual(
 				long.MinValue,
 				PhpSerialization.Deserialize("i:-9223372036854775808;")

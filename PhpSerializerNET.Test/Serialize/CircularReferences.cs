@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class TestCircularReferences {
+	public class CircularReferencesTest {
 		private class CircularClass {
 			public string Foo { get; set; }
 			public CircularClass Bar { get; set; }

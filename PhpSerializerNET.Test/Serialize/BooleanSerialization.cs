@@ -1,5 +1,4 @@
-		
-		
+
 /**
   This Source Code Form is subject to the terms of the Mozilla Public
   License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -7,23 +6,24 @@
 **/
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PhpSerializerNET.Test.DataTypes;
 
 namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class DeserializeNullTests {
+	public class BooleanSerializationTest {
 		[TestMethod]
-		public void DeserializesNull() {
-			var result = PhpSerialization.Deserialize("N;");
-
-			Assert.IsNull(result);
+		public void SerializesTrue() {
+			Assert.AreEqual(
+				"b:1;",
+				PhpSerialization.Serialize(true)
+			);
 		}
-
+		
 		[TestMethod]
-		public void DeserializesExplicitNull() {
-			var result = PhpSerialization.Deserialize<SimpleClass>("N;");
-
-			Assert.IsNull(result);
+		public void SerializesFalse() {
+			Assert.AreEqual(
+				"b:0;",
+				PhpSerialization.Serialize(false)
+			);
 		}
 	}
 }

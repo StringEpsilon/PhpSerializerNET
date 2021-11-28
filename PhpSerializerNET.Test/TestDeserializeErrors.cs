@@ -31,6 +31,10 @@ namespace PhpSerializerNET.Test {
 			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("b:1"));
 			Assert.IsNotNull(ex);
 			Assert.AreEqual("Malformed boolean at position 0: Unexpected end of input sequence.", ex.Message);
+
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("b:2;"));
+			Assert.IsNotNull(ex);
+			Assert.AreEqual("Malformed boolean at position 0: Only '1' and '0' are allowed, found '2' instead.", ex.Message);
 		}
 
 		[TestMethod]
@@ -61,6 +65,9 @@ namespace PhpSerializerNET.Test {
 
 			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s:a:\"\";"));
 			Assert.AreEqual("String at position 3 has illegal, missing or malformed length.", ex.Message);
+
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s:3:\"foo\""));
+			Assert.AreEqual("Malformed string at position 9: Expected semicolon.", ex.Message);
 		}
 
 		[TestMethod]

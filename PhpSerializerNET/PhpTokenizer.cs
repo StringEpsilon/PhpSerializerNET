@@ -41,7 +41,9 @@ namespace PhpSerializerNET {
 							throw new DeserializationException($"Malformed boolean at position {position}: Unexpected end of input sequence.");
 						}
 						if (_inputBytes[position + 2] != '0' && _inputBytes[position + 2] != '1') {
-							throw new DeserializationException($"Malformed boolean at position {position}: Only '1' and '0' are allowed.");
+							throw new DeserializationException(
+								$"Malformed boolean at position {position}: Only '1' and '0' are allowed, found '{(char)_inputBytes[position+2]}' instead."
+							);
 						}
 						position += 3;
 						break;
@@ -138,8 +140,8 @@ namespace PhpSerializerNET {
 							} else {
 								position += length + 2;
 							}
-							if (_inputBytes[position] != ';') {
-								throw new DeserializationException($"Malformed string at position {position}");
+							if (position >= _inputBytes.Length || _inputBytes[position] != ';') {
+								throw new DeserializationException($"Malformed string at position {position}: Expected semicolon.");
 							}
 
 							break;

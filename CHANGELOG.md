@@ -1,5 +1,6 @@
 # Future:
-- Further performance improvements.
+- Improved performance of the validation step of deserialization.
+- Speed up deserializing into explicit types (particularly structs and classes) significantly.
 - Improved exception messages on malformed input when deserializing.
 
 # 0.7.4:

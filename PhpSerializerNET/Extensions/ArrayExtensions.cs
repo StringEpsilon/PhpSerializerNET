@@ -4,12 +4,12 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using System.Linq;
 using System.Reflection;
 using System.Text;
 
 namespace PhpSerializerNET {
 	internal static class ArrayExtensions {
+
 		public static string Utf8Substring(this byte[] array, int start, int length, Encoding encoding) {
 			byte[] substring = new byte[length];
 			if (length > array.Length - start) {
@@ -27,45 +27,68 @@ namespace PhpSerializerNET {
 		}
 
 
-		public static MemberInfo FindField(this FieldInfo[] array, string name, PhpDeserializationOptions options) {
-			FieldInfo field = null;
-
-			// Explicetly named properties have priority:
-			field = array
-				.Where(y => y.GetCustomAttribute<PhpPropertyAttribute>() != null)
-				.FirstOrDefault(y =>
-					options.CaseSensitiveProperties
-						? y.GetCustomAttribute<PhpPropertyAttribute>().Name == name
-						: y.GetCustomAttribute<PhpPropertyAttribute>().Name.ToLower() == name.ToLower()
-				);
-
-			if (field == null) {
-				field = options.CaseSensitiveProperties
-					? array.FirstOrDefault(y => y.Name == name)
-					: array.FirstOrDefault(y => y.Name.ToLower() == name.ToLower());
+		public static MemberInfo FindField(this FieldInfo[] fields, string name, PhpDeserializationOptions options) {
+			if (!options.CaseSensitiveProperties){
+				name = name.ToLower();
 			}
-
-			return field;
+			// Explicetly named properties have priority:
+			foreach (var field in fields) {
+				PhpPropertyAttribute attribute = PhpPropertyAttribute.GetCustomAttribute(
+					field, 
+					typeof(PhpPropertyAttribute),
+					false
+				) as PhpPropertyAttribute;
+				
+				if (attribute != null){
+					var propertyName =  options.CaseSensitiveProperties 
+						? attribute.Name
+						: attribute.Name.ToLower();
+					if (propertyName == name){
+						return field;
+					}
+				}
+			}
+			foreach (var field in fields) {
+				var propertyName =  options.CaseSensitiveProperties 
+					? field.Name
+					: field.Name.ToLower();
+				if (propertyName == name){
+					return field;
+				}
+			}
+			return null;
 		}
 
-		public static MemberInfo FindProperty(this PropertyInfo[] array, string name, PhpDeserializationOptions options) {
+		public static MemberInfo FindProperty(this PropertyInfo[] properties, string name, PhpDeserializationOptions options) {
 			PropertyInfo member = null;
-
-			// Explicetly named properties have priority:
-			member = array
-				.Where(y => y.GetCustomAttribute<PhpPropertyAttribute>() != null)
-				.FirstOrDefault(y =>
-					options.CaseSensitiveProperties
-						? y.GetCustomAttribute<PhpPropertyAttribute>().Name == name
-						: y.GetCustomAttribute<PhpPropertyAttribute>().Name.ToLower() == name.ToLower()
-				);
-
-			if (member == null) {
-				member = options.CaseSensitiveProperties
-					? array.FirstOrDefault(y => y.Name == name)
-					: array.FirstOrDefault(y => y.Name.ToLower() == name.ToLower());
+			if (!options.CaseSensitiveProperties){
+				name = name.ToLower();
 			}
-
+			// Explicetly named properties have priority:
+			foreach (var property in properties) {
+				PhpPropertyAttribute attribute = PhpPropertyAttribute.GetCustomAttribute(
+					property, 
+					typeof(PhpPropertyAttribute),
+					false
+				) as PhpPropertyAttribute;
+				
+				if (attribute != null){
+					var propertyName =  options.CaseSensitiveProperties 
+						? attribute.Name
+						: attribute.Name.ToLower();
+					if (propertyName == name){
+						return property;
+					}
+				}
+			}
+			foreach (var property in properties) {
+				var propertyName =  options.CaseSensitiveProperties 
+					? property.Name
+					: property.Name.ToLower();
+				if (propertyName == name){
+					return property;
+				}
+			}
 			return member;
 		}
 	}

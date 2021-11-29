@@ -42,5 +42,27 @@ namespace PhpSerializerNET.Test {
 				PhpSerialization.Deserialize<bool>("b:0;")
 			);
 		}
+
+		[TestMethod]
+		public void DeserializesToLong() {
+			var result = PhpSerialization.Deserialize<long>("b:0;");
+
+			Assert.AreEqual(0, result);
+
+			result = PhpSerialization.Deserialize<long>("b:1;");
+
+			Assert.AreEqual(1, result);
+		}
+
+		[TestMethod]
+		public void DeserializesToString() {
+			var result = PhpSerialization.Deserialize<string>("b:0;");
+
+			Assert.AreEqual("False", result);
+
+			result = PhpSerialization.Deserialize<string>("b:1;");
+
+			Assert.AreEqual("True", result);
+		}
 	}
 }

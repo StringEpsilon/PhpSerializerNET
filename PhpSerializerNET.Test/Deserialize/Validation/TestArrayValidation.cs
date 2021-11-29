@@ -44,5 +44,14 @@ namespace PhpSerializerNET.Test {
 			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a:1000000"));
 			Assert.AreEqual("Array at position 8: Unexpected end of input sequence.", ex.Message);
 		}
+
+		[TestMethod]
+		public void ThrowsOnFalseLength() {
+			var exception = Assert.ThrowsException<DeserializationException>(
+				() => PhpSerialization.Deserialize("a:2:{i:0;i:0;i:1;i:1;i:2;i:2;}")
+			);
+
+			Assert.AreEqual("Array at position 5 should be of length 2, but actual length is 3.", exception.Message);
+		}
 	}
 }

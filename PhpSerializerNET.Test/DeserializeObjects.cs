@@ -7,27 +7,14 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PhpSerializerNET.Test.DataTypes;
 
 namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class DeserializeObjects {
+	public partial class DeserializeObjects {
 		public class CircularTest {
 			public string Foo { get; set; }
 			public CircularTest Bar { get; set; }
-		}
-
-
-		public class MappedClass {
-			[PhpProperty("en")]
-			public string English { get; set; }
-
-			[PhpProperty("de")]
-			public string German { get; set; }
-
-			[PhpIgnore]
-			public string it { get; set; }
-
-			public Guid guid {get;set;}
 		}
 
 		[TestMethod]
@@ -43,26 +30,8 @@ namespace PhpSerializerNET.Test {
 			Assert.AreEqual(null, deserializedObject.it);
 		}
 
-		[TestMethod]
-		public void DeserializeObjectCaseInsenstiveProps() {
-			var deserializedObject = PhpSerialization.Deserialize<MappedClass>(
-				"a:2:{s:2:\"EN\";s:12:\"Hello World!\";s:2:\"DE\";s:11:\"Hallo Welt!\";}",
-				new PhpDeserializationOptions() { CaseSensitiveProperties = false }
-			);
 
-			// en and de mapped to differently named property:
-			Assert.AreEqual("Hello World!", deserializedObject.English);
-			Assert.AreEqual("Hallo Welt!", deserializedObject.German);
-		}
 
-		[TestMethod]
-		public void DeserializeObjectWithExcessKeys() {
-			var deserializedObject = PhpSerialization.Deserialize<MappedClass>(
-				"a:3:{s:2:\"en\";s:12:\"Hello World!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:2:\"es\";s:11:\"Hola Mundo!\";}",
-				new PhpDeserializationOptions() { AllowExcessKeys = true }
-			);
-			Assert.IsNotNull(deserializedObject);
-		}
 		[TestMethod]
 
 		public void Test_Issue11() {
@@ -73,23 +42,15 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void ThrowsOnExcessKeys() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize<MappedClass>(
-				"a:3:{s:2:\"en\";s:12:\"Hello World!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:2:\"es\";s:11:\"Hola Mundo!\";}",
-				new PhpDeserializationOptions() { AllowExcessKeys = false }
-			));
-			Assert.AreEqual("Could not bind the key \"es\" to object of type MappedClass: No such property.", ex.Message);
-		}
-
-		[TestMethod]
 		public void AssignsGuids() {
 			var result = PhpSerialization.Deserialize<MappedClass>(
-				"a:1:{s:4:\"guid\";s:36:\"82e2ebf0-43e6-4c10-82cf-57d60383a6be\";}",
-				new PhpDeserializationOptions() { AllowExcessKeys = true }
+				"a:1:{s:4:\"guid\";s:36:\"82e2ebf0-43e6-4c10-82cf-57d60383a6be\";}"
 			);
-			Assert.AreEqual(new Guid("82e2ebf0-43e6-4c10-82cf-57d60383a6be"), result.guid);
+			Assert.AreEqual(
+				new Guid("82e2ebf0-43e6-4c10-82cf-57d60383a6be"),
+				result.guid
+			);
 		}
-
 
 		[TestMethod]
 		public void DeserializeList() {
@@ -99,15 +60,6 @@ namespace PhpSerializerNET.Test {
 			Assert.AreEqual("Hello", result[0]);
 			Assert.AreEqual("World", result[1]);
 			Assert.AreEqual("12345", result[2]);
-		}
-
-		[TestMethod]
-		public void DeserializeListInvalidLength() {
-			var exception = Assert.ThrowsException<DeserializationException>(
-				() => PhpSerialization.Deserialize<List<String>>("a:2:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}")
-			);
-
-			Assert.AreEqual("Array at position 5 should be of length 2, but actual length is 3.", exception.Message);
 		}
 
 		[TestMethod]
@@ -128,7 +80,7 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void Test_Issue12(){
+		public void Test_Issue12() {
 			var result = PhpSerialization.Deserialize("a:1:{i:0;a:4:{s:1:\"A\";s:2:\"63\";s:1:\"B\";a:2:{i:558710;s:1:\"2\";i:558709;s:1:\"2\";}s:1:\"C\";s:2:\"71\";s:1:\"G\";a:3:{s:1:\"x\";s:6:\"446368\";s:1:\"y\";s:1:\"0\";s:1:\"z\";s:5:\"1.029\";}}}");
 			Assert.IsNotNull(result);
 		}

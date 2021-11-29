@@ -66,22 +66,5 @@ namespace PhpSerializerNET.Test {
 				PhpSerialization.Deserialize("s:9:\"_\";s:1:\"_\";")
 			);
 		}
-
-		[TestMethod]
-		public void DeserializeStringToBool() {
-			var options = new PhpDeserializationOptions() { NumberStringToBool = true };
-
-			var value = PhpSerialization.Deserialize<bool>("s:1:\"1\";", options);
-			Assert.AreEqual(true, value);
-
-			value = PhpSerialization.Deserialize<bool>("s:1:\"0\";", options);
-			Assert.AreEqual(false, value);
-
-			value = (bool)PhpSerialization.Deserialize("s:1:\"1\";", options);
-			Assert.AreEqual(true, value);
-
-			value = (bool)PhpSerialization.Deserialize("s:1:\"0\";", options);
-			Assert.AreEqual(false, value);
-		}
 	}
 }

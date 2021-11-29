@@ -19,23 +19,11 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void ConvertsProperly() {
-			var result = PhpSerialization.Deserialize<long>("b:0;");
 
-			Assert.AreEqual(0, result);
-
-			result = PhpSerialization.Deserialize<long>("b:1;");
-
-			Assert.AreEqual(1, result);
 
 			double number = PhpSerialization.Deserialize<double>("i:10;");
 
 			Assert.AreEqual(10.00, number);
-		}
-
-		[TestMethod]
-		public void ConvertsEmptyString() {
-			var result = PhpSerialization.Deserialize<int>("s:0:\"\";");
-			Assert.AreEqual(0, result);
 		}
 	}
 }

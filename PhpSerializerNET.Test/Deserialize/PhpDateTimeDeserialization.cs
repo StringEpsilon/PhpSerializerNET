@@ -21,6 +21,7 @@ namespace PhpSerializerNET.Test {
 			var date = result as PhpDateTime;
 			Assert.AreEqual("UTC", date.Timezone);
 			Assert.AreEqual("2021-08-18 09:10:23.441055", date.Date);
+			Assert.AreEqual("DateTime", date.GetClassName());
 		}
 	}
 }

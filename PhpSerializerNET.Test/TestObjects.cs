@@ -22,11 +22,6 @@ namespace PhpSerializerNET.Test {
 			public double Jane { get; set; }
 		}
 
-		public struct MyStruct {
-			public double John;
-			public double Jane;
-		}
-
 		[TestMethod]
 		public void SerializesToObject() {
 			var testObject = new MyPhpObject() {
@@ -68,67 +63,6 @@ namespace PhpSerializerNET.Test {
 			);
 			Assert.AreEqual(3.14, result.John);
 			Assert.AreEqual(2.718, result.Jane);
-		}
-
-		[TestMethod]
-		public void DeserializesStdClassToDynamic() {
-			var anonymous = new { foo = "foo" };
-
-			var result = (dynamic)PhpSerialization.Deserialize(
-				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}"
-			);
-
-			Assert.AreEqual(3.14, result["John"]);
-			Assert.AreEqual(2.718, result["Jane"]);
-		}
-
-		[TestMethod]
-		public void DeserializesStdClassToDictionary() {
-			var anonymous = new { foo = "foo" };
-			dynamic result = (PhpDynamicObject)PhpSerialization.Deserialize(
-				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
-				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
-			);
-
-			Assert.AreEqual(3.14, result.John);
-			Assert.AreEqual(2.718, result.Jane);
-			Assert.AreEqual("stdClass", result.GetClassName());
-		}
-
-		[TestMethod]
-		public void DeserializesToSpecificClass() {
-			var anonymous = new { foo = "foo" };
-			var result = PhpSerialization.Deserialize<NamedClass>(
-				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
-				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
-			);
-
-			Assert.AreEqual(3.14, result.John);
-			Assert.AreEqual(2.718, result.Jane);
-		}
-
-		[TestMethod]
-		public void DeserializesToSpecificStruct() {
-			var anonymous = new { foo = "foo" };
-			var result = PhpSerialization.Deserialize<MyStruct>(
-				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
-				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
-			);
-
-			Assert.AreEqual(3.14, result.John);
-			Assert.AreEqual(2.718, result.Jane);
-		}
-
-		[TestMethod]
-		public void DeserializesToSpecifiedDictionary() {
-			var anonymous = new { foo = "foo" };
-			var result = PhpSerialization.Deserialize<Dictionary<string, object>>(
-				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
-				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
-			);
-
-			Assert.AreEqual(3.14, result["John"]);
-			Assert.AreEqual(2.718, result["Jane"]);
 		}
 
 		[TestMethod]

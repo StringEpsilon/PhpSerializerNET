@@ -1,4 +1,4 @@
-# Future:
+# 0.8.0:
 - Improved performance of the validation step of deserialization.
 - Speed up deserializing into explicit types (particularly structs and classes) significantly.
 - Improved exception messages on malformed inputs when deserializing.

@@ -22,14 +22,17 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void Disabled_Throws() {
-			var exception = Assert.ThrowsException<System.FormatException>(
+			var exception = Assert.ThrowsException<DeserializationException>(
 				() => PhpSerialization.Deserialize<bool>(
 					"s:1:\"0\";",
 					new PhpDeserializationOptions() { NumberStringToBool = false }
 				)
 			);
 
-			// TODO: Rethrow the format exception and assert the proper text.
+			Assert.AreEqual(
+				"Exception encountered while trying to assign '0' to type Boolean. See inner exception for details.",
+				exception.Message
+			);
 		}
 	}
 }

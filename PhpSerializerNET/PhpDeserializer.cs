@@ -156,7 +156,15 @@ namespace PhpSerializerNET {
 								return token.ToBool();
 							}
 						}
-						return ((IConvertible)token.Value).ToType(targetType, CultureInfo.InvariantCulture);
+						
+						try{
+							return ((IConvertible)token.Value).ToType(targetType, CultureInfo.InvariantCulture);
+						} catch(Exception exception){
+							throw new DeserializationException(
+								$"Exception encountered while trying to assign '{token.Value}' to type {targetType.Name}. See inner exception for details.",
+								exception
+							);
+						}
 					} else if(targetType == typeof(System.Guid)) {
 						return new Guid(token.Value);
 					} else {

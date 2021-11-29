@@ -29,26 +29,38 @@ namespace PhpSerializerNET.Test {
 
 		[TestMethod]
 		public void Disabled_EmptyStringToInt() {
-			var ex = Assert.ThrowsException<System.FormatException>(
+			var exception = Assert.ThrowsException<DeserializationException>(
 				() => PhpSerialization.Deserialize<int>("s:0:\"\";", new PhpDeserializationOptions(){EmptyStringToDefault = false})
 			);
-			// TODO: Rethrow the exception in the code with a useful error message, then test that here.
+			
+			Assert.AreEqual(
+				"Exception encountered while trying to assign '' to type Int32. See inner exception for details.",
+				exception.Message
+			);
 		}
 
 		[TestMethod]
 		public void Disabled_StringToBool() {
-			var ex = Assert.ThrowsException<System.FormatException>(
+			var exception = Assert.ThrowsException<DeserializationException>(
 				() => PhpSerialization.Deserialize<bool>("s:0:\"\";", new PhpDeserializationOptions(){EmptyStringToDefault = false})
 			);
-			// TODO: Rethrow the exception in the code with a useful error message, then test that here.
+			
+			Assert.AreEqual(
+				"Exception encountered while trying to assign '' to type Boolean. See inner exception for details.",
+				exception.Message
+			);
 		}
 
 		[TestMethod]
 		public void Disabled_StringToDouble() {
-			var ex = Assert.ThrowsException<System.FormatException>(
+			var exception = Assert.ThrowsException<DeserializationException>(
 				() => PhpSerialization.Deserialize<double>("s:0:\"\";", new PhpDeserializationOptions(){EmptyStringToDefault = false})
 			);
-			// TODO: Rethrow the exception in the code with a useful error message, then test that here.
+			
+			Assert.AreEqual(
+				"Exception encountered while trying to assign '' to type Double. See inner exception for details.",
+				exception.Message
+			);
 		}
 	}
 }

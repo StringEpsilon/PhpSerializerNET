@@ -7,7 +7,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using static PhpSerializerNET.Test.TestObjects;
 
 namespace PhpSerializerNET.Test {
 	[TestClass]
@@ -59,12 +58,13 @@ namespace PhpSerializerNET.Test {
 		public void Overridden_By_Class() {
 			var anonymous = new { foo = "foo" };
 			var result = PhpSerialization.Deserialize<NamedClass>(
-				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
+				"O:8:\"stdClass\":2:{s:3:\"Foo\";d:3.14;s:3:\"Bar\";d:2.718;}",
 				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
 			);
 
-			Assert.AreEqual(3.14, result.John);
-			Assert.AreEqual(2.718, result.Jane);
+			Assert.IsInstanceOfType(result, typeof(NamedClass));
+			Assert.AreEqual(3.14, result.Foo);
+			Assert.AreEqual(2.718, result.Bar);
 		}
 
 		[TestMethod]
@@ -74,6 +74,7 @@ namespace PhpSerializerNET.Test {
 				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
 			);
 
+			Assert.IsInstanceOfType(result, typeof(MyStruct));
 			Assert.AreEqual(3.14, result.John);
 			Assert.AreEqual(2.718, result.Jane);
 		}

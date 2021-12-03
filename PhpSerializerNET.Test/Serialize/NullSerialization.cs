@@ -8,19 +8,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class LongSerializationTest {
+	public class NullSerializationTest {
 		[TestMethod]
-		public void SerializeIntMaxValue() {
+		public void SerializesNull() {
 			Assert.AreEqual(
-				"i:9223372036854775807;",
-				PhpSerialization.Serialize(long.MaxValue)
-			);
-		}
-		[TestMethod]
-		public void SerializeMinValue() {
-			Assert.AreEqual(
-				"i:-9223372036854775808;",
-				PhpSerialization.Serialize(long.MinValue)
+				"N;",
+				PhpSerialization.Serialize(null)
 			);
 		}
 	}

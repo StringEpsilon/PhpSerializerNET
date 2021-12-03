@@ -5,7 +5,6 @@
 **/
 
 using System;
-using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PhpSerializerNET.Test.DataTypes;
 
@@ -18,22 +17,6 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void DeserializesObjectWithMappingInfo() {
-			var deserializedObject = PhpSerialization.Deserialize<MappedClass>(
-				"a:3:{s:2:\"en\";s:12:\"Hello World!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:2:\"it\";s:11:\"Ciao mondo!\";}"
-			);
-
-			// en and de mapped to differently named property:
-			Assert.AreEqual("Hello World!", deserializedObject.English);
-			Assert.AreEqual("Hallo Welt!", deserializedObject.German);
-			// "it" correctly ignored:
-			Assert.AreEqual(null, deserializedObject.it);
-		}
-
-
-
-		[TestMethod]
-
 		public void Test_Issue11() {
 			var deserializedObject = PhpSerialization.Deserialize(
 				"a:1:{i:0;a:7:{s:1:\"A\";N;s:1:\"B\";N;s:1:\"C\";s:1:\"C\";s:5:\"odSdr\";i:1;s:1:\"D\";d:1;s:1:\"E\";N;s:1:\"F\";a:3:{s:1:\"X\";i:8;s:1:\"Y\";N;s:1:\"Z\";N;}}}"
@@ -52,15 +35,7 @@ namespace PhpSerializerNET.Test {
 			);
 		}
 
-		[TestMethod]
-		public void DeserializeList() {
-			var result = PhpSerialization.Deserialize<List<String>>("a:3:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}");
 
-			Assert.AreEqual(3, result.Count);
-			Assert.AreEqual("Hello", result[0]);
-			Assert.AreEqual("World", result[1]);
-			Assert.AreEqual("12345", result[2]);
-		}
 
 		[TestMethod]
 		public void DeserializeNestedObject() {

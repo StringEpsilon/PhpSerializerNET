@@ -8,17 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PhpSerializerNET.Test {
 	[TestClass]
-	public class DeserializeErrors {
-		[TestMethod]
-		public void ThrowsOnMalformedNull() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("N"));
-			Assert.AreEqual("Malformed null at position 0: Expected ';'", ex.Message);
-
-			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("N?"));
-			Assert.AreEqual("Malformed null at position 0: Expected ';'", ex.Message);
-		}
-
-		
+	public class TestOtherErrors {
 		[TestMethod]
 		public void ThrowsOnUnexpectedToken() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("_"));
@@ -29,6 +19,15 @@ namespace PhpSerializerNET.Test {
 
 			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("_i:42;"));
 			Assert.AreEqual("Unexpected token '_' at position 0.", ex.Message);
+		}
+
+		[TestMethod]
+		public void ErrorOnFlatValue() {
+			var ex = Assert.ThrowsException<DeserializationException>(
+				() => PhpSerialization.Deserialize("s:7:\"AString\";s:7:\"AString\";")
+			);
+
+			Assert.AreEqual("Can not deserialize loose collection of values into object", ex.Message);
 		}
 	}
 }

@@ -23,22 +23,6 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void DeserializeArrayToStruct() {
-			var value = PhpSerialization.Deserialize<AStruct>(
-				"a:2:{s:3:\"foo\";s:3:\"Foo\";s:3:\"bar\";s:3:\"Bar\";}"
-			);
-
-			Assert.AreEqual(
-				"Foo",
-				value.foo
-			);
-			Assert.AreEqual(
-				"Bar",
-				value.bar
-			);
-		}
-
-		[TestMethod]
 		public void DeserializeIgnoreField() {
 			var value = PhpSerialization.Deserialize<AStructWithIgnore>(
 				"a:2:{s:3:\"foo\";s:3:\"Foo\";s:3:\"bar\";s:3:\"Bar\";}"

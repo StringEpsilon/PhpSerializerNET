@@ -1,6 +1,7 @@
 # 0.8.0:
 - Improved performance of the validation step of deserialization.
-- Speed up deserializing into explicit types (particularly structs and classes) significantly.
+- Sped up deserializing into explicit types (particularly structs and classes) significantly.
+- Sped up serialization, especially when using attribute annotated classes and structs.
 - Improved exception messages on malformed inputs when deserializing.
 - Cleaner exception when trying to deserialize into incompatible types (i.e. "a" to int32.).
 

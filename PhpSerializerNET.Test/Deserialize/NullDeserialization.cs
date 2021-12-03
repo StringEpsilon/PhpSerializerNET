@@ -25,5 +25,25 @@ namespace PhpSerializerNET.Test {
 
 			Assert.IsNull(result);
 		}
+	
+		[TestMethod]
+		public void ExplicitToPrimitiveDefaultValues() {
+			Assert.AreEqual(
+				0,
+				PhpSerialization.Deserialize<long>("N;")
+			);
+			Assert.AreEqual(
+				false,
+				PhpSerialization.Deserialize<bool>("N;")
+			);
+			Assert.AreEqual(
+				0,
+				PhpSerialization.Deserialize<double>("N;")
+			);
+			Assert.AreEqual(
+				null,
+				PhpSerialization.Deserialize<string>("N;")
+			);
+		}
 	}
 }

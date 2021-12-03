@@ -9,13 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace PhpSerializerNET.Test {
 	[TestClass]
 	public class SerializePrimitives {
-		[TestMethod]
-		public void SerializesNull() {
-			Assert.AreEqual(
-				"N;",
-				PhpSerialization.Serialize(null)
-			);
-		}
+
 
 		[TestMethod]
 		public void ConvertsProperly() {

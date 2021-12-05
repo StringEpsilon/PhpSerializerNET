@@ -27,7 +27,7 @@ namespace PhpSerializerNET.Test {
 				() => PhpSerialization.Deserialize("s:7:\"AString\";s:7:\"AString\";")
 			);
 
-			Assert.AreEqual("Can not deserialize loose collection of values into object", ex.Message);
+			Assert.AreEqual("Unexpected token 's' at position 14.", ex.Message);
 		}
 	}
 }

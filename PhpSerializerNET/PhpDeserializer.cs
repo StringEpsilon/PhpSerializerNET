@@ -14,7 +14,7 @@ using System.Reflection;
 namespace PhpSerializerNET {
 	internal class PhpDeserializer {
 		private PhpDeserializationOptions _options;
-		private List<PhpSerializeToken> _tokens;
+		private PhpSerializeToken _token;
 		private static Dictionary<string, Type> TypeLookupCache = new() {
 			{ "DateTime", typeof(PhpDateTime) }
 		};
@@ -24,23 +24,16 @@ namespace PhpSerializerNET {
 			if (this._options == null) {
 				this._options = PhpDeserializationOptions.DefaultOptions;
 			}
-			this._tokens = new PhpTokenizer(input, _options.InputEncoding).Tokenize();
-
-			if (_tokens.Count > 1) {
-				throw new DeserializationException("Can not deserialize loose collection of values into object");
-			}
-			if (_tokens.Count == 0) {
-				throw new DeserializationException("No PHP serialization data found.");
-			}
+			this._token = new PhpTokenizer(input, _options.InputEncoding).Tokenize();
 		}
 
 		public object Deserialize() {
-			return this.DeserializeToken(_tokens[0]);
+			return this.DeserializeToken(_token);
 		}
 
 		public T Deserialize<T>() {
 			Type targetType = typeof(T);
-			return (T)this.DeserializeToken(targetType, _tokens[0]);
+			return (T)this.DeserializeToken(targetType, _token);
 		}
 
 		private object DeserializeToken(PhpSerializeToken token) {

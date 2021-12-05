@@ -4,7 +4,6 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using System.Collections.Generic;
 using System.Text;
 
 namespace PhpSerializerNET {
@@ -18,12 +17,23 @@ namespace PhpSerializerNET {
 
 		public PhpTokenizer(string input, Encoding inputEncoding) {
 			_inputEncoding = inputEncoding;
-			this._input = Encoding.Convert(Encoding.Default, _inputEncoding, Encoding.Default.GetBytes(input));
+			this._input = Encoding.Convert(
+				Encoding.Default, 
+				_inputEncoding, 
+				Encoding.Default.GetBytes(input)
+			);
 			_position = 0;
 			_lastIndex = _input.Length - 1;
 		}
 
 		private void CheckBounds(string expectation) {
+			if (_lastIndex < _position) {
+				throw new DeserializationException(
+					$"Unexpected end of input. Expected '{expectation}' at index {_position}, but input ends at index {_lastIndex}"
+				);
+			}
+		}
+		private void CheckBounds(char expectation) {
 			if (_lastIndex < _position) {
 				throw new DeserializationException(
 					$"Unexpected end of input. Expected '{expectation}' at index {_position}, but input ends at index {_lastIndex}"
@@ -47,7 +57,7 @@ namespace PhpSerializerNET {
 		}
 
 		private void GetCharacter(char character) {
-			this.CheckBounds(character.ToString());
+			this.CheckBounds(character);
 			if (_input[_position] != character) {
 				throw new DeserializationException(
 					$"Unexpected token at index {_position}. Expected '{character}' but found '{(char)_input[_position]}' instead."
@@ -103,18 +113,19 @@ namespace PhpSerializerNET {
 
 		private int GetLength(PhpSerializerType dataType) {
 			bool valid = true;
+			int length = 0;
 			int start = _position;
 			int end = _position;
 
 			for (; _input[_position] != ':' && _position < _lastIndex && valid; _position++) {
-				_ = (char)_input[_position] switch {
-					>= '0' and <= '9' => true,
+				length = (char)_input[_position] switch {
+					>= '0' and <= '9' => length * 10 + (_input[_position]-48),
 					_ => throw new DeserializationException(
 						$"{dataType} at position {_position} has illegal, missing or malformed length."
 					),
 				};
 			}
-			return int.Parse(_input.Utf8Substring(start, _position - start, _inputEncoding));
+			return length;
 
 		}
 
@@ -235,10 +246,13 @@ namespace PhpSerializerNET {
 			return result;
 		}
 
-		internal List<PhpSerializeToken> Tokenize() {
-			var result = new List<PhpSerializeToken>();
-			while (_position <= _lastIndex) {
-				result.Add(GetToken());
+		internal PhpSerializeToken Tokenize() {
+			if (this._input.Length < 1){
+				throw new DeserializationException("No PHP serialization data found.");
+			}
+			var result = GetToken();
+			if (_position <= _lastIndex){
+				throw new DeserializationException($"Unexpected token '{(char)_input[_position]}' at position {_position}.");
 			}
 			return result;
 		}

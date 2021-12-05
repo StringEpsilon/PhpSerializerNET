@@ -12,14 +12,14 @@ namespace PhpSerializerNET.Test {
 		[TestMethod]
 		public void ThrowsOnTruncatedInput() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s"));
-			Assert.AreEqual("Malformed string at position 0", ex.Message);
+			Assert.AreEqual("Unexpected end of input. Expected ':' at index 1, but input ends at index 0", ex.Message);
 		}
 
 		[TestMethod]
 		public void ThrowsOnMissingStartQuote() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s:3:abc\";"));
 			Assert.AreEqual(
-				"String at position 3 has an incorrect length of 3: Expected double quote at position 4, found 'a' instead.", 
+				"Unexpected token at index 4. Expected '\"' but found 'a' instead.",
 				ex.Message
 			);
 		}
@@ -28,7 +28,7 @@ namespace PhpSerializerNET.Test {
 		public void ThrowsOnMissingEndQuote() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s:3:\"abc;"));
 			Assert.AreEqual(
-				"String at position 4 has an incorrect length of 3: Expected double quote at position 8, found ';' instead.",
+				"Unexpected token at index 8. Expected '\"' but found ';' instead.",
 				ex.Message
 			);
 		}
@@ -37,7 +37,7 @@ namespace PhpSerializerNET.Test {
 		public void ThrowsOnInvalidLength() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s:3\"abc\";"));
 			Assert.AreEqual(
-				"String at position 4 has illegal, missing or malformed length.",
+				"String at position 3 has illegal, missing or malformed length.",
 				ex.Message
 			);
 		}
@@ -46,7 +46,7 @@ namespace PhpSerializerNET.Test {
 		public void ThrowsOnOutOfBoundsLength() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s:10:\"abc\";"));
 			Assert.AreEqual(
-				"Illegal length of 10. The string at position 4 points to out of bounds index 16.",
+				"Illegal length of 10. The string at position 6 points to out of bounds index 16.",
 				ex.Message
 			);
 		}
@@ -54,7 +54,7 @@ namespace PhpSerializerNET.Test {
 		[TestMethod]
 		public void ThrowsOnMissingSemicolon() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s:3:\"abc\""));
-			Assert.AreEqual("Malformed string at position 9: Expected semicolon.", ex.Message);
+			Assert.AreEqual("Unexpected end of input. Expected ';' at index 9, but input ends at index 8", ex.Message);
 		}
 	}
 }

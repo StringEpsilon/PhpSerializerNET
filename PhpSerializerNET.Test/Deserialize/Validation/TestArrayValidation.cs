@@ -9,40 +9,46 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace PhpSerializerNET.Test {
 	[TestClass]
 	public class TestArrayValidation {
-		
+
 		[TestMethod]
 		public void ThrowsOnMalformedArray() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a"));
-			Assert.AreEqual("Malformed array at position 0", ex.Message);
+			Assert.AreEqual("Unexpected end of input. Expected ':' at index 1, but input ends at index 0", ex.Message);
+
 		}
 
-		
+
 		[TestMethod]
 		public void ThrowsOnInvalidLength() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a:-1:{};"));
-			Assert.AreEqual("Array at position 3 has illegal, missing or malformed length.", ex.Message);
+			Assert.AreEqual("Array at position 2 has illegal, missing or malformed length.", ex.Message);
 		}
 
 
 		[TestMethod]
 		public void ThrowsOnMissingBracket() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a:100:};"));
-			Assert.AreEqual("Array at position 5: Expected token '{', found '}' instead.", ex.Message);
+			Assert.AreEqual("Unexpected token at index 6. Expected '{' but found '}' instead.", ex.Message);
+
+
 		}
 
 		[TestMethod]
 		public void ThrowsOnMissingColon() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a:10000   "));
-			Assert.AreEqual("Array at position 8 has illegal, missing or malformed length.", ex.Message);
+			Assert.AreEqual("Array at position 7 has illegal, missing or malformed length.", ex.Message);
+
 		}
 
 		[TestMethod]
 		public void ThrowsOnAbruptEOF() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a:10000:"));
-			Assert.AreEqual("Array at position 7: Unexpected end of input sequence.", ex.Message);
+			Assert.AreEqual("Unexpected end of input. Expected '{' at index 8, but input ends at index 7", ex.Message);
+
 
 			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a:1000000"));
-			Assert.AreEqual("Array at position 8: Unexpected end of input sequence.", ex.Message);
+			Assert.AreEqual("Unexpected token at index 8. Expected ':' but found '0' instead.", ex.Message);
+
 		}
 
 		[TestMethod]
@@ -51,7 +57,7 @@ namespace PhpSerializerNET.Test {
 				() => PhpSerialization.Deserialize("a:2:{i:0;i:0;i:1;i:1;i:2;i:2;}")
 			);
 
-			Assert.AreEqual("Array at position 5 should be of length 2, but actual length is 3.", exception.Message);
+			Assert.AreEqual("Array at position 0 should be of length 2, but actual length is 3.", exception.Message);
 		}
 	}
 }

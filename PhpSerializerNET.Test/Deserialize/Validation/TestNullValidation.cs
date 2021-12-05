@@ -13,10 +13,10 @@ namespace PhpSerializerNET.Test {
 		[TestMethod]
 		public void ThrowsOnTruncatedInput() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("N"));
-			Assert.AreEqual("Malformed null at position 0: Expected ';'", ex.Message);
+			Assert.AreEqual("Unexpected end of input. Expected ';' at index 1, but input ends at index 0", ex.Message);
 
 			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("N?"));
-			Assert.AreEqual("Malformed null at position 0: Expected ';'", ex.Message);
+			Assert.AreEqual("Unexpected token at index 1. Expected ';' but found '?' instead.", ex.Message);
 		}
 
 	}

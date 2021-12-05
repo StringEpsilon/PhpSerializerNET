@@ -12,25 +12,31 @@ namespace PhpSerializerNET.Test {
 		[TestMethod]
 		public void ThrowsOnTruncatedInput() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("d"));
-			Assert.AreEqual("Malformed double at position 0", ex.Message);
+			Assert.AreEqual("Unexpected end of input. Expected ':' at index 1, but input ends at index 0", ex.Message);
+
 		}
 
 		[TestMethod]
 		public void ThrowsOnMissingColon() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("d     "));
-			Assert.AreEqual("Malformed double at position 0", ex.Message);
+			Assert.AreEqual("Unexpected token at index 1. Expected ':' but found ' ' instead.", ex.Message);
+
 		}
 
 		[TestMethod]
 		public void ThrowsOnMissingSemicolon() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("d:111111"));
-			Assert.AreEqual("Malformed double at position 7: Expected token ';', found '1' instead.", ex.Message);
+			Assert.AreEqual("Unexpected end of input. Expected ':' at index 7, but input ends at index 7", ex.Message);
 		}
+
 
 		[TestMethod]
 		public void ThrowsOnInvalidCharacter() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("d:bgg5;"));
-			Assert.AreEqual("Malformed double at position 2, unexpected token 'b'", ex.Message);
+			Assert.AreEqual(
+				"Unexpected token at index 2. 'b' is not a valid part of a floating point number.",
+				ex.Message
+			);
 		}
 	}
 }

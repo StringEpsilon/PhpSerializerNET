@@ -12,15 +12,15 @@ namespace PhpSerializerNET.Test {
 	public class TestIntegerValidation {
 		[TestMethod]
 		public void ThrowsOnTruncatedInput() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("i"));
-			Assert.AreEqual(
-				"Malformed integer at position 0: Unexpected end of input sequence.",
-				ex.Message
-			);
+			// var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("i"));
+			// Assert.AreEqual(
+			// 	"Unexpected end of input. Expected ':' at index 1, but input ends at index 0",
+			// 	ex.Message
+			// );
 
-			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("i:1"));
+			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("i:1"));
 			Assert.AreEqual(
-				"Malformed integer at position 0: Unexpected end of input sequence.",
+				"Unexpected end of input. Expected ':' at index 2, but input ends at index 2",
 				ex.Message
 			);
 		}
@@ -29,7 +29,7 @@ namespace PhpSerializerNET.Test {
 		public void ThrowsOnInvalidValue() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("i:12345b;"));
 			Assert.AreEqual(
-				"Malformed integer at position 7. Unexpected token 'b'.",
+				"Unexpected token at index 7. 'b' is not a valid part of a number.",
 				ex.Message
 			);
 		}
@@ -38,7 +38,7 @@ namespace PhpSerializerNET.Test {
 		public void ThrowOnMissingSemicolon() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("i:12345"));
 			Assert.AreEqual(
-				"Malformed integer at position 6: Expected token ';', found '5' instead.",
+				"Unexpected end of input. Expected ':' at index 6, but input ends at index 6",
 				ex.Message
 			);
 		}

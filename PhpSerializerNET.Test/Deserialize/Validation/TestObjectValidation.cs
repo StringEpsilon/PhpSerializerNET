@@ -17,7 +17,10 @@ namespace PhpSerializerNET.Test {
 				)
 			);
 
-			Assert.AreEqual("Object at position 3 has illegal, missing or malformed length for classname.", ex.Message);
+			Assert.AreEqual(
+				"Object at position 2 has illegal, missing or malformed length.",
+				ex.Message
+			);
 
 			ex = Assert.ThrowsException<DeserializationException>(
 				() => PhpSerialization.Deserialize(
@@ -26,7 +29,7 @@ namespace PhpSerializerNET.Test {
 			);
 
 			Assert.AreEqual(
-				"Malformed object at position 5: Illegal length of 200. The specified length points to out of bounds index 207.",
+				"Illegal length of 200. The string at position 7 points to out of bounds index 207.",
 				ex.Message
 			);
 		}
@@ -40,7 +43,7 @@ namespace PhpSerializerNET.Test {
 			);
 
 			Assert.AreEqual(
-				"Malformed object at position 4 has an incorrect length of 8: Expected double quote at position 13, found ':' instead.",
+				"Unexpected token at index 13. Expected '\"' but found ':' instead.",
 				ex.Message
 			);
 
@@ -51,7 +54,7 @@ namespace PhpSerializerNET.Test {
 		   );
 
 			Assert.AreEqual(
-				"Malformed object at position 3: Expected double quote at position 4, found 's' instead.",
+				"Unexpected token at index 4. Expected '\"' but found 's' instead.",
 				ex.Message
 			);
 		}
@@ -65,7 +68,7 @@ namespace PhpSerializerNET.Test {
 			);
 
 			Assert.AreEqual(
-				"Malformed object at position 14: Expected ':', found 1 instead.",
+				"Unexpected token at index 14. Expected ':' but found '1' instead.",
 				ex.Message
 			);
 
@@ -76,7 +79,7 @@ namespace PhpSerializerNET.Test {
 			);
 
 			Assert.AreEqual(
-				"Object at position 17 has illegal, missing or malformed length.",
+				"Object at position 16 has illegal, missing or malformed length.",
 				ex.Message
 			);
 
@@ -87,7 +90,7 @@ namespace PhpSerializerNET.Test {
 			);
 
 			Assert.AreEqual(
-				"Object at position 17: Expected token '{', found 's' instead.",
+				"Unexpected token at index 17. Expected '{' but found 's' instead.",
 				ex.Message
 			);
 		}

@@ -16,6 +16,7 @@ namespace PhpSerializerNET {
 		internal PhpSerializerType Type { get; set; }
 		internal int Length { get; set; }
 		internal string Value { get; set; }
+		internal PhpSerializeToken Parent { get; set; }
 
 		internal List<PhpSerializeToken> Children { get; set; }
 		internal int Position { get; set; }

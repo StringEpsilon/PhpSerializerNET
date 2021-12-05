@@ -70,22 +70,22 @@ namespace PhpSerializerNET {
 		/// On deserializing an IConvertible from a PHP string, treat an empty string as the default value of the target type
 		/// i.e. "" => 0 for an integer.
 		/// </summary>
-		public bool EmptyStringToDefault {get;set;} = true;
+		public bool EmptyStringToDefault { get; set; } = true;
 
 		/// <summary>
-		/// Whether or not to convert strings "1"` and "0" to boolean. 
+		/// Whether or not to convert strings "1"` and "0" to boolean.
 		/// Default is false.
 		/// </summary>
 		public bool NumberStringToBool { get; set; } = false;
 
 		/// <summary>
-		/// Encoding of the input. Default is UTF-8. Encoding can make a difference in string lenghts and selecting the wrong 
+		/// Encoding of the input. Default is UTF-8. Encoding can make a difference in string lenghts and selecting the wrong
 		/// encoding for a given input can cause the deserialization to fail.
 		/// </summary>
 		public Encoding InputEncoding { get; set; } = Encoding.UTF8;
 
 		/// <summary>
-		/// Target datatype for objects of type "stdClass". 
+		/// Target datatype for objects of type "stdClass".
 		/// Default: Dictionary<string, object>.
 		/// Note: This does not affect use of PhpSerialization.Deserialize<T>()
 		/// </summary>
@@ -98,6 +98,6 @@ namespace PhpSerializerNET {
 		/// </summary>
 		public bool EnableTypeLookup { get; set; } = true;
 
-		internal static PhpDeserializationOptions DefaultOptions = new();
+		public static PhpDeserializationOptions DefaultOptions = new();
 	}
 }

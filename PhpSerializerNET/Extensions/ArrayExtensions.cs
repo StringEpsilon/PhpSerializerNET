@@ -28,31 +28,31 @@ namespace PhpSerializerNET {
 
 
 		public static MemberInfo FindField(this FieldInfo[] fields, string name, PhpDeserializationOptions options) {
-			if (!options.CaseSensitiveProperties){
+			if (!options.CaseSensitiveProperties) {
 				name = name.ToLower();
 			}
 			// Explicetly named properties have priority:
 			foreach (var field in fields) {
 				PhpPropertyAttribute attribute = PhpPropertyAttribute.GetCustomAttribute(
-					field, 
+					field,
 					typeof(PhpPropertyAttribute),
 					false
 				) as PhpPropertyAttribute;
-				
-				if (attribute != null){
-					var propertyName =  options.CaseSensitiveProperties 
+
+				if (attribute != null) {
+					var propertyName = options.CaseSensitiveProperties
 						? attribute.Name
 						: attribute.Name.ToLower();
-					if (propertyName == name){
+					if (propertyName == name) {
 						return field;
 					}
 				}
 			}
 			foreach (var field in fields) {
-				var propertyName =  options.CaseSensitiveProperties 
+				var propertyName = options.CaseSensitiveProperties
 					? field.Name
 					: field.Name.ToLower();
-				if (propertyName == name){
+				if (propertyName == name) {
 					return field;
 				}
 			}
@@ -61,31 +61,31 @@ namespace PhpSerializerNET {
 
 		public static MemberInfo FindProperty(this PropertyInfo[] properties, string name, PhpDeserializationOptions options) {
 			PropertyInfo member = null;
-			if (!options.CaseSensitiveProperties){
+			if (!options.CaseSensitiveProperties) {
 				name = name.ToLower();
 			}
 			// Explicetly named properties have priority:
 			foreach (var property in properties) {
 				PhpPropertyAttribute attribute = PhpPropertyAttribute.GetCustomAttribute(
-					property, 
+					property,
 					typeof(PhpPropertyAttribute),
 					false
 				) as PhpPropertyAttribute;
-				
-				if (attribute != null){
-					var propertyName =  options.CaseSensitiveProperties 
+
+				if (attribute != null) {
+					var propertyName = options.CaseSensitiveProperties
 						? attribute.Name
 						: attribute.Name.ToLower();
-					if (propertyName == name){
+					if (propertyName == name) {
 						return property;
 					}
 				}
 			}
 			foreach (var property in properties) {
-				var propertyName =  options.CaseSensitiveProperties 
+				var propertyName = options.CaseSensitiveProperties
 					? property.Name
 					: property.Name.ToLower();
-				if (propertyName == name){
+				if (propertyName == name) {
 					return property;
 				}
 			}

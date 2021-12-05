@@ -14,13 +14,13 @@ namespace PhpSerializerNET.Test {
 		public void ThrowsOnTruncatedInput() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("b"));
 			Assert.AreEqual(
-				"Malformed boolean at position 0: Unexpected end of input sequence.",
+				"Unexpected end of input. Expected ':' at index 1, but input ends at index 0",
 				ex.Message
 			);
 
 			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("b:1"));
 			Assert.AreEqual(
-				"Malformed boolean at position 0: Unexpected end of input sequence.",
+				"Unexpected end of input. Expected ';' at index 3, but input ends at index 2",
 				ex.Message
 			);
 		}
@@ -29,7 +29,7 @@ namespace PhpSerializerNET.Test {
 		public void ThrowsOnInvalidValue() {
 			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("b:2;"));
 			Assert.AreEqual(
-				"Malformed boolean at position 0: Only '1' and '0' are allowed, found '2' instead.",
+				"Unexpected token in boolean at index 2. Expected either '1' or '0', but found '2' instead.",
 				ex.Message
 			);
 		}

@@ -7,6 +7,10 @@ trigger:
 - main
 
 pool:
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '6.0'
   vmImage: ubuntu-latest
 
 steps:

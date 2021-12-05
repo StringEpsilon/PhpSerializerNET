@@ -126,7 +126,6 @@ namespace PhpSerializerNET {
 				};
 			}
 			return length;
-
 		}
 
 		private string GetBoolean() {

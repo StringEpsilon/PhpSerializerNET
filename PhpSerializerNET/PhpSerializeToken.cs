@@ -4,7 +4,6 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 
@@ -12,19 +11,12 @@ namespace PhpSerializerNET {
 	/// <summary>
 	/// PHP Serialization format token. Holds type, length, position (of the token in the input string) and child information.
 	/// </summary>
-	internal class PhpSerializeToken {
-		internal PhpSerializerType Type { get; set; }
-		internal int Length { get; set; }
-		internal string Value { get; set; }
-		internal PhpSerializeToken Parent { get; set; }
+	internal struct PhpSerializeToken {
+		internal PhpSerializerType Type;
+		internal string Value;
 
-		internal List<PhpSerializeToken> Children { get; set; }
-		internal int Position { get; set; }
-
-		/// <summary>
-		/// Default constructor.
-		/// </summary>
-		internal PhpSerializeToken() { }
+		internal List<PhpSerializeToken> Children;
+		internal int Position;
 
 		/// <summary>
 		/// Convert the token value to a <see cref="long"/>.

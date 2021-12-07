@@ -4,6 +4,8 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -26,70 +28,48 @@ namespace PhpSerializerNET {
 			}
 		}
 
+		public static Dictionary<string, PropertyInfo> GetAllProperties(this PropertyInfo[] properties, PhpDeserializationOptions options) {
+			var result = new Dictionary<string, PropertyInfo>();
+			foreach (var property in properties) {
+				var attributes = PhpPropertyAttribute.GetCustomAttributes(property, false);
+				PhpPropertyAttribute attribute = (PhpPropertyAttribute)attributes.FirstOrDefault(y => y.GetType() == typeof(PhpPropertyAttribute));
 
-		public static MemberInfo FindField(this FieldInfo[] fields, string name, PhpDeserializationOptions options) {
-			if (!options.CaseSensitiveProperties) {
-				name = name.ToLower();
-			}
-			// Explicetly named properties have priority:
-			foreach (var field in fields) {
-				PhpPropertyAttribute attribute = PhpPropertyAttribute.GetCustomAttribute(
-					field,
-					typeof(PhpPropertyAttribute),
-					false
-				) as PhpPropertyAttribute;
-
-				if (attribute != null) {
-					var propertyName = options.CaseSensitiveProperties
+				var isIgnored = attributes.Any(y => y.GetType() == typeof(PhpIgnoreAttribute));
+	
+				if (attribute != null){
+					var attributeName = options.CaseSensitiveProperties
 						? attribute.Name
 						: attribute.Name.ToLower();
-					if (propertyName == name) {
-						return field;
-					}
+					result.Add(attributeName, isIgnored ? null : property);
 				}
-			}
-			foreach (var field in fields) {
 				var propertyName = options.CaseSensitiveProperties
-					? field.Name
-					: field.Name.ToLower();
-				if (propertyName == name) {
-					return field;
-				}
+						? property.Name
+						: property.Name.ToLower();
+				result.Add(propertyName, isIgnored ? null : property);
 			}
-			return null;
+			return result;
 		}
 
-		public static MemberInfo FindProperty(this PropertyInfo[] properties, string name, PhpDeserializationOptions options) {
-			PropertyInfo member = null;
-			if (!options.CaseSensitiveProperties) {
-				name = name.ToLower();
-			}
-			// Explicetly named properties have priority:
-			foreach (var property in properties) {
-				PhpPropertyAttribute attribute = PhpPropertyAttribute.GetCustomAttribute(
-					property,
-					typeof(PhpPropertyAttribute),
-					false
-				) as PhpPropertyAttribute;
+		public static Dictionary<string, FieldInfo> GetAllFields(this FieldInfo[] fields, PhpDeserializationOptions options) {
+			var result = new Dictionary<string, FieldInfo>();
+			foreach (var field in fields) {
+				var attributes = PhpPropertyAttribute.GetCustomAttributes(field, false);
+				PhpPropertyAttribute attribute = (PhpPropertyAttribute)attributes.FirstOrDefault(y => y.GetType() == typeof(PhpPropertyAttribute));
 
-				if (attribute != null) {
-					var propertyName = options.CaseSensitiveProperties
+				var isIgnored = attributes.Any(y => y.GetType() == typeof(PhpIgnoreAttribute));
+	
+				if (attribute != null){
+					var attributeName = options.CaseSensitiveProperties
 						? attribute.Name
 						: attribute.Name.ToLower();
-					if (propertyName == name) {
-						return property;
-					}
+					result.Add(attributeName, isIgnored ? null : field);
 				}
+				var fieldName = options.CaseSensitiveProperties
+						? field.Name
+						: field.Name.ToLower();
+				result.Add(fieldName, isIgnored ? null : field);
 			}
-			foreach (var property in properties) {
-				var propertyName = options.CaseSensitiveProperties
-					? property.Name
-					: property.Name.ToLower();
-				if (propertyName == name) {
-					return property;
-				}
-			}
-			return member;
+			return result;
 		}
 	}
 }

@@ -1,6 +1,7 @@
 # Future:
 - Rewrote the parsing and validation logic, which results in different exception messages in many cases.
-- A very slight performance gain for some deserialization workloads.
+- Parsing: A very slight performance gain for some deserialization workloads.
+- Object / struct creation: Improved performance.
 
 # 0.8.0:
 - Improved performance of the validation step of deserialization.

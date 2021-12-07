@@ -175,9 +175,10 @@ namespace PhpSerializerNET {
 						}
 					}
 				case PhpSerializerType.Array:
-					if (typeof(IList).IsAssignableFrom(targetType)) {
+
+					if (targetType.IsAssignableTo(typeof(IList))) {
 						return this.MakeList(targetType, token);
-					} else if (typeof(IDictionary).IsAssignableFrom(targetType)) {
+					} else if (targetType.IsAssignableTo(typeof(IDictionary))) {
 						return this.MakeDictionary(targetType, token);
 					} else if (targetType.IsClass) {
 						return this.MakeObject(targetType, token);
@@ -191,66 +192,63 @@ namespace PhpSerializerNET {
 
 		private object MakeStruct(Type targetType, PhpSerializeToken token) {
 			var result = Activator.CreateInstance(targetType);
-			var targetFields = targetType.GetFields();
+			var fields = targetType.GetFields().GetAllFields(_options);
 
 			for (int i = 0; i < token.Children.Count; i += 2) {
-				var fieldName = token.Children[i].Value;
+				var fieldName = _options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();
 				var valueToken = token.Children[i + 1];
-
-				var field = targetFields.FindField(fieldName, _options) as FieldInfo;
-
-				if (field == null) {
+				if (!fields.ContainsKey(fieldName)) {
 					if (!_options.AllowExcessKeys) {
 						throw new DeserializationException(
-							$"Could not bind the key \"{fieldName}\" to struct of type {targetType.Name}: No such field."
+							$"Could not bind the key \"{token.Children[i].Value}\" to struct of type {targetType.Name}: No such field."
 						);
 					}
 					break;
 				}
-				if (field.GetCustomAttribute<PhpIgnoreAttribute>() != null) {
-					break;
-				}
-				try {
-					field.SetValue(result, this.DeserializeToken(field.FieldType, valueToken));
-				} catch (Exception exception) {
-					throw new DeserializationException(
-						$"Exception encountered while trying to assign '{token.Value}' to {targetType.Name}.{field.Name}. See inner exception for details.",
-						exception
-					);
+				if (fields[fieldName] != null) {
+					var field = fields[fieldName];
+					try {
+						field.SetValue(result, this.DeserializeToken(field.FieldType, valueToken));
+					} catch (Exception exception) {
+						throw new DeserializationException(
+							$"Exception encountered while trying to assign '{token.Value}' to {targetType.Name}.{field.Name}. See inner exception for details.",
+							exception
+						);
+					}
 				}
 			}
 			return result;
 		}
 
-
 		private object MakeObject(Type targetType, PhpSerializeToken token) {
 			var result = Activator.CreateInstance(targetType);
-			var targetProperties = targetType.GetProperties();
+			var properties = targetType.GetProperties().GetAllProperties(_options);
 
 			for (int i = 0; i < token.Children.Count; i += 2) {
-				var propertyName = token.Children[i].Value;
+				var propertyName = _options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();
 				var valueToken = token.Children[i + 1];
 
-				var property = targetProperties.FindProperty(propertyName, _options) as PropertyInfo;
-
-				if (property == null) {
+				if (!properties.ContainsKey(propertyName)) {
 					if (!_options.AllowExcessKeys) {
 						throw new DeserializationException(
-							$"Could not bind the key \"{propertyName}\" to object of type {targetType.Name}: No such property."
+							$"Could not bind the key \"{token.Children[i].Value}\" to object of type {targetType.Name}: No such property."
 						);
 					}
 					break;
 				}
-				if (property.GetCustomAttribute<PhpIgnoreAttribute>() != null) {
-					break;
-				}
-				try {
-					property.SetValue(result, this.DeserializeToken(property.PropertyType, valueToken));
-				} catch (Exception exception) {
-					throw new DeserializationException(
-						$"Exception encountered while trying to assign '{token.Value}' to {targetType.Name}.{property.Name}. See inner exception for details.",
-						exception
-					);
+				var property = properties[propertyName];
+				if (property != null) { // null if PhpIgnore'd
+					try {
+						property.SetValue(
+							result,
+							this.DeserializeToken(property.PropertyType, valueToken)
+						);
+					} catch (Exception exception) {
+						throw new DeserializationException(
+							$"Exception encountered while trying to assign '{token.Value}' to {targetType.Name}.{property.Name}. See inner exception for details.",
+							exception
+						);
+					}
 				}
 			}
 			return result;

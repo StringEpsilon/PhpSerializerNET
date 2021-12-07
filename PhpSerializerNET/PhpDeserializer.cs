@@ -71,13 +71,12 @@ namespace PhpSerializerNET {
 					foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic)) {
 						// TODO: PhpClass attribute should win over classes who happen to have the name...?
 						targetType = assembly.GetExportedTypes()
-							.Where(y => y.Name == typeName || y.GetCustomAttribute<PhpClass>()?.Name == typeName)
-							.FirstOrDefault();
+							.FirstOrDefault(y => y.Name == typeName || y.GetCustomAttribute<PhpClass>()?.Name == typeName);
 						if (targetType != null) {
-							TypeLookupCache.Add(typeName, targetType);
 							break;
 						}
 					}
+					TypeLookupCache.Add(typeName, targetType);
 				}
 			}
 			if (targetType != null && typeName != "stdClass") {

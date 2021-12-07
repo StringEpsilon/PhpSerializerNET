@@ -1,12 +1,17 @@
 # 0.9.0:
-- Rewrote the parsing and validation logic, which results in different exception messages in many cases.
-- Parsing: A very slight performance gain for some deserialization workloads.
-- Object / struct creation: Improved performance.
 
 ## Semi breaking:
 - Type lookup: Now negative lookup results are also cached. 
 	- This may also lead to undeseriable results when adding classes and structs at runtime.
 	- May increase the memory footprint over time faster than before.
+	- On the upside: It is significantly faster when dealing with objects where automapping doesn't work without having to disable the feature entirely.
+
+## Regular changes
+
+- Rewrote the parsing and validation logic, which results in different exception messages in many cases.
+- Parsing: A very slight performance gain for some deserialization workloads.
+- Object / struct creation: Improved performance.
+- General: Reduced amount of memory allocated while deserializing.
 
 # 0.8.0:
 - Improved performance of the validation step of deserialization.

@@ -71,7 +71,8 @@ namespace PhpSerializerNET {
 					foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic)) {
 						// TODO: PhpClass attribute should win over classes who happen to have the name...?
 						targetType = assembly.GetExportedTypes()
-							.FirstOrDefault(y => y.Name == typeName || y.GetCustomAttribute<PhpClass>()?.Name == typeName);
+							.Where(y => y.Name == typeName || y.GetCustomAttribute<PhpClass>()?.Name == typeName)
+							.FirstOrDefault();
 						if (targetType != null) {
 							break;
 						}
@@ -80,7 +81,6 @@ namespace PhpSerializerNET {
 				}
 			}
 			if (targetType != null && typeName != "stdClass") {
-
 				constructedObject = DeserializeToken(targetType, token);
 			} else {
 				dynamic result;

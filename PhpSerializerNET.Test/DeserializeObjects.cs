@@ -35,8 +35,6 @@ namespace PhpSerializerNET.Test {
 			);
 		}
 
-
-
 		[TestMethod]
 		public void DeserializeNestedObject() {
 			var result = PhpSerialization.Deserialize<CircularTest>("a:2:{s:3:\"Foo\";s:5:\"First\";s:3:\"Bar\";a:2:{s:3:\"Foo\";s:6:\"Second\";s:3:\"Bar\";N;}}");

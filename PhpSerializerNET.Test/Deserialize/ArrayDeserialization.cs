@@ -26,6 +26,17 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
+		public void ExplicitToClassFormatException() {
+			var ex = Assert.ThrowsException<DeserializationException>( () =>
+				PhpSerialization.Deserialize<SimpleClass>("a:1:{s:9:\"AnInteger\";s:3:\"1b1\";}")
+			);
+			Assert.AreEqual(
+				"Exception encountered while trying to assign '1b1' to SimpleClass.AnInteger. See inner exception for details.", 
+				ex.Message
+			);
+		}
+
+		[TestMethod]
 		public void ExplicitToClassWrongProperty() {
 			var ex = Assert.ThrowsException<PhpSerializerNET.DeserializationException>(() =>
 				PhpSerialization.Deserialize<SimpleClass>(

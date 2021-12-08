@@ -4,6 +4,7 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace PhpSerializerNET.Test {
@@ -22,12 +23,27 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
-		public void ErrorOnFlatValue() {
+		public void ErrorOnTuple() {
 			var ex = Assert.ThrowsException<DeserializationException>(
 				() => PhpSerialization.Deserialize("s:7:\"AString\";s:7:\"AString\";")
 			);
 
 			Assert.AreEqual("Unexpected token 's' at position 14.", ex.Message);
+		}
+
+		[TestMethod]
+		public void ErrorOnEmptyInput() {
+			var ex = Assert.ThrowsException<ArgumentException>(
+				() => PhpSerialization.Deserialize("")
+			);
+
+			Assert.AreEqual("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.", ex.Message);
+
+			ex = Assert.ThrowsException<ArgumentException>(
+				() => PhpSerialization.Deserialize<string>("")
+			);
+
+			Assert.AreEqual("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.", ex.Message);
 		}
 	}
 }

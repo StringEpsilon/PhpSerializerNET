@@ -5,6 +5,7 @@
 	- This may also lead to undeseriable results when adding classes and structs at runtime.
 	- May increase the memory footprint over time faster than before.
 	- On the upside: It is significantly faster when dealing with objects where automapping doesn't work without having to disable the feature entirely.
+- Different exception (System.ArgumentException) on empty input for `PhpSerialization.Deserialize<T>()`
 
 ## Regular changes
 

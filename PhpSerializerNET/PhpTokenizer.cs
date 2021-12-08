@@ -33,7 +33,7 @@ namespace PhpSerializerNET {
 				);
 			}
 		}
-		
+
 		private void CheckBounds(char expectation) {
 			if (_lastIndex < _position) {
 				throw new DeserializationException(
@@ -247,9 +247,6 @@ namespace PhpSerializerNET {
 		}
 
 		internal PhpSerializeToken Tokenize() {
-			if (this._input.Length < 1){
-				throw new DeserializationException("No PHP serialization data found.");
-			}
 			var result = GetToken();
 			if (_position <= _lastIndex){
 				throw new DeserializationException($"Unexpected token '{(char)_input[_position]}' at position {_position}.");

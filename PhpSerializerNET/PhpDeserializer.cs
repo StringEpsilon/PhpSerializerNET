@@ -38,8 +38,6 @@ namespace PhpSerializerNET {
 
 		private object DeserializeToken(PhpSerializeToken token) {
 			switch (token.Type) {
-				case PhpSerializerType.Null:
-					return null;
 				case PhpSerializerType.Boolean:
 					return token.ToBool();
 				case PhpSerializerType.Integer:
@@ -55,8 +53,9 @@ namespace PhpSerializerNET {
 					return this.MakeCollection(token);
 				case PhpSerializerType.Object:
 					return this.MakeClass(token);
+				case PhpSerializerType.Null:
 				default:
-					throw new Exception("Unsupported datatype.");
+					return null;
 			}
 		}
 
@@ -107,12 +106,6 @@ namespace PhpSerializerNET {
 
 		private object DeserializeToken(Type targetType, PhpSerializeToken token) {
 			switch (token.Type) {
-				case PhpSerializerType.Null:
-					if (targetType.IsValueType) {
-						return Activator.CreateInstance(targetType);
-					} else {
-						return null;
-					}
 				case PhpSerializerType.Boolean:
 					if (targetType.IsIConvertible()) {
 						return ((IConvertible)token.ToBool()).ToType(targetType, CultureInfo.InvariantCulture);
@@ -184,8 +177,13 @@ namespace PhpSerializerNET {
 					} else {
 						return this.MakeStruct(targetType, token);
 					}
+				case PhpSerializerType.Null:
 				default:
-					throw new DeserializationException($"Unsupported datatype {targetType.Name}.");
+					if (targetType.IsValueType) {
+						return Activator.CreateInstance(targetType);
+					} else {
+						return null;
+					}
 			}
 		}
 

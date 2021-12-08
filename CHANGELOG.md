@@ -1,5 +1,8 @@
 # 0.9.0:
 
+## Breaking:
+- Targeting net6.0
+
 ## Semi breaking:
 - Type lookup: Now negative lookup results are also cached. 
 	- This may also lead to undeseriable results when adding classes and structs at runtime.

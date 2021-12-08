@@ -60,6 +60,15 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
+		public void ThrowsOnFalseLength() {
+			var exception = Assert.ThrowsException<DeserializationException>(
+				() => PhpSerialization.Deserialize("O:1:\"a\":2:{i:0;i:0;i:1;i:1;i:2;i:2;}")
+			);
+
+			Assert.AreEqual("Object at position 0 should have 2 properties, but actually has 3 properties.", exception.Message);
+		}
+
+		[TestMethod]
 		public void ErrorOnInvalidSyntax() {
 			var ex = Assert.ThrowsException<DeserializationException>(
 				() => PhpSerialization.Deserialize(

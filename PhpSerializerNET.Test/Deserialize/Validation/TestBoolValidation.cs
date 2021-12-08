@@ -23,6 +23,11 @@ namespace PhpSerializerNET.Test {
 				"Unexpected end of input. Expected ';' at index 3, but input ends at index 2",
 				ex.Message
 			);
+			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("b:"));
+			Assert.AreEqual(
+				"Unexpected end of input. Expected '0' or '1' at index 2, but input ends at index 1",
+				ex.Message
+			);
 		}
 
 		[TestMethod]

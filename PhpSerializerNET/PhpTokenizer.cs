@@ -33,6 +33,7 @@ namespace PhpSerializerNET {
 				);
 			}
 		}
+		
 		private void CheckBounds(char expectation) {
 			if (_lastIndex < _position) {
 				throw new DeserializationException(

@@ -26,6 +26,16 @@ namespace PhpSerializerNET.Test {
 		}
 
 		[TestMethod]
+		public void ExplicitToClassWrongProperty() {
+			var ex = Assert.ThrowsException<PhpSerializerNET.DeserializationException>(() =>
+				PhpSerialization.Deserialize<SimpleClass>(
+					"a:1:{s:7:\"BString\";s:22:\"this is a string value\";}"
+				)
+			);
+			Assert.AreEqual("Could not bind the key \"BString\" to object of type SimpleClass: No such property.", ex.Message);
+		}
+
+		[TestMethod]
 		public void ExplicitToDictionary() {
 			var result = PhpSerialization.Deserialize<Dictionary<string, object>>(
 				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}"
@@ -85,6 +95,16 @@ namespace PhpSerializerNET.Test {
 				"Bar",
 				value.bar
 			);
+		}
+
+		[TestMethod]
+		public void ExplicitToStructWrongField() {
+			var ex = Assert.ThrowsException<PhpSerializerNET.DeserializationException>(() =>
+				PhpSerialization.Deserialize<AStruct>(
+					"a:1:{s:7:\"BString\";s:22:\"this is a string value\";}"
+				)
+			);
+			Assert.AreEqual("Could not bind the key \"BString\" to struct of type AStruct: No such field.", ex.Message);
 		}
 
 		[TestMethod]

@@ -208,7 +208,7 @@ namespace PhpSerializerNET {
 						field.SetValue(result, this.DeserializeToken(field.FieldType, valueToken));
 					} catch (Exception exception) {
 						throw new DeserializationException(
-							$"Exception encountered while trying to assign '{token.Value}' to {targetType.Name}.{field.Name}. See inner exception for details.",
+							$"Exception encountered while trying to assign '{valueToken.Value}' to {targetType.Name}.{field.Name}. See inner exception for details.",
 							exception
 						);
 					}
@@ -242,7 +242,7 @@ namespace PhpSerializerNET {
 						);
 					} catch (Exception exception) {
 						throw new DeserializationException(
-							$"Exception encountered while trying to assign '{token.Value}' to {targetType.Name}.{property.Name}. See inner exception for details.",
+							$"Exception encountered while trying to assign '{valueToken.Value}' to {targetType.Name}.{property.Name}. See inner exception for details.",
 							exception
 						);
 					}
@@ -263,7 +263,7 @@ namespace PhpSerializerNET {
 				if (token.Children[i].Type != PhpSerializerType.Integer) {
 					throw new DeserializationException(
 						$"Can not deserialize array at position {token.Position} to list: " +
-						$"It has a non-integer key '{token.Value}' at element {i} (position {token.Children[i].Position})."
+						$"It has a non-integer key '{token.Children[i].Value}' at element {i} (position {token.Children[i].Position})."
 					);
 				}
 			}

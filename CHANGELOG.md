@@ -13,6 +13,7 @@
 - Parsing: A very slight performance gain for some deserialization workloads.
 - Object / struct creation: Improved performance.
 - General: Reduced amount of memory allocated while deserializing.
+- Fixed exception message for non-integer keys in lists.
 
 # 0.8.0:
 - Improved performance of the validation step of deserialization.

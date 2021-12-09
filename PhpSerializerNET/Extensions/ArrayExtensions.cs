@@ -5,7 +5,6 @@
 **/
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -31,15 +30,22 @@ namespace PhpSerializerNET {
 		public static Dictionary<string, PropertyInfo> GetAllProperties(this PropertyInfo[] properties, PhpDeserializationOptions options) {
 			var result = new Dictionary<string, PropertyInfo>();
 			foreach (var property in properties) {
+				var isIgnored = false;
 				var attributes = PhpPropertyAttribute.GetCustomAttributes(property, false);
-				PhpPropertyAttribute attribute = (PhpPropertyAttribute)attributes.FirstOrDefault(y => y.GetType() == typeof(PhpPropertyAttribute));
-
-				var isIgnored = attributes.Any(y => y.GetType() == typeof(PhpIgnoreAttribute));
-	
-				if (attribute != null){
+				PhpPropertyAttribute phpPropertyAttribute = null;
+				foreach(var attribute in attributes){
+					if (attribute is PhpIgnoreAttribute ){
+						isIgnored = true;
+						break;
+					}
+					if (attribute is PhpPropertyAttribute ){ 
+						phpPropertyAttribute = (PhpPropertyAttribute)attribute;
+					}
+				}
+				if (phpPropertyAttribute != null){
 					var attributeName = options.CaseSensitiveProperties
-						? attribute.Name
-						: attribute.Name.ToLower();
+						? phpPropertyAttribute.Name
+						: phpPropertyAttribute.Name.ToLower();
 					result.Add(attributeName, isIgnored ? null : property);
 				}
 				var propertyName = options.CaseSensitiveProperties
@@ -53,17 +59,25 @@ namespace PhpSerializerNET {
 		public static Dictionary<string, FieldInfo> GetAllFields(this FieldInfo[] fields, PhpDeserializationOptions options) {
 			var result = new Dictionary<string, FieldInfo>();
 			foreach (var field in fields) {
+				var isIgnored = false;
 				var attributes = PhpPropertyAttribute.GetCustomAttributes(field, false);
-				PhpPropertyAttribute attribute = (PhpPropertyAttribute)attributes.FirstOrDefault(y => y.GetType() == typeof(PhpPropertyAttribute));
-
-				var isIgnored = attributes.Any(y => y.GetType() == typeof(PhpIgnoreAttribute));
-	
-				if (attribute != null){
+				PhpPropertyAttribute phpPropertyAttribute = null;
+				foreach(var attribute in attributes){
+					if (attribute is PhpIgnoreAttribute ){
+						isIgnored = true;
+						break;
+					}
+					if (attribute is PhpPropertyAttribute ){ 
+						phpPropertyAttribute = (PhpPropertyAttribute)attribute;
+					}
+				}
+				if (phpPropertyAttribute != null){
 					var attributeName = options.CaseSensitiveProperties
-						? attribute.Name
-						: attribute.Name.ToLower();
+						? phpPropertyAttribute.Name
+						: phpPropertyAttribute.Name.ToLower();
 					result.Add(attributeName, isIgnored ? null : field);
 				}
+
 				var fieldName = options.CaseSensitiveProperties
 						? field.Name
 						: field.Name.ToLower();

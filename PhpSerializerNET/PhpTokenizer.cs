@@ -204,7 +204,7 @@ namespace PhpSerializerNET {
 						int length = GetLength(result.Type);
 						GetDelimiter();
 						GetBracketOpen();
-						result.Children = new();
+						result.Children = new(length*2);
 						while (_input[_position] != '}') {
 							result.Children.Add(GetToken());
 						}
@@ -228,7 +228,7 @@ namespace PhpSerializerNET {
 						int propertyCount = GetLength(result.Type);
 						GetDelimiter();
 						GetBracketOpen();
-						result.Children = new();
+						result.Children = new(propertyCount*2);
 						while (_input[_position] != '}') {
 							result.Children.Add(GetToken());
 						}

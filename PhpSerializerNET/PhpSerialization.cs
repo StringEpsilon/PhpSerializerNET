@@ -19,16 +19,14 @@ namespace PhpSerializerNET {
 		/// Options for deserialization. See the  <see cref="PhpDeserializationOptions"/> class for more details.
 		/// </param>
 		/// <returns>
-		/// The deserialized data. Either null or one of these types:
-		/// <br/>
+		/// <see cref="null" />, <br/>
 		/// <see cref="bool" />, <br/>
 		/// <see cref="long" />, <br/>
 		/// <see cref="double" />, <br/>
 		/// <see cref="string" />, <br/>
 		/// <see cref="List{object}"/> for arrays with integer keys <br/>
 		/// <see cref="Dictionary{object,object}"/> for arrays with mixed keys or objects <br/>
-		/// <see cref="System.Dynamic.ExpandoObject"/> for objects (see options).
-		///
+		/// <see cref="PhpDynamicObject"/> for objects (see options).
 		/// </returns>
 		public static object Deserialize(string input, PhpDeserializationOptions options = null) {
 			if (string.IsNullOrEmpty(input)){

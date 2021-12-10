@@ -21,9 +21,21 @@ namespace PhpSerializerNET.Test.Deserialize {
 		
 		[TestMethod]
 		public void DeserializeEmptyStringExplicit() {
-			Assert.AreEqual(
+
+            Assert.AreEqual(
 				"",
-				PhpSerialization.Deserialize<string>("s:0:\"\";")
+				PhpSerialization.Deserialize<string>("s:0:\"\";", new PhpDeserializationOptions
+                {
+                    EmptyStringToDefault = false
+                })
+			);
+
+			Assert.AreEqual(
+				default,
+				PhpSerialization.Deserialize<string>("s:0:\"\";", new PhpDeserializationOptions
+                {
+                    EmptyStringToDefault = true
+                })
 			);
 		}
 

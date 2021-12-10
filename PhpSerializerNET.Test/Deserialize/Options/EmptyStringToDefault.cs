@@ -71,13 +71,6 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
         }
 
         [TestMethod]
-        public void Enabled_StringToObject()
-        {
-            var result = PhpSerialization.Deserialize<object>(EmptyPhpStringInput);
-            Assert.AreEqual(default, result);
-        }
-
-        [TestMethod]
         public void Enabled_StringToGuid()
         {
             var result = PhpSerialization.Deserialize<Guid>(EmptyPhpStringInput);
@@ -91,9 +84,77 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
             Assert.AreEqual(default, result);
         }
 
+        [TestMethod]
+        public void Enabled_StringToObject()
+        {
+            var result = PhpSerialization.Deserialize<object>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
         #region Nullables
 
-        // TODO nullables for all types..
+        [TestMethod]
+        public void Enabled_EmptyStringToIntNullable()
+        {
+            var result = PhpSerialization.Deserialize<int?>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_EmptyStringToLongNullable()
+        {
+            var result = PhpSerialization.Deserialize<long?>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_StringToDoubleNullable()
+        {
+            var result = PhpSerialization.Deserialize<double?>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_StringToFloatNullable()
+        {
+            var result = PhpSerialization.Deserialize<float?>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_StringToDecimalNullable()
+        {
+            var result = PhpSerialization.Deserialize<decimal?>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_StringToBoolNullable()
+        {
+            var result = PhpSerialization.Deserialize<bool?>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_StringToCharNullable()
+        {
+            var result = PhpSerialization.Deserialize<char?>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_StringToEnumNullable()
+        {
+            var result = PhpSerialization.Deserialize<IntEnum?>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_StringToGuidNullable()
+        {
+            var result = PhpSerialization.Deserialize<Guid?>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
 
         #endregion
 

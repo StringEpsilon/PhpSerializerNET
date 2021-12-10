@@ -4,6 +4,7 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PhpSerializerNET.Test.DataTypes;
 
@@ -75,6 +76,23 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
             var result = PhpSerialization.Deserialize<object>(EmptyPhpStringInput);
             Assert.AreEqual(default, result);
         }
+
+        [TestMethod]
+        public void Enabled_StringToGuid()
+        {
+            var result = PhpSerialization.Deserialize<Guid>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        #region Nullables
+
+        // TODO nullables for all types..
+
+        #endregion
+
+
+        // TODO collections of various objects
+
 
         #endregion
 

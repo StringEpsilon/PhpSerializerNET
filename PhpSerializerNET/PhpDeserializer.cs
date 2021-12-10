@@ -190,7 +190,10 @@ namespace PhpSerializerNET {
                     }
                     else if (targetType == typeof(Guid))
                     {
-                        return new Guid(token.Value);
+                        if (token.Value == "" && _options.EmptyStringToDefault)
+                            return default(Guid);
+
+						return new Guid(token.Value);
                     }
 					else if (targetType == typeof(object))
                     {

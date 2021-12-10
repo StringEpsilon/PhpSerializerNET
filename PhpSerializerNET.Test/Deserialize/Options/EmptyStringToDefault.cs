@@ -5,62 +5,110 @@
 **/
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PhpSerializerNET.Test.DataTypes;
 
 namespace PhpSerializerNET.Test.Deserialize.Options {
+
 	[TestClass]
 	public class EmptyStringToDefaultTest {
-		[TestMethod]
-		public void Enabled_EmptyStringToInt() {
-			var result = PhpSerialization.Deserialize<int>("s:0:\"\";");
-			Assert.AreEqual(0, result);
-		}
+        private const string EmptyPhpStringInput = "s:0:\"\";";
 
-		[TestMethod]
-		public void Enabled_StringToBool() {
-			var result = PhpSerialization.Deserialize<bool>("s:0:\"\";");
-			Assert.AreEqual(false, result);
-		}
+        #region Enabled
 
-		[TestMethod]
-		public void Enabled_StringToDouble() {
-			var result = PhpSerialization.Deserialize<double>("s:0:\"\";");
-			Assert.AreEqual(0, result);
-		}
+        [TestMethod]
+        public void Enabled_EmptyStringToInt() {
+            var result = PhpSerialization.Deserialize<int>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
 
-		[TestMethod]
-		public void Disabled_EmptyStringToInt() {
-			var exception = Assert.ThrowsException<DeserializationException>(
-				() => PhpSerialization.Deserialize<int>("s:0:\"\";", new PhpDeserializationOptions(){EmptyStringToDefault = false})
-			);
+        [TestMethod]
+        public void Enabled_EmptyStringToLong()
+        {
+            var result = PhpSerialization.Deserialize<long>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_StringToDouble()
+        {
+            var result = PhpSerialization.Deserialize<double>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_StringToFloat()
+        {
+            var result = PhpSerialization.Deserialize<float>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_StringToDecimal()
+        {
+            var result = PhpSerialization.Deserialize<decimal>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_StringToBool() {
+            var result = PhpSerialization.Deserialize<bool>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_StringToChar()
+        {
+            var result = PhpSerialization.Deserialize<char>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        [TestMethod]
+        public void Enabled_StringToEnum()
+        {
+            var result = PhpSerialization.Deserialize<IntEnum>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
+        #endregion
+
+        #region Disabled
+
+        [TestMethod]
+        public void Disabled_EmptyStringToInt() {
+            var exception = Assert.ThrowsException<DeserializationException>(
+                () => PhpSerialization.Deserialize<int>(EmptyPhpStringInput, new PhpDeserializationOptions {EmptyStringToDefault = false})
+            );
 			
-			Assert.AreEqual(
-				"Exception encountered while trying to assign '' to type Int32. See inner exception for details.",
-				exception.Message
-			);
-		}
+            Assert.AreEqual(
+                "Exception encountered while trying to assign '' to type Int32. See inner exception for details.",
+                exception.Message
+            );
+        }
 
-		[TestMethod]
-		public void Disabled_StringToBool() {
-			var exception = Assert.ThrowsException<DeserializationException>(
-				() => PhpSerialization.Deserialize<bool>("s:0:\"\";", new PhpDeserializationOptions(){EmptyStringToDefault = false})
-			);
+        [TestMethod]
+        public void Disabled_StringToBool() {
+            var exception = Assert.ThrowsException<DeserializationException>(
+                () => PhpSerialization.Deserialize<bool>(EmptyPhpStringInput, new PhpDeserializationOptions {EmptyStringToDefault = false})
+            );
 			
-			Assert.AreEqual(
-				"Exception encountered while trying to assign '' to type Boolean. See inner exception for details.",
-				exception.Message
-			);
-		}
+            Assert.AreEqual(
+                "Exception encountered while trying to assign '' to type Boolean. See inner exception for details.",
+                exception.Message
+            );
+        }
 
-		[TestMethod]
-		public void Disabled_StringToDouble() {
-			var exception = Assert.ThrowsException<DeserializationException>(
-				() => PhpSerialization.Deserialize<double>("s:0:\"\";", new PhpDeserializationOptions(){EmptyStringToDefault = false})
-			);
+        [TestMethod]
+        public void Disabled_StringToDouble() {
+            var exception = Assert.ThrowsException<DeserializationException>(
+                () => PhpSerialization.Deserialize<double>(EmptyPhpStringInput, new PhpDeserializationOptions {EmptyStringToDefault = false})
+            );
 			
-			Assert.AreEqual(
-				"Exception encountered while trying to assign '' to type Double. See inner exception for details.",
-				exception.Message
-			);
-		}
+            Assert.AreEqual(
+                "Exception encountered while trying to assign '' to type Double. See inner exception for details.",
+                exception.Message
+            );
+        }
+
+        #endregion
 	}
 }

@@ -20,11 +20,9 @@ string serializedData = PhpSerialization.Serialize(myObject);
 [and for deserializing, see here](./docs/Deserializing.md)
 
 
-## TODOs
+## TODOs for 1.0
 
-* [ ] Documentation.
-* [ ] General polish.
-* [ ] Reorganize unit tests.
+See https://github.com/StringEpsilon/PhpSerializerNET/milestone/1 
 
 ## Why?
 

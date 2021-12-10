@@ -4,6 +4,8 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System;
+
 namespace PhpSerializerNET {
 
 	[PhpClass("DateTime")]
@@ -21,8 +23,9 @@ namespace PhpSerializerNET {
 			return "DateTime";
 		}
 
-		public void SetClassName(string className) {
-			// Nothing to do.
-		}
+		public void SetClassName(string className)
+        {
+            throw new InvalidOperationException("Cannot set name on object of type " + nameof(PhpDateTime) + " name is of constant " + GetClassName());
+        }
 	}
 }

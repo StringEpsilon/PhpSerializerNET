@@ -44,10 +44,10 @@ namespace PhpSerializerNET.Test.Deserialize {
 
 		[TestMethod]
 		public void ExplictCastFormatException() {
-			var ex = Assert.ThrowsException<PhpSerializerNET.DeserializationException>( () => 
-				PhpSerialization.Deserialize<int>(
-					"s:3:\"1b1\";"
-				)
+			var ex = Assert.ThrowsException<PhpSerializerNET.DeserializationException>(() =>
+			   PhpSerialization.Deserialize<int>(
+				   "s:3:\"1b1\";"
+			   )
 			);
 			Assert.IsInstanceOfType(ex.InnerException, typeof(System.FormatException));
 			Assert.AreEqual("Exception encountered while trying to assign '1b1' to type Int32. See inner exception for details.", ex.Message);

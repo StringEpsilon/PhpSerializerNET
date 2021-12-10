@@ -11,7 +11,7 @@ using PhpSerializerNET.Test.DataTypes;
 namespace PhpSerializerNET.Test.Deserialize {
 
 	[TestClass]
-	public class EnumDeserializationTest{
+	public class EnumDeserializationTest {
 
 		[TestMethod]
 		public void DeserializeLongBasedEnum() {
@@ -20,7 +20,7 @@ namespace PhpSerializerNET.Test.Deserialize {
 				PhpSerialization.Deserialize<IntEnum>("i:1;")
 			);
 		}
-		
+
 		[TestMethod]
 		public void DeserializeIntBasedEnum() {
 			Assert.AreEqual(

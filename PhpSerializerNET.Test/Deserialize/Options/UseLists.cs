@@ -41,7 +41,7 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 			Assert.AreEqual("a", list[0]);
 			Assert.AreEqual("b", list[1]);
 		}
-		
+
 		[TestMethod]
 		public void Option_Default_NonConsequetive() {
 			// Same option, non-consecutive integer keys:

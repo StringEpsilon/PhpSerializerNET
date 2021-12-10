@@ -125,10 +125,13 @@ namespace PhpSerializerNET {
                 case PhpSerializerType.Integer:
                 case PhpSerializerType.Floating:
                 case PhpSerializerType.String:
+
                     // Short-circuit strings:
                     if (targetType == typeof(string))
                     {
-                        return token.Value;
+                        return token.Value == "" && _options.EmptyStringToDefault 
+                            ? default : 
+                            token.Value;
                     }
 
                     if (targetType.IsEnum)
@@ -164,7 +167,7 @@ namespace PhpSerializerNET {
 
                     if (targetType.IsIConvertible())
                     {
-                        if (token.Value == "" && this._options.EmptyStringToDefault)
+                        if (token.Value == "" && _options.EmptyStringToDefault)
                         {
                             return Activator.CreateInstance(targetType);
                         }
@@ -190,23 +193,24 @@ namespace PhpSerializerNET {
                     }
                     else if (targetType == typeof(Guid))
                     {
-                        if (token.Value == "" && _options.EmptyStringToDefault)
-                            return default(Guid);
-
-						return new Guid(token.Value);
+                        return token.Value == "" && _options.EmptyStringToDefault
+                            ? default
+                            : new Guid(token.Value);
                     }
-					else if (targetType == typeof(object))
+					else
                     {
-                        if (token.Value == "" && _options.EmptyStringToDefault)
-                            return null;
-
-                        return token.Value;
-                    }
-                    else
-                    {
-                        throw new DeserializationException(
-                            $"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}."
-                        );
+                        if (targetType == typeof(object))
+                        {
+                            return token.Value == "" && _options.EmptyStringToDefault 
+                                ? default
+                                : token.Value;
+                        }
+                        else
+                        {
+                            throw new DeserializationException(
+                                $"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}."
+                            );
+                        }
                     }
                 case PhpSerializerType.Object:
                     {

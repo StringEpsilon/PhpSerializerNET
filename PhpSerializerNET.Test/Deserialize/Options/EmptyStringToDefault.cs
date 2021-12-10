@@ -84,6 +84,13 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
             Assert.AreEqual(default, result);
         }
 
+        [TestMethod]
+        public void Enabled_StringToString()
+        {
+            var result = PhpSerialization.Deserialize<string>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
         #region Nullables
 
         // TODO nullables for all types..

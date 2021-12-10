@@ -17,7 +17,15 @@ using PhpSerializerNET;
 string serializedData = PhpSerialization.Serialize(myObject);
 ```
 
-[and for deserializing, see here](./docs/Deserializing.md)
+and
+
+```c#
+using PhpSerializerNET;
+
+object myObject = PhpSerialization.Deserialize(serializedData);
+```
+
+[Detailed documentation can be found here](./docs/Index.md) - Work in Progress.
 
 
 ## TODOs for 1.0

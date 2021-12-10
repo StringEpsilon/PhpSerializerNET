@@ -1,3 +1,25 @@
+[back to overview](../Index.md)
+
+---
+
+**Table of contents**
+1. [PhpDeserializationOptions](#PhpDeserializationOptions)
+	1. [CaseSensitiveProperties](#CaseSensitiveProperties)
+	2. [AllowExcessKeys](#AllowExcessKeys)
+	3. [UseLists](#UseLists)
+	4. [EmptyStringToDefault](#EmptyStringToDefault)
+	5. [NumberStringToBool](#NumberStringToBool)
+	6. [InputEncoding](#InputEncoding)
+	7. [StdClass](#StdClass)
+	8. [EnableTypeLookup](#EnableTypeLookup)
+2. [ListOptions](#ListOptions) 
+	1. [Default](#Default)
+	2. [OnAllIntegerKeys](#OnAllIntegerKeys)
+	3. [Never](#Never)
+3. [StdClassOption](#StdClassOption)
+	1. [Dictionary](#Dictionary)
+	1. [Dynamic](#Dynamic)
+	1. [Throw](#Throw)
 
 ---
 

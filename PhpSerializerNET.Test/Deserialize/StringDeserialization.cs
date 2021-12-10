@@ -18,12 +18,22 @@ namespace PhpSerializerNET.Test.Deserialize {
 				PhpSerialization.Serialize("Hello World!")
 			);
 		}
-		
+
 		[TestMethod]
 		public void DeserializeEmptyStringExplicit() {
+
 			Assert.AreEqual(
 				"",
-				PhpSerialization.Deserialize<string>("s:0:\"\";")
+				PhpSerialization.Deserialize<string>("s:0:\"\";", new PhpDeserializationOptions {
+					EmptyStringToDefault = false
+				})
+			);
+
+			Assert.AreEqual(
+				default,
+				PhpSerialization.Deserialize<string>("s:0:\"\";", new PhpDeserializationOptions {
+					EmptyStringToDefault = true
+				})
 			);
 		}
 

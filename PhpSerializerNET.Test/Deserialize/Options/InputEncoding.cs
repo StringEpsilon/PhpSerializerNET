@@ -35,7 +35,7 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 		public void CorrectEncodingWorks() {
 			var result = PhpSerialization.Deserialize(
 				Latin1TestString,
-				new PhpDeserializationOptions(){
+				new PhpDeserializationOptions() {
 					InputEncoding = Encoding.Latin1
 				}
 			);

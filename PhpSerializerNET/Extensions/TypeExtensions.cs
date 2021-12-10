@@ -14,9 +14,8 @@ namespace PhpSerializerNET {
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
-		public static bool IsIConvertible(this Type type) {
-			return typeof(IConvertible).IsAssignableFrom(type);
-		}
+		public static bool IsIConvertible(this Type type) =>
+			typeof(IConvertible).IsAssignableFrom(type);
 
 		internal static object GetValue(this MemberInfo member, object input) {
 			if (member is PropertyInfo property) {
@@ -33,5 +32,14 @@ namespace PhpSerializerNET {
 				.ToType(enumValue.GetType().GetEnumUnderlyingType(), CultureInfo.InvariantCulture)
 				.ToString();
 		}
+
+		/// <summary>
+		/// Whether a type is a nullable reference type, like bool? int? etc.
+		/// Adapted from <see href="https://stackoverflow.com/a/374663/4122889"/>
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		internal static bool IsNullableReferenceType(this Type type) =>
+			Nullable.GetUnderlyingType(type) != null;
 	}
 }

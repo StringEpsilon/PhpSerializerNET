@@ -4,6 +4,7 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System.Linq;
 using System.Text;
 
 namespace PhpSerializerNET {
@@ -14,6 +15,11 @@ namespace PhpSerializerNET {
 
 		private readonly byte[] _input;
 		private readonly int _lastIndex;
+
+#if DEBUG
+		private char DebugCurrentCharacter => (char)_input[_position];
+		private char[] DebugInput => _inputEncoding.GetChars(_input);
+#endif
 
 		public PhpTokenizer(string input, Encoding inputEncoding) {
 			this._inputEncoding = inputEncoding;
@@ -113,12 +119,11 @@ namespace PhpSerializerNET {
 
 
 		private int GetLength(PhpSerializerType dataType) {
-			bool valid = true;
 			int length = 0;
 
-			for (; this._input[this._position] != ':' && this._position < this._lastIndex && valid; this._position++) {
+			for (; this._input[this._position] != ':' && this._position < this._lastIndex; this._position++) {
 				length = (char)this._input[this._position] switch {
-					>= '0' and <= '9' => length * 10 + (this._input[this._position] - 48),
+					>= '0' and <= '9' => length * 10 + (_input[_position] - 48),
 					_ => throw new DeserializationException(
 						$"{dataType} at position {this._position} has illegal, missing or malformed length."
 					),

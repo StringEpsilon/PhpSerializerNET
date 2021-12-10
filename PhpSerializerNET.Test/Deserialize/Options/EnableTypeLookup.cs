@@ -29,7 +29,7 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 		public void Disabled_UseStdClass() {
 			var result = PhpSerialization.Deserialize(
 				"O:11:\"MappedClass\":2:{s:2:\"en\";s:12:\"Hello World!\";s:2:\"de\";s:11:\"Hallo Welt!\";}",
-				new PhpDeserializationOptions() { 
+				new PhpDeserializationOptions() {
 					EnableTypeLookup = false,
 					StdClass = StdClassOption.Dictionary,
 				}
@@ -40,7 +40,7 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 			// Check that everything was deserialized onto the properties:
 			var dictionary = result as PhpObjectDictionary;
 			Assert.AreEqual("Hello World!", dictionary["en"]);
-			Assert.AreEqual("Hallo Welt!", dictionary["de"]); 
+			Assert.AreEqual("Hallo Welt!", dictionary["de"]);
 		}
 
 	}

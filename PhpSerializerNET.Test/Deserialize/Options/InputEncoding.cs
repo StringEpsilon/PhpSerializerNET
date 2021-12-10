@@ -4,10 +4,10 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Text;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PhpSerializerNET.Test {
+namespace PhpSerializerNET.Test.Deserialize.Options {
 	[TestClass]
 	public class InputEncodingTest {
 		private static string Latin1TestString = Encoding.Latin1.GetString(

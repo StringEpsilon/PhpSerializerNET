@@ -7,7 +7,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PhpSerializerNET.Test {
+namespace PhpSerializerNET.Test.Deserialize.Validation {
 	[TestClass]
 	public class TestOtherErrors {
 		[TestMethod]

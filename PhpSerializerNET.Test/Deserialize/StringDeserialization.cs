@@ -8,7 +8,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PhpSerializerNET.Test {
+namespace PhpSerializerNET.Test.Deserialize {
 	[TestClass]
 	public class StringDeserializationTest {
 		[TestMethod]

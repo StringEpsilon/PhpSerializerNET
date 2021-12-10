@@ -4,7 +4,7 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-namespace PhpSerializerNET.Test {
+namespace PhpSerializerNET.Test.DataTypes {
 	[PhpClass]
 	public class UnnamedClass {
 		public double Foo { get; set; }

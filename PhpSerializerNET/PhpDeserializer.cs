@@ -192,6 +192,13 @@ namespace PhpSerializerNET {
                     {
                         return new Guid(token.Value);
                     }
+					else if (targetType == typeof(object))
+                    {
+                        if (token.Value == "" && _options.EmptyStringToDefault)
+                            return null;
+
+                        return token.Value;
+                    }
                     else
                     {
                         throw new DeserializationException(

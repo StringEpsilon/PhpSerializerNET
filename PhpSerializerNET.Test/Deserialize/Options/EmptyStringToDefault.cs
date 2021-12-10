@@ -69,6 +69,13 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
             Assert.AreEqual(default, result);
         }
 
+        [TestMethod]
+        public void Enabled_StringToObject()
+        {
+            var result = PhpSerialization.Deserialize<object>(EmptyPhpStringInput);
+            Assert.AreEqual(default, result);
+        }
+
         #endregion
 
         #region Disabled

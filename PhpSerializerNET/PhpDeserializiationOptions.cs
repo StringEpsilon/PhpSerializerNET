@@ -34,7 +34,7 @@ namespace PhpSerializerNET {
 		Dictionary,
 
 		/// <summary>
-		/// Deserialize all 'stdClass' objects dynamic objects (<see cref="System.Dynamic.ExpandoObject"/>)
+		/// Deserialize all 'stdClass' objects dynamic objects (<see cref="PhpDynamicObject"/>)
 		/// </summary>
 		Dynamic,
 

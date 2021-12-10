@@ -4,11 +4,9 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using System.Collections;
-using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PhpSerializerNET.Test {
+namespace PhpSerializerNET.Test.Deserialize {
 	[TestClass]
 	public class PhpDateTimeDeserializationTest {
 		[TestMethod]

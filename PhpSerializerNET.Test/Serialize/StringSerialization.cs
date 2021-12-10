@@ -7,7 +7,7 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PhpSerializerNET.Test {
+namespace PhpSerializerNET.Test.Serialize {
 	[TestClass]
 	public class StringSerializationTest {
 		[TestMethod]

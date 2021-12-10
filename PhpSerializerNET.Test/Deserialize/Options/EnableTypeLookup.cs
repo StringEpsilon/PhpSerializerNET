@@ -6,9 +6,8 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PhpSerializerNET.Test.DataTypes;
-using PhpSerializerNET;
 
-namespace PhpSerializerNET.Test {
+namespace PhpSerializerNET.Test.Deserialize.Options {
 	[TestClass]
 	public class EnableTypeLookupTest {
 		[TestMethod]

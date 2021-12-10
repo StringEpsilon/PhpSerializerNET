@@ -7,7 +7,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PhpSerializerNET.Test.DataTypes;
 
-namespace PhpSerializerNET.Test {
+namespace PhpSerializerNET.Test.Deserialize.Options {
 	[TestClass]
 	public class AllowExcessKeysTest {
 		public static string StructTestInput = "a:3:{s:3:\"foo\";s:3:\"Foo\";s:3:\"bar\";s:3:\"Bar\";s:6:\"foobar\";s:6:\"FooBar\";}";

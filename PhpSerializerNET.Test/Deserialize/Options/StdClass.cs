@@ -7,8 +7,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PhpSerializerNET.Test.DataTypes;
 
-namespace PhpSerializerNET.Test {
+namespace PhpSerializerNET.Test.Deserialize.Options {
 	[TestClass]
 	public class StdClassTest {
 		public struct MyStruct {

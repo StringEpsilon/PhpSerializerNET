@@ -29,7 +29,7 @@ namespace PhpSerializerNET {
 
 	public enum StdClassOption {
 		/// <summary>
-		/// Deserialize all 'stdClass' objects into Dictionary<string, object>
+		/// Deserialize all 'stdClass' objects into <see cref="PhpObjectDictionary"/> (extending <see cref="System.Collections.Generic.Dictionary{string,object}"/>)
 		/// </summary>
 		Dictionary,
 
@@ -86,7 +86,7 @@ namespace PhpSerializerNET {
 
 		/// <summary>
 		/// Target datatype for objects of type "stdClass".
-		/// Default: Dictionary<string, object>.
+		/// Default: <see cref="StdClassOption.Dictionary"/>.
 		/// Note: This does not affect use of PhpSerialization.Deserialize<T>()
 		/// </summary>
 		public StdClassOption StdClass { get; set; } = StdClassOption.Dictionary;

@@ -166,7 +166,7 @@ var deserializedBool = PhpSerialization.Deserialize<boolean>(
 
 Note: This does not affect explicitly typed deserialization via ```PhpSerialization.Deserialize<T>()```
 
-**Default value:** `StdClassOption.Dictionary` [details here](#ListOptions)
+**Default value:** `StdClassOption.Dictionary` [details and examples here](#ListOptions)
 
 ## EnableTypeLookup
 
@@ -178,25 +178,96 @@ Note: This does not affect explicitly typed deserialization via ```PhpSerializat
 
 **Default value:** `true`
 
+**Example 1 - true (default)**
+
+```c#
+public class ExampleClass {
+	public string Foo { get; set; }
+	public string Bar { get; set; }
+}
+
+var deserialized = PhpSerialization.Deserialize(
+	"O:12:\"ExampleClass\":2:{s:3:\"Foo\";s:3:\"abc\";s:3:\"Bar\";s:3:\"xyz\";}",
+	new PhpDeserializationOptions() {
+		EnableTypeLookup = true
+	}
+);
+// deserialized is instance of ExampleClass
+```
+
+**Example 2 - false**
+
+```c#
+public class ExampleClass {
+	public string Foo { get; set; }
+	public string Bar { get; set; }
+}
+
+var deserialized = PhpSerialization.Deserialize(
+	"O:12:\"ExampleClass\":2:{s:3:\"Foo\";s:3:\"abc\";s:3:\"Bar\";s:3:\"xyz\";}",
+	new PhpDeserializationOptions() {
+		EnableTypeLookup = false
+	}
+);
+// deserialized is instance of PhpObjectDictionary (extending Dictionary(string, object))
+// See also the StdClass option.
+```
+
 # ListOptions
 
 Available values for [PhpDeserializationOptions.UseLists](#UseLists).
 
 ## Default
 
-Convert associative array to list when all keys are consecutive integers.
+Convert associative array to list when all keys are consecutive integers. Otherwise make a dictionary.
 
 **Notes:** 
 * This means `0, 1, 2, 3, 4`, but also `9, 10, 11, 12`. The library does not check that the indizes start at 0.
 * The consecutiveness is only checked in the positive direction. 
 
+**Example**
+
+```c#
+var deserialized = PhpSerialization.Deserialize(
+	"a:3:{i:1;s:1:\"a\";i:2;s:1:\"b\";i:3;s:1:\"c\";}",
+	new PhpDeserializationOptions() {
+		AllowExcessKeys = true
+	}
+);
+// deserialized == List<string> { "a", "b", "c" }
+```
+
 ## OnAllIntegerKeys
 
-Convert associative array to list when all keys are integers, consecutive or not.
+Convert associative array to list when all keys are integers, consecutive or not. Otherwise make a dictionary.
+
+**Example**
+
+```c#
+var deserialized = PhpSerialization.Deserialize(
+	"a:3:{i:1;s:1:\"a\";i:5;s:1:\"b\";i:200;s:1:\"c\";}",
+	new PhpDeserializationOptions() {
+		AllowExcessKeys = true
+	}
+);
+// deserialized == List<string> { "a", "b", "c" }
+```
 
 ## Never
 
 Always use dictionaries.
+
+**Example**
+
+```c#
+var deserialized = PhpSerialization.Deserialize(
+	"a:3:{i:1;s:1:\"a\";i:5;s:1:\"b\";i:200;s:1:\"c\";}",
+	new PhpDeserializationOptions() {
+		AllowExcessKeys = true
+	}
+);
+// deserialized == Dictionary<integer, string> { {1, "a"} , {2, "b"} , {3, "c"} }
+```
 
 # StdClassOption
 
@@ -204,11 +275,11 @@ Available values for [PhpDeserializationOptions.StdClass](#StdClass).
 
 ## Dictionary
 
-Deserialize all 'stdClass' objects into `Dictionary<string, object>`
+Deserialize all 'stdClass' objects into `PhpObjectDictionary` (extending `Dictionary<string, object>`).
 
 ## Dynamic
 
-Deserialize all 'stdClass' objects dynamic objects (see `PhpDynamicObject`).
+Deserialize all 'stdClass' objects into dynamic objects (see `PhpDynamicObject`).
 
 ## Throw
 

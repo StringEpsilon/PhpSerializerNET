@@ -11,17 +11,93 @@ Options for deserializing PHP data.
 
 **Default value:** `true`
 
+**Example 1 - true (default):**
+
+```C#
+public class ExampleClass {
+	public string Foo { get; set; }
+	public string Bar { get; set; }
+}
+
+var deserialized = PhpSerialization.Deserialize<ExampleClass>(
+	"a:2:{s:3:\"foo\";s:3:\"abc\";s:3:\"bar\";s:3:\"xyz\";}",
+	new PhpDeserializationOptions() { 
+		CaseSensitiveProperties = true,
+		AllowExcessKeys = true // To avoid exception, see below.
+	}
+);
+
+// deserialized.Foo == null because "foo" != "Foo"
+// deserialized.bar == null because "bar" != "Bar"
+```
+
+**Example 2 - false:**
+
+```C#
+public class ExampleClass {
+	public string Foo { get; set; }
+	public string Bar { get; set; }
+}
+
+var deserialized = PhpSerialization.Deserialize<ExampleClass>(
+	"a:2:{s:3:\"foo\";s:3:\"abc\";s:3:\"bar\";s:3:\"xyz\";}",
+	new PhpDeserializationOptions() { 
+		CaseSensitiveProperties = false, 
+		AllowExcessKeys = true // To avoid exception, see below.
+	}
+);
+
+// deserialized.Foo == "abc"
+// deserialized.bar == "xyz"
+```
+
 ## AllowExcessKeys
 
 **Description:** If true, keys present in the array but not on the target type will be ignored. Otherwise an exception will be thrown.
 
 **Default value:** `false`
 
+**Example 1 - false (default)**
+
+```C#
+public class ExampleClass {
+	public string Foo { get; set; }
+	public string Bar { get; set; }
+}
+
+// Throws exception, because "Baz" is not defined on "ExampleClass":
+var deserialized = PhpSerialization.Deserialize<ExampleClass>(
+	"a:3:{s:3:\"Foo\";s:3:\"abc\";s:3:\"Bar\";s:3:\"xyz\";s:3:\"Baz\";s:3:\"...\";}",
+	new PhpDeserializationOptions() {
+		AllowExcessKeys = true
+	}
+);
+```
+
+**Example 2 - true**
+
+```C#
+public class ExampleClass {
+	public string Foo { get; set; }
+	public string Bar { get; set; }
+}
+
+// No exception, "Baz" is simply ignored and dropped.
+var deserialized = PhpSerialization.Deserialize<ExampleClass>(
+	"a:3:{s:3:\"Foo\";s:3:\"abc\";s:3:\"Bar\";s:3:\"xyz\";s:3:\"Baz\";s:3:\"...\";}",
+	new PhpDeserializationOptions() {
+		AllowExcessKeys = true
+	}
+);
+// deserialized.Foo == "abc"
+// deserialized.bar == "xyz"
+```
+
 ## UseLists
 
 **Description:** Determines how and when associative arrays are deserialized into a `List<T>` instead of a dictionary.
 
-**Default value:** `ListOptions.Default` [details here](#ListOptions)
+**Default value:** `ListOptions.Default` [details and examples here](#ListOptions)
 
 ## EmptyStringToDefault
 
@@ -35,11 +111,54 @@ Options for deserializing PHP data.
 
 **Default value:** `false`
 
+**Example 1 - false (default)**
+
+```C#
+var deserialized = PhpSerialization.Deserialize(
+	"s:1:\"1\"",
+	new PhpDeserializationOptions() {
+		NumberStringToBool = false
+	}
+);
+// deserialized == "1"
+
+// Throws exception, because the string "1" can not be assigned or converted to type boolean.
+var deserializedBool = PhpSerialization.Deserialize<boolean>(
+	"s:1:\"1\"",
+	new PhpDeserializationOptions() {
+		NumberStringToBool = false
+	}
+);
+```
+
+**Example 2 - true**
+
+```C#
+var deserialized = PhpSerialization.Deserialize(
+	"s:1:\"1\"",
+	new PhpDeserializationOptions() {
+		NumberStringToBool = true
+	}
+);
+// deserialized == true
+
+var deserializedBool = PhpSerialization.Deserialize<boolean>(
+	"s:1:\"1\"",
+	new PhpDeserializationOptions() {
+		NumberStringToBool = false
+	}
+);
+// deserializedBool == true
+```
+
 ## InputEncoding
 
 **Description:** Encoding of the input. Default is UTF-8. Encoding can make a difference in string lenghts and selecting the wrong encoding for a given input can cause the deserialization to fail.
 
 **Default value:** `System.Text.Encoding.UTF8`
+
+**Example:** 
+[See the unit tests](https://github.com/StringEpsilon/PhpSerializerNET/blob/main/PhpSerializerNET.Test/Deserialize/Options/InputEncoding.cs)
 
 ## StdClass
 

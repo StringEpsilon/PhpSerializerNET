@@ -2,6 +2,14 @@
 
 ---
 
-# IPhpObject
+# Interface IPhpObject
 
-**TODO**
+## Methods
+
+### SetClassName
+
+**TODO.**
+
+### GetClassName
+
+**TODO.**

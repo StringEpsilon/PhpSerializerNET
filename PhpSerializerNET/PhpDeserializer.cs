@@ -98,7 +98,7 @@ namespace PhpSerializerNET {
 				}
 				constructedObject = result;
 			}
-			if (constructedObject is IPhpObject phpObject) {
+			if (constructedObject is IPhpObject phpObject and not PhpDateTime) {
 				phpObject.SetClassName(typeName);
 			}
 			return constructedObject;

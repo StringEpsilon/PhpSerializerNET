@@ -1,6 +1,15 @@
-[back to overview](../Index.md)
+[back to overview](../README.md)
 
 ---
+
+**Table of contents**
+1. [PhpClass](#PhpClass)
+	1. [Example 1: Serialize with classname](#Example-1:-Serialize-with-classname)
+	2. [Example 2: Serialize without classname](#Example-2:-Serialize-without-classname)
+	3. [Example 2: Deserialize with classname](#Example-3:-Deserialize-with-classname)
+
+---
+
 # PhpClass
 
 Indicates that instances of the decorated class or struct should be serialized with Object notation and with which classname (if specified)

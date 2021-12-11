@@ -1,13 +1,22 @@
-[back to overview](../Index.md)
+[back to overview](../README.md)
 
 ---
+
+**Table of contents**
+1. [PhpProperty](#PhpProperty)
+	1. [Example 1: Serialize](#Example-1:-Serialize)
+	2. [Example 2: Deserialize with classname](#Example-1:-Deserialize-with-classname)
+	3. [Example 3: Deserialization with actual name.](#Example-1:-Deserialize-with-actual-name)
+
+---
+
 # PhpProperty
 
 Specifiy the name of the property in the serialization data, for both serialization and deserialization.
 
-Please be aware that the actual name of the property may be used as a fallback for assignment. See example 3.
+Please be aware that the actual name of the property may be used as a fallback for assignment. See [example 3](#Example-1:-Deserialize-with-actual-name).
 
-## Example - Serialize
+## Example 1: Serialize
 
 
 ```C#

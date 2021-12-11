@@ -1,11 +1,17 @@
 
-[back to overview](../Index.md)
+[back to overview](../README.md)
+
+---
+
+**Table of contents**
+1. [PhpIgnore](#PhpClass)
+	1. [Example](#Example)
 
 ---
 
 # PhpIgnore
 
-Tells both the serializer and deserializer to ignore a given property. 
+Tells both the serializer and deserializer to ignore a given property.
 
 When deserializing, the property or field will assume the default value.
 

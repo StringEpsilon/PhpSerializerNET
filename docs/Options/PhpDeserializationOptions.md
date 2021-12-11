@@ -1,4 +1,4 @@
-[back to overview](../Index.md)
+[back to overview](../README.md)
 
 ---
 
@@ -12,14 +12,19 @@
 	6. [InputEncoding](#InputEncoding)
 	7. [StdClass](#StdClass)
 	8. [EnableTypeLookup](#EnableTypeLookup)
-2. [ListOptions](#ListOptions) 
+	9. [TypeCache][#TypeCache]
+2. [ListOptions](#ListOptions)
 	1. [Default](#Default)
 	2. [OnAllIntegerKeys](#OnAllIntegerKeys)
 	3. [Never](#Never)
 3. [StdClassOption](#StdClassOption)
 	1. [Dictionary](#Dictionary)
-	1. [Dynamic](#Dynamic)
-	1. [Throw](#Throw)
+	2. [Dynamic](#Dynamic)
+	3. [Throw](#Throw)
+4. [TypeCacheFlag][#TypeCacheFlag]
+	1. [Deactivated](#Deactivated)
+	2. [ClassNames (default)](#ClassNames-(default))
+	3. [PropertyInfo](#PropertyInfo)
 
 ---
 
@@ -29,7 +34,7 @@ Options for deserializing PHP data.
 
 ## CaseSensitiveProperties
 
-**Description:** Whether or not properties are matched case sensitive. 
+**Description:** Whether or not properties are matched case sensitive.
 
 **Default value:** `true`
 
@@ -43,7 +48,7 @@ public class ExampleClass {
 
 var deserialized = PhpSerialization.Deserialize<ExampleClass>(
 	"a:2:{s:3:\"foo\";s:3:\"abc\";s:3:\"bar\";s:3:\"xyz\";}",
-	new PhpDeserializationOptions() { 
+	new PhpDeserializationOptions() {
 		CaseSensitiveProperties = true,
 		AllowExcessKeys = true // To avoid exception, see below.
 	}
@@ -63,8 +68,8 @@ public class ExampleClass {
 
 var deserialized = PhpSerialization.Deserialize<ExampleClass>(
 	"a:2:{s:3:\"foo\";s:3:\"abc\";s:3:\"bar\";s:3:\"xyz\";}",
-	new PhpDeserializationOptions() { 
-		CaseSensitiveProperties = false, 
+	new PhpDeserializationOptions() {
+		CaseSensitiveProperties = false,
 		AllowExcessKeys = true // To avoid exception, see below.
 	}
 );
@@ -127,6 +132,8 @@ var deserialized = PhpSerialization.Deserialize<ExampleClass>(
 
 **Default value:** `true`
 
+**Examples:** **TODO**
+
 ## NumberStringToBool
 
 **Description:** Whether or not to convert strings "1"` and "0" to boolean.
@@ -167,7 +174,7 @@ var deserialized = PhpSerialization.Deserialize(
 var deserializedBool = PhpSerialization.Deserialize<boolean>(
 	"s:1:\"1\"",
 	new PhpDeserializationOptions() {
-		NumberStringToBool = false
+		NumberStringToBool = true
 	}
 );
 // deserializedBool == true
@@ -179,12 +186,12 @@ var deserializedBool = PhpSerialization.Deserialize<boolean>(
 
 **Default value:** `System.Text.Encoding.UTF8`
 
-**Example:** 
+**Example:**
 [See the unit tests](https://github.com/StringEpsilon/PhpSerializerNET/blob/main/PhpSerializerNET.Test/Deserialize/Options/InputEncoding.cs)
 
 ## StdClass
 
-**Description:** Target datatype for objects of type "stdClass". 
+**Description:** Target datatype for objects of with classname "stdClass".
 
 Note: This does not affect explicitly typed deserialization via ```PhpSerialization.Deserialize<T>()```
 
@@ -194,8 +201,8 @@ Note: This does not affect explicitly typed deserialization via ```PhpSerializat
 
 **Description:** Enable or disable lookup in currently loaded assemblies for target classes and structs to deserialize objects into. i.E. `o:8:"UserInfo":...` being mapped to a UserInfo class.
 
-**Notes:** 
-* Disabling this option can improve performance in some cases and reduce memory footprint. Finding a class or struct with a given name is a relatively costly operation and the library caches the results. 
+**Notes:**
+* Disabling this option can improve performance in some cases and reduce memory footprint. Finding a class or struct with a given name is a relatively costly operation and the library caches the results.
 * The caching might lead to some unexpected behaviors too. If the library can not find a type for a given name, the negative result will be stored for future deserializations. If a new assembly with a matchign type is loaded in the meantime, the type lookup will still fail and the fallback option (see [PhpDeserializationOptions.StdClass](#StdClass)) will be used.
 
 **Default value:** `true`
@@ -235,6 +242,10 @@ var deserialized = PhpSerialization.Deserialize(
 // See also the StdClass option.
 ```
 
+## TypeCache
+
+Controls what type information cached. See [TypeCacheFlag](#TypeCacheFlag) for details.
+
 # ListOptions
 
 Available values for [PhpDeserializationOptions.UseLists](#UseLists).
@@ -243,9 +254,9 @@ Available values for [PhpDeserializationOptions.UseLists](#UseLists).
 
 Convert associative array to list when all keys are consecutive integers. Otherwise make a dictionary.
 
-**Notes:** 
+**Notes:**
 * This means `0, 1, 2, 3, 4`, but also `9, 10, 11, 12`. The library does not check that the indizes start at 0.
-* The consecutiveness is only checked in the positive direction. 
+* The consecutiveness is only checked in the positive direction.
 
 **Example**
 
@@ -299,10 +310,93 @@ Available values for [PhpDeserializationOptions.StdClass](#StdClass).
 
 Deserialize all 'stdClass' objects into `PhpObjectDictionary` (extending `Dictionary<string, object>`).
 
+This is the default option.
+
+```c#
+var objectDictionary = (PhpObjectDictionary)PhpSerialization.Deserialize(
+	"O:8:\"stdClass\":2:{s:3:\"Foo\";s:3:\"xyz!\";s:3:\"Bar\";d:3.1415}",
+	new PhpDeserializationOptions() { 
+		StdClass = StdClassOption.Dictionary,
+	}
+);
+/*
+objectDictionary["Foo"] == "xyz"
+objectDictionary["Bar"] == 3.1415
+*/
+```
+
 ## Dynamic
 
-Deserialize all 'stdClass' objects into dynamic objects (see `PhpDynamicObject`).
+Deserialize all 'stdClass' objects into dynamic objects. See [System.Dynamic.DynamicObject](https://docs.microsoft.com/en-us/dotnet/api/system.dynamic.dynamicobject?view=net-6.0) for more details on dynamic objects in general. 
+
+The option will result in instances of [PhpDynamicObject](../Types/PhpDynamicObject.md) specifically.
+
+```c#
+dynamic object = PhpSerialization.Deserialize(
+	"O:8:\"stdClass\":2:{s:3:\"Foo\";s:3:\"xyz!\";s:3:\"Bar\";d:3.1415}",
+	new PhpDeserializationOptions() { 
+		StdClass = StdClassOption.Dynamic,
+	}
+);
+/*
+object.Foo == "xyz"
+object.Bar == 3.1415
+*/
+```
 
 ## Throw
 
-Throw an exception and abort deserialization when encountering stdClass objects.
+Throw an exception and abort deserialization when encountering 'stdClass' objects.
+
+```c#
+try {
+	_ = PhpSerialization.Deserialize(
+		"O:8:\"stdClass\":2:{s:3:\"Foo\";s:3:\"xyz!\";s:3:\"Bar\";d:3.1415}",
+		new PhpDeserializationOptions() { 
+			StdClass = StdClassOption.Throw,
+		}
+	);
+} catch (DeserializationException ex) {
+	// ex.Message = "Encountered 'stdClass' and the behavior 'Throw' was specified in deserialization options."
+}
+```
+
+# TypeCacheFlag
+
+Specifies the behavior of the type information caches of the library.
+
+Note that these are flags. To combine them, use the `|`  operator:
+```c#
+TypeCache = TypeCacheFlag.ClassNames | TypeCacheFlag.PropertyInfo
+```
+
+The `Deactivated` can not be combined. The other flags will override it:
+
+```c#
+// don't:
+TypeCache = TypeCacheFlag.Deactivated | TypeCacheFlag.PropertyInfo
+
+// do:
+TypeCache = TypeCacheFlag.Deactivated
+```
+
+## Deactivated
+
+Do not cache anything.
+**Beware:** This can cause severe performance degradation when dealing with lots of the same Objects in the data to deserialize.
+
+In a simple test of deserializing the same object data in a loop, I saw a **400 fold** increase in run time when disabling all caching.
+
+## ClassNames (default)
+
+Enable or disable lookup in currently loaded assemblies for target classes and structs to deserialize objects into.
+i.E. `o:8:"UserInfo":...` being mapped to a UserInfo class.
+Note: This does not affect use of PhpSerialization.Deserialize<T>()
+
+## PropertyInfo
+
+Enable or disable cache for property information of classes and structs that are handled during deserialization.
+This can speed up work signifcantly when dealing with a lot of instances of those types but might decrease performance when dealing with
+lots of structures or only deserializing a couple instances.
+
+In the same test as with the `Deactivated` option, I saw roughly 0.5x the run time.

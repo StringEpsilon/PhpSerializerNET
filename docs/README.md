@@ -3,7 +3,7 @@
 ## Usage
 
 * [Deserializing data](./Usage/Deserializing.md)
-* [Deserializing data](./Usage/Serializing.md)
+* [Serializing data](./Usage/Serializing.md)
 
 ## API
 

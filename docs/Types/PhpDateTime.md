@@ -1,12 +1,12 @@
-[back to overview](../Index.md)
+[back to overview](../README.md)
 
 ---
 
 # Class PhpDateTime
 
-POCO for the PHP `DateTime` class. 
+POCO for the PHP `DateTime` class.
 
-PHP documentation is available here: https://www.php.net/manual/en/class.datetime.php 
+PHP documentation is available here: https://www.php.net/manual/en/class.datetime.php
 
 ## Constructor
 

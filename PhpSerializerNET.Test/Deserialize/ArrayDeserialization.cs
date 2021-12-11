@@ -121,11 +121,8 @@ namespace PhpSerializerNET.Test.Deserialize {
 		[TestMethod]
 		public void ExplicitToList() {
 			var result = PhpSerialization.Deserialize<List<string>>("a:3:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}");
-
-			Assert.AreEqual(3, result.Count);
-			Assert.AreEqual("Hello", result[0]);
-			Assert.AreEqual("World", result[1]);
-			Assert.AreEqual("12345", result[2]);
+			
+			CollectionAssert.AreEqual(new List<string>() { "Hello", "world", "12345" }, result);
 		}
 
 		[TestMethod]
@@ -136,5 +133,13 @@ namespace PhpSerializerNET.Test.Deserialize {
 
 			Assert.AreEqual("Can not deserialize array at position 0 to list: It has a non-integer key 'a' at element 2 (position 21).", ex.Message);
 		}
+		
+        [TestMethod]
+        public void ExplicitToEmptyList()
+        {
+            var result = PhpSerialization.Deserialize<List<char>>("a:0:{}");
+            CollectionAssert.AreEqual(new List<char>(), result);
+            Assert.AreEqual(new List<char>(), result);
+        }
 	}
 }

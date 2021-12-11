@@ -5,6 +5,7 @@
 **/
 
 using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PhpSerializerNET.Test.DataTypes;
 
@@ -91,9 +92,26 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
             Assert.AreEqual(default, result);
         }
 
-        #region Nullables
+        [TestMethod]
+        public void Enabled_StringToCustomObject()
+        {
+            var deserializedObject = PhpSerialization.Deserialize<SimpleClass>(
+                "a:5:{s:7:\"AString\";s:0:\"\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}"
+            );
+
+            Assert.AreEqual(default, deserializedObject.AString);
+        }
 
         [TestMethod]
+        public void Enabled_StringArrayToCharCollection()
+        {
+            var result = PhpSerialization.Deserialize<List<char>>("a:2:{i:0;s:0:\"\";i:1;s:0:\"\";}");
+            CollectionAssert.AreEqual(new List<char> { default, default }, result);
+        }
+        
+        #region Nullables
+
+            [TestMethod]
         public void Enabled_EmptyStringToIntNullable()
         {
             var result = PhpSerialization.Deserialize<int?>(EmptyPhpStringInput);
@@ -158,9 +176,12 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 
         #endregion
 
-
-        // TODO collections of various objects
-
+        // TODO See:
+        //      Collections
+        //      Dictionary
+        //      Both with custom class
+        //      Both with normal + nullable simple types
+        //      
 
         #endregion
 

@@ -139,7 +139,6 @@ namespace PhpSerializerNET.Test.Deserialize {
         {
             var result = PhpSerialization.Deserialize<List<char>>("a:0:{}");
             CollectionAssert.AreEqual(new List<char>(), result);
-            Assert.AreEqual(new List<char>(), result);
         }
 	}
 }

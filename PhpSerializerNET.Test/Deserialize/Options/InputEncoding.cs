@@ -20,9 +20,15 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 
 		[TestMethod]
 		public void WrongEncodingFails() {
-			Assert.ThrowsException<DeserializationException>(
+
+			var ex = Assert.ThrowsException<DeserializationException>(
 				() => PhpSerialization.Deserialize(Latin1TestString)
 			);
+
+			// The deserialization failed, because the length of "äöü" in bytes is 6 in UTF8 but 3 in Latin1, 
+			// which results in a misalignment and failure to find the end of the string.
+			// I have cross-checked that the PHP implementation (at least in versions I tested) fails for the same reason.
+			Assert.AreEqual("Unexpected token at index 8. Expected '\"' but found '¶' instead.", ex.Message);
 		}
 
 		[TestMethod]
@@ -30,7 +36,7 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 			var result = PhpSerialization.Deserialize(
 				Latin1TestString, 
 				new PhpDeserializationOptions(){
-					InputEncoding =Encoding.Latin1
+					InputEncoding = Encoding.Latin1
 				}
 			);
 

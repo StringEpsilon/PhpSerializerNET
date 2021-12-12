@@ -11,6 +11,7 @@ namespace PhpSerializerNET {
 	public enum TypeCacheFlag {
 		/// <summary>
 		/// Do not cache anything.
+		/// Beware: This can cause severe performance degradation when dealing with lots of the same Objects in the data to deserialize.
 		/// </summary>
 		Deactivated = 0,
 		/// <summary>

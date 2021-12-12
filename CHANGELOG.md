@@ -1,10 +1,24 @@
+# 0.10.0 (future):
+
+## Breaking:
+- Trying to set the classname on PhpDateTime will throw an exception now instead of doing nothing.
+
+
+## Regular changes:
+- Added `PhpSerializerNET.ClearTypeCache()`
+- Added `TypeCache` deserialization option
+	- Allows to *disable* the classname type cache. (enabled by default)
+	- Allows to *enable* a property information cache. (disabled by default)
+- Added `PhpSerializerNET.ClearPropertyInfoCache()`
+
+
 # 0.9.0:
 
 ## Breaking:
 - Targeting net6.0
 
 ## Semi breaking:
-- Type lookup: Now negative lookup results are also cached. 
+- Type lookup: Now negative lookup results are also cached.
 	- This may also lead to undeseriable results when adding classes and structs at runtime.
 	- May increase the memory footprint over time faster than before.
 	- On the upside: It is significantly faster when dealing with objects where automapping doesn't work without having to disable the feature entirely.
@@ -58,7 +72,7 @@
 	- This replaces `IDictionary<string, object>` as the default deserialization target of objects.
 - Added public class PhpDynamicObject (implementing IPhpObject)
 - Added PhpDateTime to avoid conflicts with System.DateTime.
- 
+
 With IPhpObjects, you can get the class name specified in the serialized data via `GetClassName()`.
 
 **Known issues:**

@@ -7,42 +7,6 @@
 using System.Text;
 
 namespace PhpSerializerNET {
-	/// <summary>
-	/// Available behaviors for dealing with associative arrays and their conversion to Lists.
-	/// </summary>
-	public enum ListOptions {
-		/// <summary>
-		/// Convert associative array to list when all keys are consecutive integers
-		/// </summary>
-		Default,
-
-		/// <summary>
-		/// Convert associative array to list when all keys are integers, consecutiveh or not.
-		/// </summary>
-		OnAllIntegerKeys,
-
-		/// <summary>
-		/// Always use dictionaries.
-		/// </summary>
-		Never
-	}
-
-	public enum StdClassOption {
-		/// <summary>
-		/// Deserialize all 'stdClass' objects into <see cref="PhpObjectDictionary"/> (extending <see cref="System.Collections.Generic.Dictionary{string,object}"/>)
-		/// </summary>
-		Dictionary,
-
-		/// <summary>
-		/// Deserialize all 'stdClass' objects dynamic objects (<see cref="PhpDynamicObject"/>)
-		/// </summary>
-		Dynamic,
-
-		/// <summary>
-		/// Throw an exception and abort deserialization when encountering stdClass objects.
-		/// </summary>
-		Throw,
-	}
 
 	/// <summary>
 	/// Options for deserializing PHP data.
@@ -97,6 +61,8 @@ namespace PhpSerializerNET {
 		/// Note: This does not affect use of PhpSerialization.Deserialize<T>()
 		/// </summary>
 		public bool EnableTypeLookup { get; set; } = true;
+
+		public TypeCacheFlag TypeCache { get; set; } = TypeCacheFlag.ClassNames;
 
 		public static PhpDeserializationOptions DefaultOptions = new();
 	}

@@ -21,6 +21,8 @@ namespace PhpSerializerNET {
 
 		private static Dictionary<Type, Dictionary<string, PropertyInfo>> PropertyInfoCache = new();
 
+		private static Dictionary<Type, Dictionary<string, FieldInfo>> FieldInfoCache { get; set; } = new();
+
 		public PhpDeserializer(string input, PhpDeserializationOptions options) {
 			this._options = options;
 			if (this._options == null) {
@@ -210,7 +212,16 @@ namespace PhpSerializerNET {
 
 		private object MakeStruct(Type targetType, PhpSerializeToken token) {
 			var result = Activator.CreateInstance(targetType);
-			var fields = targetType.GetFields().GetAllFields(_options);
+			Dictionary<string, FieldInfo> fields = null;
+
+			if (FieldInfoCache.ContainsKey(targetType)) {
+				fields = FieldInfoCache[targetType];
+			} else {
+				fields = targetType.GetFields().GetAllFields(_options);
+				if (_options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
+					FieldInfoCache.Add(targetType, fields);
+				}
+			}
 
 			for (int i = 0; i < token.Children.Count; i += 2) {
 				var fieldName = _options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();

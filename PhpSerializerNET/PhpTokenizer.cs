@@ -4,16 +4,22 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System.Linq;
 using System.Text;
 
 namespace PhpSerializerNET {
 	public class PhpTokenizer {
 
 		private int _position;
-		private Encoding _inputEncoding;
+		private readonly Encoding _inputEncoding;
 
-		private byte[] _input;
-		private int _lastIndex;
+		private readonly byte[] _input;
+		private readonly int _lastIndex;
+
+#if DEBUG
+        private char DebugCurrentCharacter => (char)_input[_position];
+        private char[] DebugInput => _inputEncoding.GetChars(_input);
+#endif
 
 		public PhpTokenizer(string input, Encoding inputEncoding) {
 			_inputEncoding = inputEncoding;
@@ -113,12 +119,9 @@ namespace PhpSerializerNET {
 
 
 		private int GetLength(PhpSerializerType dataType) {
-			bool valid = true;
 			int length = 0;
-			int start = _position;
-			int end = _position;
 
-			for (; _input[_position] != ':' && _position < _lastIndex && valid; _position++) {
+			for (; _input[_position] != ':' && _position < _lastIndex; _position++) {
 				length = (char)_input[_position] switch {
 					>= '0' and <= '9' => length * 10 + (_input[_position]-48),
 					_ => throw new DeserializationException(

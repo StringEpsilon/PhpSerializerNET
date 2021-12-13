@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PhpSerializerNET.Test.DataTypes;
 
@@ -175,13 +176,58 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
         }
 
         #endregion
+        
+        [TestMethod]
+        public void Enabled_StringArrayToIntList()
+        {
+            var result = PhpSerialization.Deserialize<List<int>>("a:1:{i:0;s:0:\"\";}");
+            CollectionAssert.AreEqual(new List<int> { default }, result);
+        }
 
-        // TODO See:
-        //      Collections
-        //      Dictionary
-        //      Both with custom class
-        //      Both with normal + nullable simple types
-        //      
+        [TestMethod]
+        public void Enabled_StringArrayToNullableIntList()
+        {
+            var result = PhpSerialization.Deserialize<List<int?>>("a:1:{i:0;s:0:\"\";}");
+            CollectionAssert.AreEqual(new List<int?> { default }, result);
+        }
+
+        [TestMethod]
+        public void Enabled_ClassArrayToClassDictionary()
+        {
+            var result = PhpSerialization.Deserialize<Dictionary<string, SimpleClass>>(
+                "a:1:{s:4:\"AKey\";a:5:{s:7:\"AString\";s:0:\"\";s:9:\"AnInteger\";i:0;s:7:\"ADouble\";d:0;s:4:\"True\";b:0;s:5:\"False\";b:0;}}"
+            );
+
+            var expected = new Dictionary<string, SimpleClass>
+            {
+                {
+                    "AKey", 
+                    new SimpleClass
+                    {
+                        ADouble = default,
+                        AString = default,
+                        AnInteger = default,
+                        False = default,
+                        True = default
+                    }
+
+                }
+            };
+
+            // No easy way to assert dicts in MsTest :/
+
+            Assert.AreEqual(expected.Count, result.Count);
+
+            foreach (var ((expectedKey, expectedValue), (actualKey, actualValue)) in expected.Zip(result))
+            {
+                Assert.AreEqual(expectedKey, actualKey);
+                Assert.AreEqual(expectedValue.ADouble, actualValue.ADouble);
+                Assert.AreEqual(expectedValue.AString, actualValue.AString);
+                Assert.AreEqual(expectedValue.AnInteger, actualValue.AnInteger);
+                Assert.AreEqual(expectedValue.False, actualValue.False);
+                Assert.AreEqual(expectedValue.True, actualValue.True);
+            }
+        }
 
         #endregion
 

@@ -7,6 +7,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PhpSerializerNET.Test.DataTypes;
 
@@ -47,7 +48,7 @@ namespace PhpSerializerNET.Test.Deserialize {
 		}
 
 		[TestMethod]
-		public void ExplicitToDictionary() {
+		public void ExplicitToDictionaryOfObject() {
 			var result = PhpSerialization.Deserialize<Dictionary<string, object>>(
 				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}"
 			);
@@ -61,6 +62,45 @@ namespace PhpSerializerNET.Test.Deserialize {
 			Assert.AreEqual(true, result["True"]);
 			Assert.AreEqual(false, result["False"]);
 		}
+
+
+        [TestMethod]
+        public void ExplicitToDictionaryOfComplexType()
+        {
+            var result = PhpSerialization.Deserialize<Dictionary<string, SimpleClass>>(
+				"a:1:{s:4:\"AKey\";a:5:{s:7:\"AString\";s:0:\"\";s:9:\"AnInteger\";i:0;s:7:\"ADouble\";d:0;s:4:\"True\";b:0;s:5:\"False\";b:0;}}"
+			);
+
+            var expected = new Dictionary<string, SimpleClass>
+            {
+                {
+                    "AKey",
+                    new SimpleClass
+                    {
+                        ADouble = 1.2345d,
+                        AString = "this is a string value",
+                        AnInteger = 10,
+                        False = false,
+                        True = true
+                    }
+
+                }
+            };
+
+            // No easy way to assert dicts in MsTest :/
+
+            Assert.AreEqual(expected.Count, result.Count);
+
+            foreach (var ((expectedKey, expectedValue), (actualKey, actualValue)) in expected.Zip(result))
+            {
+                Assert.AreEqual(expectedKey, actualKey);
+                Assert.AreEqual(expectedValue.ADouble, actualValue.ADouble);
+                Assert.AreEqual(expectedValue.AString, actualValue.AString);
+                Assert.AreEqual(expectedValue.AnInteger, actualValue.AnInteger);
+                Assert.AreEqual(expectedValue.False, actualValue.False);
+                Assert.AreEqual(expectedValue.True, actualValue.True);
+            }
+        }
 
 		[TestMethod]
 		public void ExplicitToHashtable() {
@@ -122,7 +162,7 @@ namespace PhpSerializerNET.Test.Deserialize {
 		public void ExplicitToList() {
 			var result = PhpSerialization.Deserialize<List<string>>("a:3:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}");
 			
-			CollectionAssert.AreEqual(new List<string>() { "Hello", "world", "12345" }, result);
+			CollectionAssert.AreEqual(new List<string>() { "Hello", "World", "12345" }, result);
 		}
 
 		[TestMethod]

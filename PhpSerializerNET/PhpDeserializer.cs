@@ -19,6 +19,10 @@ namespace PhpSerializerNET {
 			{ "DateTime", typeof(PhpDateTime) }
 		};
 
+		private static Dictionary<Type, Dictionary<string, PropertyInfo>> PropertyInfoCache = new();
+
+		private static Dictionary<Type, Dictionary<string, FieldInfo>> FieldInfoCache { get; set; } = new();
+
 		public PhpDeserializer(string input, PhpDeserializationOptions options) {
 			_options = options;
 			if (_options == null) {
@@ -34,6 +38,23 @@ namespace PhpSerializerNET {
 		public T Deserialize<T>() {
 			Type targetType = typeof(T);
 			return (T)DeserializeToken(targetType, _token);
+		}
+
+		/// <summary>
+		/// Reset the type lookup cache.
+		/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
+		/// </summary>
+		public static void ClearTypeCache() {
+			TypeLookupCache.Clear();
+			TypeLookupCache.Add("DateTime", typeof(PhpDateTime));
+		}
+
+		/// <summary>
+		/// Reset the property info cache.
+		/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
+		/// </summary>
+		public static void ClearPropertyInfoCache() {
+			PropertyInfoCache.Clear();
 		}
 
 		private object DeserializeToken(PhpSerializeToken token) {
@@ -76,7 +97,9 @@ namespace PhpSerializerNET {
 							break;
 						}
 					}
-					TypeLookupCache.Add(typeName, targetType);
+					if (_options.TypeCache.HasFlag(TypeCacheFlag.ClassNames)) {
+						TypeLookupCache.Add(typeName, targetType);
+					}
 				}
 			}
 			if (targetType != null && typeName != "stdClass") {
@@ -273,7 +296,16 @@ namespace PhpSerializerNET {
 
         private object MakeStruct(Type targetType, PhpSerializeToken token) {
 			var result = Activator.CreateInstance(targetType);
-			var fields = targetType.GetFields().GetAllFields(_options);
+			Dictionary<string, FieldInfo> fields = null;
+
+			if (FieldInfoCache.ContainsKey(targetType)) {
+				fields = FieldInfoCache[targetType];
+			} else {
+				fields = targetType.GetFields().GetAllFields(_options);
+				if (_options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
+					FieldInfoCache.Add(targetType, fields);
+				}
+			}
 
 			for (int i = 0; i < token.Children.Count; i += 2) {
 				var fieldName = _options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();
@@ -303,7 +335,16 @@ namespace PhpSerializerNET {
 
 		private object MakeObject(Type targetType, PhpSerializeToken token) {
 			var result = Activator.CreateInstance(targetType);
-			var properties = targetType.GetProperties().GetAllProperties(_options);
+			Dictionary<string, PropertyInfo> properties = null;
+
+			if (PropertyInfoCache.ContainsKey(targetType)) {
+				properties = PropertyInfoCache[targetType];
+			} else {
+				properties = targetType.GetProperties().GetAllProperties(_options);
+				if (_options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
+					PropertyInfoCache.Add(targetType, properties);
+				}
+			}
 
 			for (int i = 0; i < token.Children.Count; i += 2) {
 				var propertyName = _options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();

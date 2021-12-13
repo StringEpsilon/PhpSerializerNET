@@ -68,7 +68,7 @@ namespace PhpSerializerNET.Test.Deserialize {
         public void ExplicitToDictionaryOfComplexType()
         {
             var result = PhpSerialization.Deserialize<Dictionary<string, SimpleClass>>(
-				"a:1:{s:4:\"AKey\";a:5:{s:7:\"AString\";s:0:\"\";s:9:\"AnInteger\";i:0;s:7:\"ADouble\";d:0;s:4:\"True\";b:0;s:5:\"False\";b:0;}}"
+				"a:1:{s:4:\"AKey\";a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}}"
 			);
 
             var expected = new Dictionary<string, SimpleClass>

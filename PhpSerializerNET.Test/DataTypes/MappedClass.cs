@@ -16,8 +16,8 @@ namespace PhpSerializerNET.Test.DataTypes {
 		public string German { get; set; }
 
 		[PhpIgnore]
-		public string it { get; set; }
+		public string It { get; set; }
 
-		public Guid guid { get; set; }
+		public Guid Guid { get; set; }
 	}
 }

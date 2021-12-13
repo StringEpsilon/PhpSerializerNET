@@ -1,5 +1,9 @@
-{
+{    
+	"RoslynExtensionsOptions": {
+		"enableAnalyzersSupport": true
+	},
 	"FormattingOptions": {
+		"EnableEditorConfigSupport": true,
 		"NewLinesForBracesInLambdaExpressionBody": false,
 		"NewLinesForBracesInAnonymousMethods": false,
 		"NewLinesForBracesInAnonymousTypes": false,

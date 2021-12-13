@@ -35,16 +35,13 @@ namespace PhpSerializerNET {
 		/// The token value as a <see cref="double"/>.
 		/// </returns>
 		internal double ToDouble() {
-			switch (this.Value) {
-				case "INF":
-					return double.PositiveInfinity;
-				case "-INF":
-					return double.NegativeInfinity;
-				case "NAN":
-					return double.NaN;
-				default:
-					return double.Parse(this.Value, CultureInfo.InvariantCulture);
+			return this.Value switch {
+				"INF" => double.PositiveInfinity,
+				"-INF" => double.NegativeInfinity,
+				"NAN" => double.NaN,
+				_ => double.Parse(this.Value, CultureInfo.InvariantCulture),
 			};
+			;
 		}
 
 		/// <summary>
@@ -54,7 +51,7 @@ namespace PhpSerializerNET {
 		/// The token value as a <see cref="bool"/>
 		/// </returns>
 		internal bool ToBool() {
-			return this.Value == "1" ? true : false;
+			return this.Value == "1";
 		}
 	}
 }

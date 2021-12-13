@@ -33,16 +33,16 @@ namespace PhpSerializerNET {
 				var isIgnored = false;
 				var attributes = PhpPropertyAttribute.GetCustomAttributes(property, false);
 				PhpPropertyAttribute phpPropertyAttribute = null;
-				foreach(var attribute in attributes){
-					if (attribute is PhpIgnoreAttribute ){
+				foreach (var attribute in attributes) {
+					if (attribute is PhpIgnoreAttribute) {
 						isIgnored = true;
 						break;
 					}
-					if (attribute is PhpPropertyAttribute ){ 
-						phpPropertyAttribute = (PhpPropertyAttribute)attribute;
+					if (attribute is PhpPropertyAttribute foundAttribute) {
+						phpPropertyAttribute = foundAttribute;
 					}
 				}
-				if (phpPropertyAttribute != null){
+				if (phpPropertyAttribute != null) {
 					var attributeName = options.CaseSensitiveProperties
 						? phpPropertyAttribute.Name
 						: phpPropertyAttribute.Name.ToLower();
@@ -62,16 +62,16 @@ namespace PhpSerializerNET {
 				var isIgnored = false;
 				var attributes = PhpPropertyAttribute.GetCustomAttributes(field, false);
 				PhpPropertyAttribute phpPropertyAttribute = null;
-				foreach(var attribute in attributes){
-					if (attribute is PhpIgnoreAttribute ){
+				foreach (var attribute in attributes) {
+					if (attribute is PhpIgnoreAttribute) {
 						isIgnored = true;
 						break;
 					}
-					if (attribute is PhpPropertyAttribute ){ 
-						phpPropertyAttribute = (PhpPropertyAttribute)attribute;
+					if (attribute is PhpPropertyAttribute foundAttribute) {
+						phpPropertyAttribute = foundAttribute;
 					}
 				}
-				if (phpPropertyAttribute != null){
+				if (phpPropertyAttribute != null) {
 					var attributeName = options.CaseSensitiveProperties
 						? phpPropertyAttribute.Name
 						: phpPropertyAttribute.Name.ToLower();

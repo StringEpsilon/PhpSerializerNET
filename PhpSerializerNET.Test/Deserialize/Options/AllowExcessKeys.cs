@@ -10,8 +10,8 @@ using PhpSerializerNET.Test.DataTypes;
 namespace PhpSerializerNET.Test.Deserialize.Options {
 	[TestClass]
 	public class AllowExcessKeysTest {
-		public static string StructTestInput = "a:3:{s:3:\"foo\";s:3:\"Foo\";s:3:\"bar\";s:3:\"Bar\";s:6:\"foobar\";s:6:\"FooBar\";}";
-		public static string ObjectTestInput = "a:2:{s:7:\"AString\";s:3:\"foo\";s:7:\"BString\";s:3:\"bar\";}";
+		const string StructTestInput = "a:3:{s:3:\"foo\";s:3:\"Foo\";s:3:\"bar\";s:3:\"Bar\";s:6:\"foobar\";s:6:\"FooBar\";}";
+		const string ObjectTestInput = "a:2:{s:7:\"AString\";s:3:\"foo\";s:7:\"BString\";s:3:\"bar\";}";
 
 		[TestMethod]
 		public void Struct_DeserializesWithOptionEnabled() {

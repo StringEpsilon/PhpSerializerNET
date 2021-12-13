@@ -27,11 +27,11 @@ namespace PhpSerializerNET.Test {
 		[TestMethod]
 		public void AssignsGuids() {
 			var result = PhpSerialization.Deserialize<MappedClass>(
-				"a:1:{s:4:\"guid\";s:36:\"82e2ebf0-43e6-4c10-82cf-57d60383a6be\";}"
+				"a:1:{s:4:\"Guid\";s:36:\"82e2ebf0-43e6-4c10-82cf-57d60383a6be\";}"
 			);
 			Assert.AreEqual(
 				new Guid("82e2ebf0-43e6-4c10-82cf-57d60383a6be"),
-				result.guid
+				result.Guid
 			);
 		}
 

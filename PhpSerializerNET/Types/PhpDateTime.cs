@@ -23,9 +23,8 @@ namespace PhpSerializerNET {
 			return "DateTime";
 		}
 
-		public void SetClassName(string className)
-        {
-            throw new InvalidOperationException("Cannot set name on object of type " + nameof(PhpDateTime) + " name is of constant " + GetClassName());
-        }
+		public void SetClassName(string className) {
+			throw new InvalidOperationException("Cannot set name on object of type " + nameof(PhpDateTime) + " name is of constant " + this.GetClassName());
+		}
 	}
 }

@@ -1,0 +1,15 @@
+[*.cs]
+	indent_style = tab
+	tab_width = 4
+	trim_trailing_whitespace = true
+	dotnet_style_qualification_for_field = true
+	dotnet_style_qualification_for_property = true
+	dotnet_style_qualification_for_method = true
+	dotnet_style_qualification_for_event = true
+	csharp_style_var_when_type_is_apparent = true
+	dotnet_style_require_accessibility_modifiers = for_non_interface_members
+	csharp_prefer_braces = true:error
+	csharp_new_line_before_else = false
+	csharp_new_line_before_open_brace = none
+	csharp_new_line_before_catch = false
+	csharp_new_line_before_finally = false

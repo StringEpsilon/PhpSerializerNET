@@ -83,7 +83,7 @@ namespace PhpSerializerNET.Test {
 		[TestMethod]
 		public void DeserializeNullToStruct() {
 			Assert.AreEqual(
-				default(AStruct),
+				default,
 				PhpSerialization.Deserialize<AStruct>(
 					"N;"
 				)

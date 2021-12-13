@@ -16,11 +16,11 @@ namespace PhpSerializerNET.Test {
 			var testObject = new MappedClass() {
 				English = "Hello world!",
 				German = "Hallo Welt!",
-				it = "Ciao mondo!"
+				It = "Ciao mondo!"
 			};
 
 			Assert.AreEqual(
-				"a:3:{s:2:\"en\";s:12:\"Hello world!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:4:\"guid\";a:1:{s:5:\"Empty\";N;}}",
+				"a:3:{s:2:\"en\";s:12:\"Hello world!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:4:\"Guid\";a:1:{s:5:\"Empty\";N;}}",
 				PhpSerialization.Serialize(testObject)
 			);
 		}

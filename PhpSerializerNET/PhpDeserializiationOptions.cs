@@ -64,6 +64,6 @@ namespace PhpSerializerNET {
 
 		public TypeCacheFlag TypeCache { get; set; } = TypeCacheFlag.ClassNames;
 
-		public static PhpDeserializationOptions DefaultOptions = new();
+		public static PhpDeserializationOptions DefaultOptions {get;} = new();
 	}
 }

@@ -19,7 +19,7 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 
 		[TestMethod]
 		public void Option_Throw() {
-			var ex = Assert.ThrowsException<DeserializationException>( 
+			var ex = Assert.ThrowsException<DeserializationException>(
 				() => PhpSerialization.Deserialize(
 					"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
 					new PhpDeserializationOptions() { StdClass = StdClassOption.Throw }
@@ -57,7 +57,6 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 
 		[TestMethod]
 		public void Overridden_By_Class() {
-			var anonymous = new { foo = "foo" };
 			var result = PhpSerialization.Deserialize<NamedClass>(
 				"O:8:\"stdClass\":2:{s:3:\"Foo\";d:3.14;s:3:\"Bar\";d:2.718;}",
 				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }

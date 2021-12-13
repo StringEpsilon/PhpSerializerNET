@@ -29,7 +29,7 @@ namespace PhpSerializerNET {
 		/// <see cref="PhpDynamicObject"/> for objects (see options).
 		/// </returns>
 		public static object Deserialize(string input, PhpDeserializationOptions options = null) {
-			if (string.IsNullOrEmpty(input)){
+			if (string.IsNullOrEmpty(input)) {
 				throw new System.ArgumentException("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
 			}
 			return new PhpDeserializer(input, options).Deserialize();
@@ -55,7 +55,7 @@ namespace PhpSerializerNET {
 			string input,
 			PhpDeserializationOptions options = null
 		) {
-			if (string.IsNullOrEmpty(input)){
+			if (string.IsNullOrEmpty(input)) {
 				throw new System.ArgumentException("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
 			}
 			return new PhpDeserializer(input, options).Deserialize<T>();

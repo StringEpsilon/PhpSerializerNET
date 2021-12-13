@@ -31,7 +31,7 @@ namespace PhpSerializerNET.Test.Deserialize {
 				PhpSerialization.Deserialize<SimpleClass>("a:1:{s:9:\"AnInteger\";s:3:\"1b1\";}")
 			);
 			Assert.AreEqual(
-				"Exception encountered while trying to assign '1b1' to SimpleClass.AnInteger. See inner exception for details.", 
+				"Exception encountered while trying to assign '1b1' to SimpleClass.AnInteger. See inner exception for details.",
 				ex.Message
 			);
 		}
@@ -82,14 +82,14 @@ namespace PhpSerializerNET.Test.Deserialize {
 		[TestMethod]
 		public void ExplicitToClass_MappingInfo() {
 			var deserializedObject = PhpSerialization.Deserialize<MappedClass>(
-				"a:3:{s:2:\"en\";s:12:\"Hello World!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:2:\"it\";s:11:\"Ciao mondo!\";}"
+				"a:3:{s:2:\"en\";s:12:\"Hello World!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:2:\"It\";s:11:\"Ciao mondo!\";}"
 			);
 
 			// en and de mapped to differently named property:
 			Assert.AreEqual("Hello World!", deserializedObject.English);
 			Assert.AreEqual("Hallo Welt!", deserializedObject.German);
 			// "it" correctly ignored:
-			Assert.AreEqual(null, deserializedObject.it);
+			Assert.AreEqual(null, deserializedObject.It);
 		}
 
 		[TestMethod]

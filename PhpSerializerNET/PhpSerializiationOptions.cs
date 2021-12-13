@@ -12,13 +12,13 @@ namespace PhpSerializerNET {
 	/// </summary>
 	public class PhpSerializiationOptions {
 		/// <summary>
-		/// Whether or not to throw on encountering a circular reference or to terminate it with null. 
+		/// Whether or not to throw on encountering a circular reference or to terminate it with null.
 		/// Default false.
 		/// </summary>
 		public bool ThrowOnCircularReferences { get; set; } = false;
 
 		/// <summary>
-		/// Whether to serialize enums as numeric values (integers) or using their string representation 
+		/// Whether to serialize enums as numeric values (integers) or using their string representation
 		/// (via <see cref="Enum.ToString()"/>)
 		/// </summary>
 		public bool NumericEnums { get; set; } = true;

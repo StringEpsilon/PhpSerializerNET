@@ -27,6 +27,16 @@ namespace PhpSerializerNET.Test.Deserialize {
 		}
 
 		[TestMethod]
+		public void DeserializeToNullable() {
+			var result = PhpSerialization.Deserialize<int?>("i:1;");
+			Assert.IsInstanceOfType(result, typeof(int?));
+			Assert.AreEqual(
+				1,
+				result.Value
+			);
+		}
+
+		[TestMethod]
 		public void DeserializeIntMaxValue() {
 			Assert.AreEqual(
 				int.MaxValue,

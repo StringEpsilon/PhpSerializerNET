@@ -71,5 +71,13 @@ namespace PhpSerializerNET.Test.Deserialize {
 				PhpSerialization.Deserialize("d:NAN;")
 			);
 		}
+
+		[TestMethod]
+		public void DeserializesToNullable() {
+			Assert.AreEqual(
+				3.1415,
+				PhpSerialization.Deserialize<double?>("d:3.1415;")
+			);
+		}
 	}
 }

@@ -36,8 +36,6 @@ namespace PhpSerializerNET.Test.Deserialize {
 			);
 		}
 
-
-
 		[TestMethod]
 		public void DeserializeMinValue() {
 			Assert.AreEqual(
@@ -51,6 +49,17 @@ namespace PhpSerializerNET.Test.Deserialize {
 			var result = PhpSerialization.Deserialize<long>("N;");
 
 			Assert.AreEqual(0, result);
+		}
+
+		[TestMethod]
+		public void DeserializesToNullable() {
+			var result = PhpSerialization.Deserialize<long?>("N;");
+
+			Assert.AreEqual(null, result);
+
+			result = PhpSerialization.Deserialize<long?>("i:1;");
+
+			Assert.AreEqual(1, result);
 		}
 	}
 }

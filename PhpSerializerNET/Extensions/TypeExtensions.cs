@@ -39,7 +39,8 @@ namespace PhpSerializerNET {
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
-		internal static bool IsNullableReferenceType(this Type type) =>
-			Nullable.GetUnderlyingType(type) != null;
+		internal static bool IsNullableReferenceType(this Type type) {
+			return Nullable.GetUnderlyingType(type) != null;
+		}
 	}
 }

@@ -2,15 +2,20 @@
 
 ## Breaking:
 - Trying to set the classname on PhpDateTime will throw an exception now instead of doing nothing.
+- Behavior of the option `EmptyStringToDefault` changed:
+	- And empty string will now result in `default(string)` (which is null) instead of an empty string.
+	- For some target types, the return value might have changed due to better checks for the proper default value.
 
+**Beware**: EmptyStringToDefault is enabled by default.
 
 ## Regular changes:
+- Added support for `Nullable<>`
 - Added `PhpSerializerNET.ClearTypeCache()`
 - Added `TypeCache` deserialization option
 	- Allows to *disable* the classname type cache. (enabled by default)
 	- Allows to *enable* a property information cache. (disabled by default)
 - Added `PhpSerializerNET.ClearPropertyInfoCache()`
-
+- When converting to an enum member that is not known a better exception is thrown instead of a nullref (because the fieldinfo cannot be found)
 
 # 0.9.0:
 

@@ -27,6 +27,13 @@ namespace PhpSerializerNET.Test.Deserialize {
 		}
 
 		[TestMethod]
+		public void DeserializesToNullableStruct() {
+			var result = PhpSerialization.Deserialize<AStruct?>("N;");
+
+			Assert.IsNull(result);
+		}
+
+		[TestMethod]
 		public void ExplicitToPrimitiveDefaultValues() {
 			Assert.AreEqual(
 				0,

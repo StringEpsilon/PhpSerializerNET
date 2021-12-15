@@ -36,5 +36,14 @@ namespace PhpSerializerNET.Test.Deserialize {
 				PhpSerialization.Deserialize<LongEnum>("s:1:\"A\";")
 			);
 		}
+
+		[TestMethod]
+		public void DeserializeToNullable() {
+			LongEnum? result = PhpSerialization.Deserialize<LongEnum?>("i:1;");
+			Assert.AreEqual(
+				LongEnum.A,
+				result
+			);
+		}
 	}
 }

@@ -133,13 +133,21 @@ namespace PhpSerializerNET {
 			}
 
 			switch (token.Type) {
-				case PhpSerializerType.Boolean:
-					if (targetType.IsIConvertible()) {
-						return ((IConvertible)token.ToBool()).ToType(targetType, CultureInfo.InvariantCulture);
-					} else {
-						throw new DeserializationException(
-							$"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}."
-						);
+				case PhpSerializerType.Boolean: {
+						Type underlyingType = targetType;
+						if (targetType.IsNullableReferenceType()) {
+							underlyingType = targetType.GenericTypeArguments[0];
+						}
+						if (underlyingType == typeof(bool)) {
+							return token.ToBool();
+						}
+						if (underlyingType.IsIConvertible()) {
+							return ((IConvertible)token.ToBool()).ToType(underlyingType, CultureInfo.InvariantCulture);
+						} else {
+							throw new DeserializationException(
+								$"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}."
+							);
+						}
 					}
 				case PhpSerializerType.Integer:
 				case PhpSerializerType.Floating:
@@ -149,9 +157,9 @@ namespace PhpSerializerNET {
 							return null;
 						}
 
-						var underlyingType = Nullable.GetUnderlyingType(targetType);
+						var underlyingType = targetType.GenericTypeArguments[0];
 						if (underlyingType == null) {
-							 throw new NullReferenceException("Could not get underlying type for nullable reference type " + targetType);
+							throw new NullReferenceException("Could not get underlying type for nullable reference type " + targetType);
 						}
 						return DeserializeTokenFromSimpleType(underlyingType, token);
 					}
@@ -200,25 +208,24 @@ namespace PhpSerializerNET {
 				// Enums are converted by name if the token is a string and by underlying value if they are not
 
 				if (token.Type != PhpSerializerType.String) {
-					return ((IConvertible)token.Value).ToType(targetType.GetEnumUnderlyingType(), CultureInfo.InvariantCulture);
-				} else {
-					var foundFieldInfo = targetType
-						.GetFields()
-						.FirstOrDefault(y => y.Name == token.Value);
-
-					if (foundFieldInfo == null) {
-						if (_options.EmptyStringToDefault) {
-							return Activator.CreateInstance(targetType);
-						} else {
-							throw new DeserializationException(
-								$"Exception encountered while trying to assign '{token.Value}' to type '{targetType.Name}'. " +
-								$"The value could not be matched to an enum member.");
-						}
-					}
-
-					return foundFieldInfo
-						.GetRawConstantValue();
+					return Enum.Parse(targetType, token.Value);
 				}
+
+				var foundFieldInfo = targetType
+					.GetFields()
+					.FirstOrDefault(y => y.Name == token.Value);
+
+				if (foundFieldInfo == null) {
+					if (_options.EmptyStringToDefault) {
+						return Activator.CreateInstance(targetType);
+					} else {
+						throw new DeserializationException(
+							$"Exception encountered while trying to assign '{token.Value}' to type '{targetType.Name}'. " +
+							$"The value could not be matched to an enum member.");
+					}
+				}
+
+				return foundFieldInfo.GetRawConstantValue();
 			}
 
 			if (targetType.IsIConvertible()) {

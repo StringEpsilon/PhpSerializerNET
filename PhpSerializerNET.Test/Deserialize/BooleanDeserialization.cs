@@ -64,5 +64,13 @@ namespace PhpSerializerNET.Test.Deserialize {
 
 			Assert.AreEqual("True", result);
 		}
+
+		[TestMethod]
+		public void DeserializeToNullable() {
+			Assert.AreEqual(
+				false,
+				PhpSerialization.Deserialize<bool?>("b:0;")
+			);
+		}
 	}
 }

@@ -4,6 +4,7 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System.Collections.Generic;
 using System.Dynamic;
 
 namespace PhpSerializerNET {
@@ -16,6 +17,14 @@ namespace PhpSerializerNET {
 		public string GetClassName() => this._dictionary.GetClassName();
 
 		internal void TryAdd(string key, object value) => this._dictionary.TryAdd(key, value);
+
+		internal object GetMember(string name) {
+			return this._dictionary[name];
+		}
+
+		public override IEnumerable<string> GetDynamicMemberNames() {
+			return this._dictionary.Keys;
+		}
 
 		public override bool TryGetMember(GetMemberBinder binder, out object result) {
 			return this._dictionary.TryGetValue(binder.Name, out result);

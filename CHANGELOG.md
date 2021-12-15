@@ -9,6 +9,8 @@
 **Beware**: EmptyStringToDefault is enabled by default.
 
 ## Regular changes:
+
+**Deserialization:**
 - Added support for `Nullable<>`
 - Added `PhpSerializerNET.ClearTypeCache()`
 - Added `TypeCache` deserialization option
@@ -16,6 +18,9 @@
 	- Allows to *enable* a property information cache. (disabled by default)
 - Added `PhpSerializerNET.ClearPropertyInfoCache()`
 - When converting to an enum member that is not known a better exception is thrown instead of a nullref (because the fieldinfo cannot be found)
+
+**Serialization:**
+- Added support for serializing `PhpDynamicObject` and `ExpandoObject`. 
 
 # 0.9.0:
 

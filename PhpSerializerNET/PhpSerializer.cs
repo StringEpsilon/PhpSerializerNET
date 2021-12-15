@@ -9,6 +9,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Globalization;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
@@ -77,6 +79,48 @@ namespace PhpSerializerNET {
 
 			StringBuilder output = new StringBuilder();
 			switch (input) {
+				case PhpDynamicObject dynamicObject: {
+						var inputType = input.GetType();
+						var className = dynamicObject.GetClassName() ?? "stdClass";
+						IEnumerable<string> memberNames = dynamicObject.GetDynamicMemberNames();
+
+						output.Append("O:")
+							.Append(className.Length)
+							.Append(":\"")
+							.Append(className)
+							.Append("\":")
+							.Append(memberNames.Count())
+							.Append(":{");
+
+						foreach (string memberName in memberNames) {
+							output.Append(this.Serialize(memberName))
+								.Append(this.Serialize(dynamicObject.GetMember(memberName)));
+						}
+						output.Append('}');
+						return output.ToString();
+					}
+				case ExpandoObject expando: {
+						var dictionary = (IDictionary<string, object>)expando;
+						var inputType = input.GetType();
+						output.Append("O:")
+							.Append("stdClass".Length)
+							.Append(":\"")
+							.Append("stdClass")
+							.Append("\":")
+							.Append(dictionary.Keys.Count)
+							.Append(":{");
+
+						foreach (var keyValue in dictionary) {
+							output.Append(this.Serialize(keyValue.Key))
+								.Append(this.Serialize(keyValue.Value));
+						}
+						output.Append('}');
+						return output.ToString();
+					}
+				case IDynamicMetaObjectProvider:
+					throw new NotSupportedException(
+						"Serialization support for dynamic objects is limited to PhpSerializerNET.PhpDynamicObject and System.Dynamic.ExpandoObject in this version."
+					);
 				case IDictionary dictionary: {
 						if (input is IPhpObject phpObject) {
 							output.Append("O:");
@@ -115,8 +159,6 @@ namespace PhpSerializerNET {
 						output.Append('}');
 						return output.ToString();
 					}
-				case DynamicObject:
-					throw new System.NotSupportedException("Serialization of dynamic objects isn't supported yet.");
 				default: {
 						var inputType = input.GetType();
 
@@ -130,7 +172,7 @@ namespace PhpSerializerNET {
 							foreach (FieldInfo field in inputType.GetFields()) {
 								if (field.IsPublic) {
 									var attribute = Attribute.GetCustomAttribute(field, typeof(PhpIgnoreAttribute), false);
-									if ( attribute == null) {
+									if (attribute == null) {
 										members.Add(field);
 									}
 								}

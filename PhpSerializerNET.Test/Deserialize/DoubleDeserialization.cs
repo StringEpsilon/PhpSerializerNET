@@ -79,5 +79,12 @@ namespace PhpSerializerNET.Test.Deserialize {
 				PhpSerialization.Deserialize<double?>("d:3.1415;")
 			);
 		}
+
+		[TestMethod]
+		public void DeserializeDoubleToInt() {
+			double number = PhpSerialization.Deserialize<double>("d:10;");
+			Assert.AreEqual((long)10, number);
+		}
+
 	}
 }

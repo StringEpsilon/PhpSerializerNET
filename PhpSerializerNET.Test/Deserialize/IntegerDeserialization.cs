@@ -53,6 +53,12 @@ namespace PhpSerializerNET.Test.Deserialize {
 		}
 
 		[TestMethod]
+		public void DeserializeIntToDouble() {
+			double number = PhpSerialization.Deserialize<double>("i:10;");
+			Assert.AreEqual(10.00, number);
+		}
+
+		[TestMethod]
 		public void ExplictCastFormatException() {
 			var ex = Assert.ThrowsException<PhpSerializerNET.DeserializationException>(() =>
 			   PhpSerialization.Deserialize<int>(

@@ -63,7 +63,6 @@ namespace PhpSerializerNET.Test.Deserialize {
 			Assert.AreEqual(false, result["False"]);
 		}
 
-
 		[TestMethod]
 		public void ExplicitToDictionaryOfComplexType() {
 			var result = PhpSerialization.Deserialize<Dictionary<string, SimpleClass>>(
@@ -161,6 +160,13 @@ namespace PhpSerializerNET.Test.Deserialize {
 			var result = PhpSerialization.Deserialize<List<string>>("a:3:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}");
 
 			CollectionAssert.AreEqual(new List<string>() { "Hello", "World", "12345" }, result);
+		}
+
+		[TestMethod]
+		public void ExplicitToArray() {
+			var result = PhpSerialization.Deserialize<string[]>("a:3:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}");
+
+			CollectionAssert.AreEqual(new string[]{ "Hello", "World", "12345" }, result);
 		}
 
 		[TestMethod]

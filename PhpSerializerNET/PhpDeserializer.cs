@@ -344,14 +344,24 @@ namespace PhpSerializerNET {
 			return result;
 		}
 
-		private object MakeList(Type targetType, PhpSerializeToken token) {
-			var result = (IList)(Activator.CreateInstance(targetType) ?? throw new NullReferenceException("Activator.CreateInstance(targetType) returned null"));
-			Type itemType = typeof(object);
-			if (targetType.GenericTypeArguments.Length >= 1) {
-				itemType = targetType.GenericTypeArguments[0];
-			}
+		private object MakeArray(Type targetType, PhpSerializeToken token) {
+			var elementType = targetType.GetElementType();
+			Array result = System.Array.CreateInstance(elementType, token.Children.Count / 2);
 
-			// Don't use the options for normal list serialization. Just check that the keys are all integers:
+			var arrayIndex = 0;
+			for (int i = 1; i < token.Children.Count; i += 2) {
+				result.SetValue(
+					elementType == typeof(object)
+						? DeserializeToken(token.Children[i])
+						: DeserializeToken(elementType, token.Children[i]),
+					arrayIndex
+				);
+				arrayIndex++;
+			}
+			return result;
+		}
+
+		private object MakeList(Type targetType, PhpSerializeToken token) {
 			for (int i = 0; i < token.Children.Count; i += 2) {
 				if (token.Children[i].Type != PhpSerializerType.Integer) {
 					throw new DeserializationException(
@@ -359,6 +369,18 @@ namespace PhpSerializerNET {
 						$"It has a non-integer key '{token.Children[i].Value}' at element {i} (position {token.Children[i].Position})."
 					);
 				}
+			}
+
+			if (targetType.IsArray) {
+				return MakeArray(targetType, token);
+			}
+			var result = (IList)Activator.CreateInstance(targetType);
+			if (result == null) {
+				throw new NullReferenceException("Activator.CreateInstance(targetType) returned null");
+			}
+			Type itemType = typeof(object);
+			if (targetType.GenericTypeArguments.Length >= 1) {
+				itemType = targetType.GenericTypeArguments[0];
 			}
 
 			for (int i = 1; i < token.Children.Count; i += 2) {

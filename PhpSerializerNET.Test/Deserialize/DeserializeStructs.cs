@@ -1,4 +1,3 @@
-
 /**
   This Source Code Form is subject to the terms of the Mozilla Public
   License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -8,33 +7,36 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PhpSerializerNET.Test.DataTypes;
 
-namespace PhpSerializerNET.Test {
+namespace PhpSerializerNET.Test.Deserialize {
 
 	[TestClass]
-	public class TestStructs {
+	public class DeserializeStructsTest {
 		[TestMethod]
-		public void SerializeStruct() {
-			Assert.AreEqual(
-				"a:2:{s:3:\"foo\";s:3:\"Foo\";s:3:\"bar\";s:3:\"Bar\";}",
-				PhpSerialization.Serialize(
-					new AStruct() { foo = "Foo", bar = "Bar" }
-				)
+		public void DeserializeArrayToStruct() {
+			var value = PhpSerialization.Deserialize<AStruct>(
+				"a:2:{s:3:\"foo\";s:3:\"Foo\";s:3:\"bar\";s:3:\"Bar\";}"
 			);
+			Assert.AreEqual("Foo", value.foo);
+			Assert.AreEqual("Bar", value.bar);
 		}
 
 		[TestMethod]
-		public void DeserializeIgnoreField() {
+		public void DeserializeObjectToStruct() {
+			var value = PhpSerialization.Deserialize<AStruct>(
+				"O:8:\"sdtClass\":2:{s:3:\"foo\";s:3:\"Foo\";s:3:\"bar\";s:3:\"Bar\";}"
+			);
+			Assert.AreEqual("Foo", value.foo);
+			Assert.AreEqual("Bar", value.bar);
+		}
+
+
+		[TestMethod]
+		public void DeserializeWithIgnoredField() {
 			var value = PhpSerialization.Deserialize<AStructWithIgnore>(
 				"a:2:{s:3:\"foo\";s:3:\"Foo\";s:3:\"bar\";s:3:\"Bar\";}"
 			);
-			Assert.AreEqual(
-				"Foo",
-				value.foo
-			);
-			Assert.AreEqual(
-				null,
-				value.bar
-			);
+			Assert.AreEqual("Foo", value.foo);
+			Assert.AreEqual(null, value.bar);
 		}
 
 		[TestMethod]
@@ -42,14 +44,8 @@ namespace PhpSerializerNET.Test {
 			var value = PhpSerialization.Deserialize<AStructWithRename>(
 				"a:2:{s:3:\"foo\";s:3:\"Foo\";s:6:\"foobar\";s:3:\"Bar\";}"
 			);
-			Assert.AreEqual(
-				"Foo",
-				value.foo
-			);
-			Assert.AreEqual(
-				"Bar",
-				value.bar
-			);
+			Assert.AreEqual("Foo", value.foo);
+			Assert.AreEqual("Bar", value.bar);
 		}
 
 		[TestMethod]

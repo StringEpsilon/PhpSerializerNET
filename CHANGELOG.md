@@ -18,6 +18,7 @@
 	- Allows to *enable* a property information cache. (disabled by default)
 - Added `PhpSerializerNET.ClearPropertyInfoCache()`
 - When converting to an enum member that is not known a better exception is thrown instead of a nullref (because the fieldinfo cannot be found)
+- Added support for arrays
 
 **Serialization:**
 - Added support for serializing `PhpDynamicObject` and `ExpandoObject`. 

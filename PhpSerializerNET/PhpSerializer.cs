@@ -162,8 +162,7 @@ namespace PhpSerializerNET {
 				default: {
 						var inputType = input.GetType();
 
-						if (inputType.GetCustomAttribute<PhpClass>() != null) // TODO: add option.
-						{
+						if (typeof(IPhpObject).IsAssignableFrom(inputType) || inputType.GetCustomAttribute<PhpClass>() != null) {
 							return this.SerializeToObject(input);
 						}
 

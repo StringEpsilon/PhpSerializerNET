@@ -22,6 +22,8 @@
 
 **Serialization:**
 - Added support for serializing `PhpDynamicObject` and `ExpandoObject`. 
+- Always serialize implementations of `IPhpObject` using object notation.
+	**This is technically a breaking change**, but it was always intended to work that way.
 
 # 0.9.0:
 

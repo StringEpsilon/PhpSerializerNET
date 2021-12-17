@@ -25,6 +25,7 @@ namespace PhpSerializerNET.Test {
 			);
 		}
 
+
 		[TestMethod]
 		public void SerializeList() {
 			Assert.AreEqual( // strings:

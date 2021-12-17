@@ -29,7 +29,7 @@ This method has no effect, because PhpDateTime always has a fixed classname.
 Implementation of [`IPhpObject.GetClassName`](./IPhpObject.md#GetClassName).
 This method always returns "DateTime".
 
-**Parameters:** None.
+**Parameters:** *None*.
 
 **Returns:** `string` - Always "DateTime"
 

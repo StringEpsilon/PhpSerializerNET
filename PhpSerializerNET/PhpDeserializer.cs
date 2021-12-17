@@ -113,7 +113,7 @@ namespace PhpSerializerNET {
 				} else {
 					throw new DeserializationException("Encountered 'stdClass' and the behavior 'Throw' was specified in deserialization options.");
 				}
-				for (int i = 0; i < token.Children.Count; i += 2) {
+				for (int i = 0; i < token.Children.Length; i += 2) {
 					result.TryAdd(
 						token.Children[i].Value,
 						this.DeserializeToken(token.Children[i + 1])
@@ -276,7 +276,7 @@ namespace PhpSerializerNET {
 				}
 			}
 
-			for (int i = 0; i < token.Children.Count; i += 2) {
+			for (int i = 0; i < token.Children.Length; i += 2) {
 				var fieldName = this._options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();
 				var valueToken = token.Children[i + 1];
 				if (!fields.ContainsKey(fieldName)) {
@@ -314,7 +314,7 @@ namespace PhpSerializerNET {
 				}
 			}
 
-			for (int i = 0; i < token.Children.Count; i += 2) {
+			for (int i = 0; i < token.Children.Length; i += 2) {
 				var propertyName = this._options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();
 				var valueToken = token.Children[i + 1];
 
@@ -346,10 +346,10 @@ namespace PhpSerializerNET {
 
 		private object MakeArray(Type targetType, PhpSerializeToken token) {
 			var elementType = targetType.GetElementType();
-			Array result = System.Array.CreateInstance(elementType, token.Children.Count / 2);
+			Array result = System.Array.CreateInstance(elementType, token.Children.Length / 2);
 
 			var arrayIndex = 0;
-			for (int i = 1; i < token.Children.Count; i += 2) {
+			for (int i = 1; i < token.Children.Length; i += 2) {
 				result.SetValue(
 					elementType == typeof(object)
 						? DeserializeToken(token.Children[i])
@@ -362,7 +362,7 @@ namespace PhpSerializerNET {
 		}
 
 		private object MakeList(Type targetType, PhpSerializeToken token) {
-			for (int i = 0; i < token.Children.Count; i += 2) {
+			for (int i = 0; i < token.Children.Length; i += 2) {
 				if (token.Children[i].Type != PhpSerializerType.Integer) {
 					throw new DeserializationException(
 						$"Can not deserialize array at position {token.Position} to list: " +
@@ -383,7 +383,7 @@ namespace PhpSerializerNET {
 				itemType = targetType.GenericTypeArguments[0];
 			}
 
-			for (int i = 1; i < token.Children.Count; i += 2) {
+			for (int i = 1; i < token.Children.Length; i += 2) {
 				result.Add(
 					itemType == typeof(object)
 						? DeserializeToken(token.Children[i])
@@ -399,7 +399,7 @@ namespace PhpSerializerNET {
 				throw new NullReferenceException($"Activator.CreateInstance({targetType.FullName}) returned null");
 			}
 			if (!targetType.GenericTypeArguments.Any()) {
-				for (int i = 0; i < token.Children.Count; i += 2) {
+				for (int i = 0; i < token.Children.Length; i += 2) {
 					var keyToken = token.Children[i];
 					var valueToken = token.Children[i + 1];
 					result.Add(
@@ -412,7 +412,7 @@ namespace PhpSerializerNET {
 			Type keyType = targetType.GenericTypeArguments[0];
 			Type valueType = targetType.GenericTypeArguments[1];
 
-			for (int i = 0; i < token.Children.Count; i += 2) {
+			for (int i = 0; i < token.Children.Length; i += 2) {
 				var keyToken = token.Children[i];
 				var valueToken = token.Children[i + 1];
 				result.Add(
@@ -434,7 +434,7 @@ namespace PhpSerializerNET {
 			long previousKey = -1;
 			bool isList = true;
 			bool consecutive = true;
-			for (int i = 0; i < token.Children.Count; i += 2) {
+			for (int i = 0; i < token.Children.Length; i += 2) {
 				if (token.Children[i].Type != PhpSerializerType.Integer) {
 					isList = false;
 					break;

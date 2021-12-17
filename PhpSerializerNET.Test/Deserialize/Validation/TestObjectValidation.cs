@@ -65,7 +65,7 @@ namespace PhpSerializerNET.Test.Deserialize.Validation {
 				() => PhpSerialization.Deserialize("O:1:\"a\":2:{i:0;i:0;i:1;i:1;i:2;i:2;}")
 			);
 
-			Assert.AreEqual("Object at position 0 should have 2 properties, but actually has 3 properties.", exception.Message);
+			Assert.AreEqual("Object at position 0 should have 2 properties, but actually has 3 or more properties.", exception.Message);
 		}
 
 		[TestMethod]

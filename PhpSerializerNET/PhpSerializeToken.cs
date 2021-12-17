@@ -4,7 +4,6 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using System.Collections.Generic;
 using System.Globalization;
 
 namespace PhpSerializerNET {
@@ -15,7 +14,7 @@ namespace PhpSerializerNET {
 		internal PhpSerializerType Type;
 		internal string Value;
 
-		internal List<PhpSerializeToken> Children;
+		internal PhpSerializeToken[] Children;
 		internal int Position;
 
 		/// <summary>

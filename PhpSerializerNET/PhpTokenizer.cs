@@ -207,17 +207,20 @@ namespace PhpSerializerNET {
 						int length = this.GetLength(result.Type);
 						this.GetDelimiter();
 						this.GetBracketOpen();
-						result.Children = new(length * 2);
-						while (this._input[this._position] != '}') {
-							result.Children.Add(this.GetToken());
-						}
-						this.GetBracketClose();
-						if (length * 2 != result.Children.Count) {
+						result.Children = new PhpSerializeToken[length * 2];
+						int i = 0;
+						try {
+							while (this._input[this._position] != '}') {
+								result.Children[i++] = this.GetToken();
+							}
+						} catch (System.IndexOutOfRangeException ex) {
 							throw new DeserializationException(
 								$"Array at position {result.Position} should be of length {length}, " +
-								$"but actual length is {result.Children.Count / 2}."
+								$"but actual length is {(int)((i + 1) / 2)} or more.",
+								ex
 							);
 						}
+						this.GetBracketClose();
 						break;
 					}
 				case PhpSerializerType.Object: {
@@ -231,18 +234,20 @@ namespace PhpSerializerNET {
 						int propertyCount = this.GetLength(result.Type);
 						this.GetDelimiter();
 						this.GetBracketOpen();
-						result.Children = new(propertyCount * 2);
-						while (this._input[this._position] != '}') {
-							result.Children.Add(this.GetToken());
-						}
-						this.GetBracketClose();
-
-						if (propertyCount * 2 != result.Children.Count) {
+						result.Children = new PhpSerializeToken[propertyCount * 2];
+						int i = 0;
+						try {
+							while (this._input[this._position] != '}') {
+								result.Children[i++] = this.GetToken();
+							}
+						} catch (System.IndexOutOfRangeException ex) {
 							throw new DeserializationException(
 								$"Object at position {result.Position} should have {propertyCount} properties, " +
-								$"but actually has {result.Children.Count / 2} properties."
+								$"but actually has {(int)((i + 1) / 2)} or more properties.",
+								ex
 							);
 						}
+						this.GetBracketClose();
 						break;
 					}
 			}

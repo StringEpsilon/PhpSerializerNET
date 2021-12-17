@@ -57,7 +57,7 @@ namespace PhpSerializerNET.Test.Deserialize.Validation {
 				() => PhpSerialization.Deserialize("a:2:{i:0;i:0;i:1;i:1;i:2;i:2;}")
 			);
 
-			Assert.AreEqual("Array at position 0 should be of length 2, but actual length is 3.", exception.Message);
+			Assert.AreEqual("Array at position 0 should be of length 2, but actual length is 3 or more.", exception.Message);
 		}
 	}
 }

@@ -183,5 +183,22 @@ namespace PhpSerializerNET.Test.Deserialize {
 			var result = PhpSerialization.Deserialize<List<char>>("a:0:{}");
 			CollectionAssert.AreEqual(new List<char>(), result);
 		}
+
+		[TestMethod]
+		public void ImplicitToDictionary(){
+			var result = PhpSerialization.Deserialize(
+				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}"
+			);
+
+			Assert.IsInstanceOfType(result, typeof(Dictionary<object, object>));
+			var dictionary = result as Dictionary<object, object>;
+			Assert.AreEqual(5, dictionary.Count);
+
+			Assert.AreEqual("this is a string value", dictionary["AString"]);
+			Assert.AreEqual((long)10, dictionary["AnInteger"]);
+			Assert.AreEqual(1.2345, dictionary["ADouble"]);
+			Assert.AreEqual(true, dictionary["True"]);
+			Assert.AreEqual(false, dictionary["False"]);
+		}
 	}
 }

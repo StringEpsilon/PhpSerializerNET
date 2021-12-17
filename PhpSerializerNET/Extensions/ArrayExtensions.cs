@@ -12,15 +12,17 @@ namespace PhpSerializerNET {
 	internal static class ArrayExtensions {
 
 		public static string Utf8Substring(this byte[] array, int start, int length, Encoding encoding) {
-			byte[] substring = new byte[length];
 			if (length > array.Length - start) {
 				return "";
 			}
-			System.Buffer.BlockCopy(array, start, substring, 0, length);
 
 			if (encoding == Encoding.UTF8) {
-				return Encoding.UTF8.GetString(substring);
+				// Using the ReadonlySpan<> saves some copying:
+				return Encoding.UTF8.GetString(new System.ReadOnlySpan<byte>(array, start, length));
 			} else {
+				// Sadly, Encoding.Convert does not accept a Span.
+				byte[] substring = new byte[length];
+				System.Buffer.BlockCopy(array, start, substring, 0, length);
 				return Encoding.UTF8.GetString(
 					Encoding.Convert(encoding, Encoding.UTF8, substring)
 				);
@@ -28,7 +30,7 @@ namespace PhpSerializerNET {
 		}
 
 		public static Dictionary<string, PropertyInfo> GetAllProperties(this PropertyInfo[] properties, PhpDeserializationOptions options) {
-			var result = new Dictionary<string, PropertyInfo>();
+			var result = new Dictionary<string, PropertyInfo>(properties.Length);
 			foreach (var property in properties) {
 				var isIgnored = false;
 				var attributes = PhpPropertyAttribute.GetCustomAttributes(property, false);
@@ -57,7 +59,7 @@ namespace PhpSerializerNET {
 		}
 
 		public static Dictionary<string, FieldInfo> GetAllFields(this FieldInfo[] fields, PhpDeserializationOptions options) {
-			var result = new Dictionary<string, FieldInfo>();
+			var result = new Dictionary<string, FieldInfo>(fields.Length);
 			foreach (var field in fields) {
 				var isIgnored = false;
 				var attributes = PhpPropertyAttribute.GetCustomAttributes(field, false);

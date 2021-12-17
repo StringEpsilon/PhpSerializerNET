@@ -6,7 +6,7 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace PhpSerializerNET.Test {
+namespace PhpSerializerNET.Test.Other {
 	[TestClass]
 	public class PhpDynamicObjectTest {
 		[TestMethod]
@@ -16,7 +16,6 @@ namespace PhpSerializerNET.Test {
 			testObject.foo = "Foo";
 			Assert.AreEqual("Foo", testObject.foo);
 		}
-
 
 		[TestMethod]
 		public void GetAndSetClassname() {

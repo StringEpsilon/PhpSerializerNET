@@ -10,14 +10,19 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 	[TestClass]
 	public class NumberStringToBoolTest {
 		[TestMethod]
-		public void Enabled_Deserializes() {
+		public void Enabled_Deserializes_Implicit() {
 			var options = new PhpDeserializationOptions() { NumberStringToBool = true };
 
-			var value = PhpSerialization.Deserialize<bool>("s:1:\"1\";", options);
-			Assert.AreEqual(true, value);
+			Assert.AreEqual(true, PhpSerialization.Deserialize("s:1:\"1\";", options));
+			Assert.AreEqual(false, PhpSerialization.Deserialize("s:1:\"0\";", options));
+		}
 
-			value = PhpSerialization.Deserialize<bool>("s:1:\"0\";", options);
-			Assert.AreEqual(false, value);
+		[TestMethod]
+		public void Enabled_Deserializes_Explicit() {
+			var options = new PhpDeserializationOptions() { NumberStringToBool = true };
+
+			Assert.AreEqual(true, PhpSerialization.Deserialize<bool>("s:1:\"1\";", options));
+			Assert.AreEqual(false, PhpSerialization.Deserialize<bool>("s:1:\"0\";", options));
 		}
 
 		[TestMethod]

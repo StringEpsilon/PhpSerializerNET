@@ -4,6 +4,7 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System;
 using System.Text;
 
 namespace PhpSerializerNET {
@@ -86,7 +87,7 @@ namespace PhpSerializerNET {
 			int end = this._position;
 
 			for (; this._input[this._position] != ';' && this._position < this._lastIndex && valid; this._position++) {
-				valid = (char)this._input[this._position] switch {
+				_ = (char)this._input[this._position] switch {
 					>= '0' and <= '9' => true,
 					'+' => true,
 					'-' => true,
@@ -94,14 +95,11 @@ namespace PhpSerializerNET {
 					'E' or 'e' => isFloating, // exponents.
 					'I' or 'N' or 'F' => isFloating, // infinity.
 					'N' or 'A' => isFloating, // NaN.
-					_ => false,
-				};
-				if (!valid) {
-					throw new DeserializationException(
+					_ => throw new DeserializationException(
 						$"Unexpected token at index {this._position}. " +
 						$"'{(char)this._input[this._position]}' is not a valid part of a {(isFloating ? "floating point " : "")}number."
-					);
-				}
+					),
+				};
 				end++;
 			}
 

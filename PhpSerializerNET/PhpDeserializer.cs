@@ -134,34 +134,25 @@ namespace PhpSerializerNET {
 
 			switch (token.Type) {
 				case PhpSerializerType.Boolean: {
-						if (targetType == typeof(bool)) {
-							return token.ToBool();
-						}
-						Type underlyingType = targetType;
-						if (targetType.IsNullableReferenceType()) {
-							underlyingType = targetType.GenericTypeArguments[0];
-						}
-						if (underlyingType == typeof(bool)) {
-							return token.ToBool();
-						}
-						if (underlyingType.IsIConvertible()) {
-							return ((IConvertible)token.ToBool()).ToType(underlyingType, CultureInfo.InvariantCulture);
-						} else {
-							throw new DeserializationException(
-								$"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}."
-							);
-						}
+						return DeserializeBoolean(targetType, token);
 					}
 				case PhpSerializerType.Integer:
-					if (targetType == typeof(long)) {
-						return token.ToLong();
-					}
-					return DeserializeTokenFromSimpleType(targetType, token);
+					return Type.GetTypeCode(targetType) switch {
+						TypeCode.Int16 => short.Parse(token.Value),
+						TypeCode.Int32 => int.Parse(token.Value),
+						TypeCode.Int64 => long.Parse(token.Value),
+						TypeCode.UInt16 => ushort.Parse(token.Value),
+						TypeCode.UInt32 => uint.Parse(token.Value),
+						TypeCode.UInt64 => ulong.Parse(token.Value),
+						TypeCode.SByte => sbyte.Parse(token.Value),
+						_ => this.DeserializeTokenFromSimpleType(targetType, token),
+					};
 				case PhpSerializerType.Floating:
-					if (targetType == typeof(double)) {
-						return token.ToDouble();
-					}
-					return DeserializeTokenFromSimpleType(targetType, token);
+					return Type.GetTypeCode(targetType) switch {
+						TypeCode.Single => (float)token.ToDouble(),
+						TypeCode.Double => token.ToDouble(),
+						_ => this.DeserializeTokenFromSimpleType(targetType, token),
+					};
 				case PhpSerializerType.String:
 					return DeserializeTokenFromSimpleType(targetType, token);
 				case PhpSerializerType.Object: {
@@ -191,6 +182,24 @@ namespace PhpSerializerNET {
 					} else {
 						return null;
 					}
+			}
+		}
+
+		private static object DeserializeBoolean(Type targetType, PhpSerializeToken token) {
+			if (targetType == typeof(bool) || targetType == typeof(bool?)) {
+				return token.ToBool();
+			}
+			Type underlyingType = targetType;
+			if (targetType.IsNullableReferenceType()) {
+				underlyingType = targetType.GenericTypeArguments[0];
+			}
+
+			if (underlyingType.IsIConvertible()) {
+				return ((IConvertible)token.ToBool()).ToType(underlyingType, CultureInfo.InvariantCulture);
+			} else {
+				throw new DeserializationException(
+					$"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}."
+				);
 			}
 		}
 

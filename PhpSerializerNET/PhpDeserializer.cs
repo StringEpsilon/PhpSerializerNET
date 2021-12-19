@@ -134,6 +134,9 @@ namespace PhpSerializerNET {
 
 			switch (token.Type) {
 				case PhpSerializerType.Boolean: {
+						if (targetType == typeof(bool)) {
+							return token.ToBool();
+						}
 						Type underlyingType = targetType;
 						if (targetType.IsNullableReferenceType()) {
 							underlyingType = targetType.GenericTypeArguments[0];
@@ -150,22 +153,17 @@ namespace PhpSerializerNET {
 						}
 					}
 				case PhpSerializerType.Integer:
-				case PhpSerializerType.Floating:
-				case PhpSerializerType.String:
-					if (targetType.IsNullableReferenceType()) {
-						if (token.Value == "" && _options.EmptyStringToDefault) {
-							return null;
-						}
-
-						var underlyingType = targetType.GenericTypeArguments[0];
-						if (underlyingType == null) {
-							throw new NullReferenceException("Could not get underlying type for nullable reference type " + targetType);
-						}
-						return DeserializeTokenFromSimpleType(underlyingType, token);
+					if (targetType == typeof(long)) {
+						return token.ToLong();
 					}
-
 					return DeserializeTokenFromSimpleType(targetType, token);
-
+				case PhpSerializerType.Floating:
+					if (targetType == typeof(double)) {
+						return token.ToDouble();
+					}
+					return DeserializeTokenFromSimpleType(targetType, token);
+				case PhpSerializerType.String:
+					return DeserializeTokenFromSimpleType(targetType, token);
 				case PhpSerializerType.Object: {
 						if (typeof(IDictionary).IsAssignableFrom(targetType)) {
 							return MakeDictionary(targetType, token);
@@ -196,7 +194,19 @@ namespace PhpSerializerNET {
 			}
 		}
 
-		private object DeserializeTokenFromSimpleType(Type targetType, PhpSerializeToken token) {
+		private object DeserializeTokenFromSimpleType(Type givenType, PhpSerializeToken token) {
+			var targetType = givenType;
+			if (!targetType.IsPrimitive && targetType.IsNullableReferenceType()) {
+				if (token.Value == "" && _options.EmptyStringToDefault) {
+					return null;
+				}
+
+				targetType = targetType.GenericTypeArguments[0];
+				if (targetType == null) {
+					throw new NullReferenceException("Could not get underlying type for nullable reference type " + givenType);
+				}
+			}
+
 			// Short-circuit strings:
 			if (targetType == typeof(string)) {
 				return token.Value == "" && _options.EmptyStringToDefault
@@ -210,7 +220,6 @@ namespace PhpSerializerNET {
 				if (token.Type != PhpSerializerType.String) {
 					return Enum.Parse(targetType, token.Value);
 				}
-
 				var foundFieldInfo = targetType
 					.GetFields()
 					.FirstOrDefault(y => y.Name == token.Value);
@@ -293,7 +302,8 @@ namespace PhpSerializerNET {
 						field.SetValue(result, DeserializeToken(field.FieldType, valueToken));
 					} catch (Exception exception) {
 						throw new DeserializationException(
-							$"Exception encountered while trying to assign '{valueToken.Value}' to {targetType.Name}.{field.Name}. See inner exception for details.",
+							$"Exception encountered while trying to assign '{valueToken.Value}' to {targetType.Name}.{field.Name}. " +
+							"See inner exception for details.",
 							exception
 						);
 					}
@@ -448,9 +458,21 @@ namespace PhpSerializerNET {
 				}
 			}
 			if (!isList || (this._options.UseLists == ListOptions.Default && consecutive == false)) {
-				return this.MakeDictionary(typeof(Dictionary<object, object>), token);
+				var result = new Dictionary<object, object>();
+				for (int i = 0; i < token.Children.Length; i += 2) {
+					result.Add(
+						this.DeserializeToken(token.Children[i]),
+						this.DeserializeToken(token.Children[i + 1])
+					);
+				}
+				return result;
+			} else {
+				var result = new List<object>();
+				for (int i = 1; i < token.Children.Length; i += 2) {
+					result.Add(this.DeserializeToken(token.Children[i]));
+				}
+				return result;
 			}
-			return MakeList(typeof(List<object>), token);
 		}
 	}
 }

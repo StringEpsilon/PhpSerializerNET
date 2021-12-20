@@ -12,7 +12,7 @@
 	6. [InputEncoding](#InputEncoding)
 	7. [StdClass](#StdClass)
 	8. [EnableTypeLookup](#EnableTypeLookup)
-	9. [TypeCache][#TypeCache]
+	9. [TypeCache](#TypeCache)
 2. [ListOptions](#ListOptions)
 	1. [Default](#Default)
 	2. [OnAllIntegerKeys](#OnAllIntegerKeys)
@@ -21,7 +21,7 @@
 	1. [Dictionary](#Dictionary)
 	2. [Dynamic](#Dynamic)
 	3. [Throw](#Throw)
-4. [TypeCacheFlag][#TypeCacheFlag]
+4. [TypeCacheFlag](#TypeCacheFlag)
 	1. [Deactivated](#Deactivated)
 	2. [ClassNames (default)](#ClassNames-(default))
 	3. [PropertyInfo](#PropertyInfo)
@@ -128,11 +128,25 @@ var deserialized = PhpSerialization.Deserialize<ExampleClass>(
 
 ## EmptyStringToDefault
 
-**Description:** On deserializing an IConvertible from a PHP string, treat an empty string as the default value of the target type. For example "" => 0 for an integer.
+**Description:** When trying to assign an empty string to *any* type, set the default value for that type instead. **Beware** that the default value for a string is `null` and not string.Empty.
 
 **Default value:** `true`
 
-**Examples:** **TODO**
+**Examples:**
+
+```c#
+PhpSerialization.Deserialize<int>("s:0:\"\""); // Returns 0
+PhpSerialization.Deserialize<string>("s:0:\"\""); // Returns null
+PhpSerialization.Deserialize<MyStruct>("s:0:\"\""); // Returns default(MyStruct)
+PhpSerialization.Deserialize<MyClass>("s:0:\"\""); // Returns null.
+
+
+PhpSerialization.Deserialize<string>("s:0:\"\"", new {EmptyStringToDefault = false}); // Returns string.Emtpy
+PhpSerialization.Deserialize<MyStruct>("s:0:\"\"", new {EmptyStringToDefault = false}); // Throws.
+PhpSerialization.Deserialize<MyClass>("s:0:\"\"",  new {EmptyStringToDefault = false}); // Throws.
+```
+
+[See the unit tests](https://github.com/StringEpsilon/PhpSerializerNET/blob/main/PhpSerializerNET.Test/Deserialize/Options/EmptyStringToDefault.cs#L19) for more examples.
 
 ## NumberStringToBool
 
@@ -315,7 +329,7 @@ This is the default option.
 ```c#
 var objectDictionary = (PhpObjectDictionary)PhpSerialization.Deserialize(
 	"O:8:\"stdClass\":2:{s:3:\"Foo\";s:3:\"xyz!\";s:3:\"Bar\";d:3.1415}",
-	new PhpDeserializationOptions() { 
+	new PhpDeserializationOptions() {
 		StdClass = StdClassOption.Dictionary,
 	}
 );
@@ -327,14 +341,14 @@ objectDictionary["Bar"] == 3.1415
 
 ## Dynamic
 
-Deserialize all 'stdClass' objects into dynamic objects. See [System.Dynamic.DynamicObject](https://docs.microsoft.com/en-us/dotnet/api/system.dynamic.dynamicobject?view=net-6.0) for more details on dynamic objects in general. 
+Deserialize all 'stdClass' objects into dynamic objects. See [System.Dynamic.DynamicObject](https://docs.microsoft.com/en-us/dotnet/api/system.dynamic.dynamicobject?view=net-6.0) for more details on dynamic objects in general.
 
 The option will result in instances of [PhpDynamicObject](../Types/PhpDynamicObject.md) specifically.
 
 ```c#
 dynamic object = PhpSerialization.Deserialize(
 	"O:8:\"stdClass\":2:{s:3:\"Foo\";s:3:\"xyz!\";s:3:\"Bar\";d:3.1415}",
-	new PhpDeserializationOptions() { 
+	new PhpDeserializationOptions() {
 		StdClass = StdClassOption.Dynamic,
 	}
 );
@@ -352,7 +366,7 @@ Throw an exception and abort deserialization when encountering 'stdClass' object
 try {
 	_ = PhpSerialization.Deserialize(
 		"O:8:\"stdClass\":2:{s:3:\"Foo\";s:3:\"xyz!\";s:3:\"Bar\";d:3.1415}",
-		new PhpDeserializationOptions() { 
+		new PhpDeserializationOptions() {
 			StdClass = StdClassOption.Throw,
 		}
 	);

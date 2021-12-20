@@ -25,12 +25,12 @@ using PhpSerializerNET;
 object myObject = PhpSerialization.Deserialize(serializedData);
 ```
 
-[Detailed documentation can be found here](./docs/Index.md) - Work in Progress.
+[Detailed documentation can be found here](./docs/README.md) - Work in Progress.
 
 
 ## TODOs for 1.0
 
-See https://github.com/StringEpsilon/PhpSerializerNET/milestone/1 
+See https://github.com/StringEpsilon/PhpSerializerNET/milestone/1
 
 ## Why?
 

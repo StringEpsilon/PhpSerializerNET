@@ -22,3 +22,27 @@ Overrides [System.Dynamic.DynamicObject.TryGetMember()](https://docs.microsoft.c
 
 ### TrySetMember
 Overrides [System.Dynamic.DynamicObject.TrySetMember()](https://docs.microsoft.com/en-us/dotnet/api/system.dynamic.dynamicobject.trygetmember?view=net-6.0)
+
+## Usage
+
+Like with any dynamic object, you can just assign properties and read them:
+
+```c#
+dynamic myObject = new PhpDynamicObject();
+myObject.Foo = "abc";
+myObject.Bar = "def";
+
+System.Console.WriteLine(myObject.Foo + myObject.Bar); // abcdef
+```
+
+You can also use it to construct arbitary PHP objects for serialization, including a classname.
+
+```c#
+dynamic myObject = new PhpDynamicObject();
+myObject.firstname = "Joseph";
+myObject.lastname = "Bishop";
+myObject.SetClassName("Person");
+
+PhpSerialization.Serialize(myObject);
+// O:6:"Person":2:{s:9:"firstname";s:6:"Joseph";s:8:"lastname";s:6:"Bishop";}
+```

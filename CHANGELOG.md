@@ -1,4 +1,12 @@
-# 0.10.0 (future):
+# 1.0
+
+**Deserialization:**
+- Bugfix: "INF" and "-INF" would not be handled correctly when using explicit typing (`Deserialize<T>`) for some target types.
+- Performance tweaks:
+	- Minor improvements on memory use during deserialization.
+	- Improved performance for deserializing Double and Integer values with explicit types.
+
+# 0.10.0:
 
 ## Breaking:
 - Trying to set the classname on PhpDateTime will throw an exception now instead of doing nothing.
@@ -21,7 +29,7 @@
 - Added support for arrays
 
 **Serialization:**
-- Added support for serializing `PhpDynamicObject` and `ExpandoObject`. 
+- Added support for serializing `PhpDynamicObject` and `ExpandoObject`.
 - Always serialize implementations of `IPhpObject` using object notation.
 	**This is technically a breaking change**, but it was always intended to work that way.
 

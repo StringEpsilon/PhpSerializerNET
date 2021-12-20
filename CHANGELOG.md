@@ -2,6 +2,7 @@
 
 **Deserialization:**
 - Bugfix: "INF" and "-INF" would not be handled correctly when using explicit typing (`Deserialize<T>`) for some target types.
+- Bugfix: Properly set classname when deserializing with explicit types that implement IPhpObject.
 - Performance tweaks:
 	- Minor improvements on memory use during deserialization.
 	- Improved performance for deserializing Double and Integer values with explicit types.

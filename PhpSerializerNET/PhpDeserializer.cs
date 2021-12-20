@@ -143,13 +143,18 @@ namespace PhpSerializerNET {
 				case PhpSerializerType.String:
 					return DeserializeTokenFromSimpleType(targetType, token);
 				case PhpSerializerType.Object: {
+						object result;
 						if (typeof(IDictionary).IsAssignableFrom(targetType)) {
-							return MakeDictionary(targetType, token);
+							result = MakeDictionary(targetType, token);
 						} else if (targetType.IsClass) {
-							return MakeObject(targetType, token);
+							result = MakeObject(targetType, token);
 						} else {
-							return MakeStruct(targetType, token);
+							result = MakeStruct(targetType, token);
 						}
+						if (result is IPhpObject phpObject and not PhpDateTime) {
+							phpObject.SetClassName(token.Value);
+						}
+						return result;
 					}
 				case PhpSerializerType.Array: {
 						if (targetType.IsAssignableTo(typeof(IList))) {

@@ -76,5 +76,17 @@ namespace PhpSerializerNET {
 		public static string Serialize(object input, PhpSerializiationOptions options = null) {
 			return new PhpSerializer(options).Serialize(input);
 		}
+
+		/// <summary>
+		/// Reset the type lookup cache.
+		/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
+		/// </summary>
+		public static void ClearTypeCache() => PhpDeserializer.ClearTypeCache();
+
+		/// <summary>
+		/// Reset the property info cache.
+		/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
+		/// </summary>
+		public static void ClearPropertyInfoCache() => PhpDeserializer.ClearPropertyInfoCache();
 	}
 }

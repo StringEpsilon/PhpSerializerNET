@@ -7,6 +7,10 @@
 	- Minor improvements on memory use during deserialization.
 	- Improved performance for deserializing Double and Integer values with explicit types.
 
+**General:**
+* Bugfix: `PhpSerialization.ClearTypeCache()` was not exposed.
+* Bugfix: `PhpSerialization.ClearPropertyInfoCache()` was not exposed.
+
 # 0.10.0:
 
 ## Breaking:

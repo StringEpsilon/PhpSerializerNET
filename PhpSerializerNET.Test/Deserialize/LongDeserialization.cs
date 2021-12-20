@@ -61,5 +61,53 @@ namespace PhpSerializerNET.Test.Deserialize {
 
 			Assert.AreEqual(1, result);
 		}
+
+		[TestMethod]
+		public void SupportsOtherNumberTypes() {
+			Assert.AreEqual(
+				short.MinValue,
+				PhpSerialization.Deserialize<short>($"i:{short.MinValue};")
+			);
+			Assert.AreEqual(
+				short.MaxValue,
+				PhpSerialization.Deserialize<short>($"i:{short.MaxValue};")
+			);
+
+			Assert.AreEqual(
+				ushort.MinValue,
+				PhpSerialization.Deserialize<ushort>($"i:{ushort.MinValue};")
+			);
+			Assert.AreEqual(
+				ushort.MaxValue,
+				PhpSerialization.Deserialize<ushort>($"i:{ushort.MaxValue};")
+			);
+
+			Assert.AreEqual(
+				uint.MinValue,
+				PhpSerialization.Deserialize<uint>($"i:{uint.MinValue};")
+			);
+			Assert.AreEqual(
+				uint.MaxValue,
+				PhpSerialization.Deserialize<uint>($"i:{uint.MaxValue};")
+			);
+
+			Assert.AreEqual(
+				ulong.MinValue,
+				PhpSerialization.Deserialize<ulong>($"i:{ulong.MinValue};")
+			);
+			Assert.AreEqual(
+				ulong.MaxValue,
+				PhpSerialization.Deserialize<ulong>($"i:{ulong.MaxValue};")
+			);
+
+			Assert.AreEqual(
+				sbyte.MinValue,
+				PhpSerialization.Deserialize<sbyte>($"i:{sbyte.MinValue};")
+			);
+			Assert.AreEqual(
+				sbyte.MaxValue,
+				PhpSerialization.Deserialize<sbyte>($"i:{sbyte.MaxValue};")
+			);
+		}
 	}
 }

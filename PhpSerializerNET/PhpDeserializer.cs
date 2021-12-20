@@ -137,22 +137,9 @@ namespace PhpSerializerNET {
 						return DeserializeBoolean(targetType, token);
 					}
 				case PhpSerializerType.Integer:
-					return Type.GetTypeCode(targetType) switch {
-						TypeCode.Int16 => short.Parse(token.Value),
-						TypeCode.Int32 => int.Parse(token.Value),
-						TypeCode.Int64 => long.Parse(token.Value),
-						TypeCode.UInt16 => ushort.Parse(token.Value),
-						TypeCode.UInt32 => uint.Parse(token.Value),
-						TypeCode.UInt64 => ulong.Parse(token.Value),
-						TypeCode.SByte => sbyte.Parse(token.Value),
-						_ => this.DeserializeTokenFromSimpleType(targetType, token),
-					};
+					return DeserializeInteger(targetType, token);
 				case PhpSerializerType.Floating:
-					return Type.GetTypeCode(targetType) switch {
-						TypeCode.Single => (float)token.ToDouble(),
-						TypeCode.Double => token.ToDouble(),
-						_ => this.DeserializeTokenFromSimpleType(targetType, token),
-					};
+					return DeserializeDouble(targetType, token);
 				case PhpSerializerType.String:
 					return DeserializeTokenFromSimpleType(targetType, token);
 				case PhpSerializerType.Object: {
@@ -183,6 +170,31 @@ namespace PhpSerializerNET {
 						return null;
 					}
 			}
+		}
+
+		private object DeserializeInteger(Type targetType, PhpSerializeToken token) {
+			return Type.GetTypeCode(targetType) switch {
+				TypeCode.Int16 => short.Parse(token.Value),
+				TypeCode.Int32 => int.Parse(token.Value),
+				TypeCode.Int64 => long.Parse(token.Value),
+				TypeCode.UInt16 => ushort.Parse(token.Value),
+				TypeCode.UInt32 => uint.Parse(token.Value),
+				TypeCode.UInt64 => ulong.Parse(token.Value),
+				TypeCode.SByte => sbyte.Parse(token.Value),
+				_ => this.DeserializeTokenFromSimpleType(targetType, token),
+			};
+		}
+
+		private object DeserializeDouble(Type targetType, PhpSerializeToken token) {
+			if (targetType == typeof(double) || targetType == typeof(float)) {
+				return token.ToDouble();
+			};
+			token.Value = token.Value switch {
+				"INF" => double.PositiveInfinity.ToString(CultureInfo.InvariantCulture),
+				"-INF" => double.NegativeInfinity.ToString(CultureInfo.InvariantCulture),
+				_ => token.Value,
+			};
+			return this.DeserializeTokenFromSimpleType(targetType, token);
 		}
 
 		private static object DeserializeBoolean(Type targetType, PhpSerializeToken token) {

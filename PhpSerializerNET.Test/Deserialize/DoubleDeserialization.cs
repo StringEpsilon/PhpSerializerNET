@@ -73,6 +73,54 @@ namespace PhpSerializerNET.Test.Deserialize {
 		}
 
 		[TestMethod]
+		public void Explicit_DeserializesInfinity() {
+			Assert.AreEqual(
+				double.PositiveInfinity,
+				PhpSerialization.Deserialize<double>("d:INF;")
+			);
+		}
+
+		[TestMethod]
+		public void Explicit_DeserializesNegativeInfinity() {
+			Assert.AreEqual(
+				double.NegativeInfinity,
+				PhpSerialization.Deserialize<double>("d:-INF;")
+			);
+		}
+
+		[TestMethod]
+		public void Explicit_DeserializesNotANumber() {
+			Assert.AreEqual(
+				double.NaN,
+				PhpSerialization.Deserialize<double>("d:NAN;")
+			);
+		}
+
+		[TestMethod]
+		public void Explicit_Nullable_DeserializesInfinity() {
+			Assert.AreEqual(
+				double.PositiveInfinity,
+				PhpSerialization.Deserialize<double?>("d:INF;")
+			);
+		}
+
+		[TestMethod]
+		public void Explicit_Nullable_DeserializesNegativeInfinity() {
+			Assert.AreEqual(
+				double.NegativeInfinity,
+				PhpSerialization.Deserialize<double?>("d:-INF;")
+			);
+		}
+
+		[TestMethod]
+		public void Explicit_Nullable_DeserializesNotANumber() {
+			Assert.AreEqual(
+				double.NaN,
+				PhpSerialization.Deserialize<double?>("d:NAN;")
+			);
+		}
+
+		[TestMethod]
 		public void DeserializesToNullable() {
 			Assert.AreEqual(
 				3.1415,

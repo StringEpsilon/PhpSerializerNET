@@ -19,5 +19,15 @@ namespace PhpSerializerNET.Test {
 				PhpSerialization.Serialize(data)
 			);
 		}
+
+		[TestMethod]
+		public void SerializePhpObjectDictionary() {
+			var data = new PhpObjectDictionary() { { "Foo", "" } };
+			data.SetClassName("MyPhpObject");
+			Assert.AreEqual( // strings:
+				"O:11:\"MyPhpObject\":1:{s:3:\"Foo\";s:0:\"\";}",
+				PhpSerialization.Serialize(data)
+			);
+		}
 	}
 }

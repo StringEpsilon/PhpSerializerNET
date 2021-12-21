@@ -10,7 +10,6 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PhpSerializerNET.Test.DataTypes;
 
-
 namespace PhpSerializerNET.Test.Deserialize.Options {
 	[TestClass]
 	public class EmptyStringToDefaultTest {

@@ -4,6 +4,7 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System;
 using System.Collections.Generic;
 
 namespace PhpSerializerNET {
@@ -30,7 +31,7 @@ namespace PhpSerializerNET {
 		/// </returns>
 		public static object Deserialize(string input, PhpDeserializationOptions options = null) {
 			if (string.IsNullOrEmpty(input)) {
-				throw new System.ArgumentException("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
+				throw new ArgumentException("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
 			}
 			return new PhpDeserializer(input, options).Deserialize();
 		}
@@ -56,9 +57,36 @@ namespace PhpSerializerNET {
 			PhpDeserializationOptions options = null
 		) {
 			if (string.IsNullOrEmpty(input)) {
-				throw new System.ArgumentException("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
+				throw new ArgumentException("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
 			}
 			return new PhpDeserializer(input, options).Deserialize<T>();
+		}
+
+		/// <summary>
+		/// The serialized data to deserialize.
+		/// </summary>
+		/// <param name="input">
+		/// Data in the PHP de/serialization format.
+		/// </param>
+		/// <param name="options">
+		/// Options for deserialization. See the  <see cref="PhpDeserializationOptions"/> class for more details.
+		/// </param>
+		/// <param name="type">
+		/// The desired output type.
+		/// This should be one of the primitives or a class with a public parameterless constructor.
+		/// </typeparam>
+		/// <returns>
+		/// The deserialized object.
+		/// </returns>
+		public static object Deserialize(
+			string input,
+			Type type,
+			PhpDeserializationOptions options = null
+		) {
+			if (string.IsNullOrEmpty(input)) {
+				throw new ArgumentException("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
+			}
+			return new PhpDeserializer(input, options).Deserialize(type);
 		}
 
 		/// <summary>
@@ -81,12 +109,14 @@ namespace PhpSerializerNET {
 		/// Reset the type lookup cache.
 		/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
 		/// </summary>
-		public static void ClearTypeCache() => PhpDeserializer.ClearTypeCache();
+		public static void ClearTypeCache() =>
+			PhpDeserializer.ClearTypeCache();
 
 		/// <summary>
 		/// Reset the property info cache.
 		/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
 		/// </summary>
-		public static void ClearPropertyInfoCache() => PhpDeserializer.ClearPropertyInfoCache();
+		public static void ClearPropertyInfoCache() =>
+			PhpDeserializer.ClearPropertyInfoCache();
 	}
 }

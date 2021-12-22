@@ -35,9 +35,12 @@ namespace PhpSerializerNET {
 			return this.DeserializeToken(this._token);
 		}
 
+		public object Deserialize(Type targetType) {
+			return this.DeserializeToken(targetType, this._token);
+		}
+
 		public T Deserialize<T>() {
-			Type targetType = typeof(T);
-			return (T)this.DeserializeToken(targetType, this._token);
+			return (T) this.Deserialize(typeof(T));
 		}
 
 		/// <summary>

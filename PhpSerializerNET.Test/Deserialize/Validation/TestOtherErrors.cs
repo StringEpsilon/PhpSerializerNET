@@ -33,17 +33,24 @@ namespace PhpSerializerNET.Test.Deserialize.Validation {
 
 		[TestMethod]
 		public void ErrorOnEmptyInput() {
-			var ex = Assert.ThrowsException<ArgumentException>(
+			var ex = Assert.ThrowsException<ArgumentOutOfRangeException>(
 				() => PhpSerialization.Deserialize("")
 			);
 
-			Assert.AreEqual("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.", ex.Message);
+			const string expected = "PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty. (Parameter 'input')";
+			Assert.AreEqual(expected, ex.Message);
 
-			ex = Assert.ThrowsException<ArgumentException>(
+			ex = Assert.ThrowsException<ArgumentOutOfRangeException>(
 				() => PhpSerialization.Deserialize<string>("")
 			);
 
-			Assert.AreEqual("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.", ex.Message);
+			Assert.AreEqual(expected, ex.Message);
+
+			ex = Assert.ThrowsException<ArgumentOutOfRangeException>(
+				() => PhpSerialization.Deserialize("", typeof(string))
+			);
+
+			Assert.AreEqual(expected, ex.Message);
 		}
 	}
 }

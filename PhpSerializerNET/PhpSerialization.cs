@@ -4,6 +4,9 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+// Consumers of this library may use https://docs.microsoft.com/en-us/dotnet/csharp/nullable-references
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 
@@ -29,7 +32,7 @@ namespace PhpSerializerNET {
 		/// <see cref="Dictionary{object,object}"/> for arrays with mixed keys or objects <br/>
 		/// <see cref="PhpDynamicObject"/> for objects (see options).
 		/// </returns>
-		public static object Deserialize(string input, PhpDeserializationOptions options = null) {
+		public static object? Deserialize(string input, PhpDeserializationOptions? options = null) {
 			if (string.IsNullOrEmpty(input)) {
 				throw new ArgumentException("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
 			}
@@ -54,7 +57,7 @@ namespace PhpSerializerNET {
 		/// </returns>
 		public static T Deserialize<T>(
 			string input,
-			PhpDeserializationOptions options = null
+			PhpDeserializationOptions? options = null
 		) {
 			if (string.IsNullOrEmpty(input)) {
 				throw new ArgumentException("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
@@ -78,10 +81,10 @@ namespace PhpSerializerNET {
 		/// <returns>
 		/// The deserialized object.
 		/// </returns>
-		public static object Deserialize(
+		public static object? Deserialize(
 			string input,
 			Type type,
-			PhpDeserializationOptions options = null
+			PhpDeserializationOptions? options = null
 		) {
 			if (string.IsNullOrEmpty(input)) {
 				throw new ArgumentException("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
@@ -101,8 +104,9 @@ namespace PhpSerializerNET {
 		/// Arrays, lists and dictionaries are serialized into arrays.
 		/// Objects may also be serialized into arrays, if their respective struct or class does not have the <see cref="PhpClass"/> attribute.
 		/// </returns>
-		public static string Serialize(object input, PhpSerializiationOptions options = null) {
-			return new PhpSerializer(options).Serialize(input);
+		public static string Serialize(object? input, PhpSerializiationOptions? options = null) {
+			return new PhpSerializer(options)
+				.Serialize(input) ?? throw new NullReferenceException($"{nameof(PhpSerializer)}.{nameof(Serialize)} returned null");
 		}
 
 		/// <summary>

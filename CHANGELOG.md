@@ -1,11 +1,13 @@
 # 1.0
 
 **Deserialization:**
+- Added `string Serialize(object? input, PhpSerializiationOptions? options = null)` to `PhpSerialization` so the target type can be specified at run time.
+- `PhpSerialization` (entry point of the library) is now null reference aware, aiding library consumers in caching `NullReferenceException`.
 - Bugfix: "INF" and "-INF" would not be handled correctly when using explicit typing (`Deserialize<T>`) for some target types.
 - Bugfix: Properly set classname when deserializing with explicit types that implement IPhpObject.
 - Performance tweaks:
 	- Minor improvements on memory use during deserialization.
-	- Improved performance for deserializing Double and Integer values with explicit types.
+	- Improved performance for deserializing Double and Integer values with explicit types.	
 
 **General:**
 * Bugfix: `PhpSerialization.ClearTypeCache()` was not exposed.

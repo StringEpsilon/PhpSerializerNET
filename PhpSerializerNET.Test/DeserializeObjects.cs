@@ -57,5 +57,30 @@ namespace PhpSerializerNET.Test {
 			var result = PhpSerialization.Deserialize("a:1:{i:0;a:4:{s:1:\"A\";s:2:\"63\";s:1:\"B\";a:2:{i:558710;s:1:\"2\";i:558709;s:1:\"2\";}s:1:\"C\";s:2:\"71\";s:1:\"G\";a:3:{s:1:\"x\";s:6:\"446368\";s:1:\"y\";s:1:\"0\";s:1:\"z\";s:5:\"1.029\";}}}");
 			Assert.IsNotNull(result);
 		}
+
+		[TestMethod]
+		public void DeserializeWithRuntimeType() {
+			var expectedType = typeof(CircularTest);
+			var result = PhpSerialization.Deserialize("a:2:{s:3:\"Foo\";s:5:\"First\";s:3:\"Bar\";a:2:{s:3:\"Foo\";s:6:\"Second\";s:3:\"Bar\";N;}}", expectedType);
+
+			Assert.IsNotNull(result);
+			Assert.AreEqual(expectedType, result.GetType());
+
+			if (result is CircularTest circularTest) {
+				Assert.AreEqual(
+					"First",
+					circularTest.Foo
+				);
+				Assert.IsNotNull(
+					circularTest.Bar
+				);
+				Assert.AreEqual(
+					"Second",
+					circularTest.Bar.Foo
+				);
+			} else {
+				throw new InvalidOperationException();
+			}
+		}
 	}
 }

@@ -34,7 +34,7 @@ namespace PhpSerializerNET {
 		/// </returns>
 		public static object? Deserialize(string input, PhpDeserializationOptions? options = null) {
 			if (string.IsNullOrEmpty(input)) {
-				throw new ArgumentException("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
+				throw new ArgumentOutOfRangeException(nameof(input), "PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
 			}
 			return new PhpDeserializer(input, options).Deserialize();
 		}
@@ -60,7 +60,7 @@ namespace PhpSerializerNET {
 			PhpDeserializationOptions? options = null
 		) {
 			if (string.IsNullOrEmpty(input)) {
-				throw new ArgumentException("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
+				throw new ArgumentOutOfRangeException(nameof(input), "PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
 			}
 			return new PhpDeserializer(input, options).Deserialize<T>();
 		}
@@ -86,8 +86,11 @@ namespace PhpSerializerNET {
 			Type type,
 			PhpDeserializationOptions? options = null
 		) {
+			if (type == null) {
+				throw new ArgumentNullException(nameof(type));
+			}
 			if (string.IsNullOrEmpty(input)) {
-				throw new ArgumentException("PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
+				throw new ArgumentOutOfRangeException(nameof(input), "PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty.");
 			}
 			return new PhpDeserializer(input, options).Deserialize(type);
 		}

@@ -40,7 +40,7 @@ namespace PhpSerializerNET {
 		}
 
 		public T Deserialize<T>() {
-			return (T) this.Deserialize(typeof(T));
+			return (T)this.Deserialize(typeof(T));
 		}
 
 		/// <summary>
@@ -323,7 +323,7 @@ namespace PhpSerializerNET {
 							$"Could not bind the key \"{token.Children[i].Value}\" to struct of type {targetType.Name}: No such field."
 						);
 					}
-					break;
+					continue;
 				}
 				if (fields[fieldName] != null) {
 					var field = fields[fieldName];
@@ -363,7 +363,7 @@ namespace PhpSerializerNET {
 							$"Could not bind the key \"{token.Children[i].Value}\" to object of type {targetType.Name}: No such property."
 						);
 					}
-					break;
+					continue;
 				}
 				var property = properties[propertyName];
 				if (property != null) { // null if PhpIgnore'd

@@ -1,4 +1,4 @@
-# 1.0
+# 1.0 (Future)
 
 **Deserialization:**
 - Added `string Serialize(object? input, PhpSerializiationOptions? options = null)` to `PhpSerialization` so the target type can be specified at run time.
@@ -6,9 +6,10 @@
 - `PhpSerialization` throws `ArgumentOutOfRangeException` instead of the more generalised `ArgumentException`
 - Bugfix: "INF" and "-INF" would not be handled correctly when using explicit typing (`Deserialize<T>`) for some target types.
 - Bugfix: Properly set classname when deserializing with explicit types that implement IPhpObject.
+- Bugfix: With the AllowExcessKeys, the deserialization of the given struct or object would abort when an excess key was encountered, leaving the properties after the excess key unassigned. See issue [#27](https://github.com/StringEpsilon/PhpSerializerNET/issues/27).
 - Performance tweaks:
 	- Minor improvements on memory use during deserialization.
-	- Improved performance for deserializing Double and Integer values with explicit types.	
+	- Improved performance for deserializing Double and Integer values with explicit types.
 
 **General:**
 * Bugfix: `PhpSerialization.ClearTypeCache()` was not exposed.

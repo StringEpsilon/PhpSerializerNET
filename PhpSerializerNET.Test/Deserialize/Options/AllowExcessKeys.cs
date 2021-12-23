@@ -56,5 +56,16 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 			));
 			Assert.AreEqual("Could not bind the key \"BString\" to object of type SimpleClass: No such property.", ex.Message);
 		}
+
+		[TestMethod]
+		public void Enabled_ProperlyAssignsAllKeys() {
+			// Explicit test for issue #27.
+			var result = PhpSerialization.Deserialize<SimpleClass>(
+				"O:11:\"SimpleClass\":3:{s:1:\"_\";b:0;s:4:\"True\";b:1;s:5:\"False\";b:0;}",
+				new PhpDeserializationOptions() { AllowExcessKeys = true }
+			);
+			Assert.AreEqual(true, result.True);
+			Assert.AreEqual(false, result.False);
+		}
 	}
 }

@@ -34,5 +34,32 @@ namespace PhpSerializerNET.Test.Serialize {
 				PhpSerialization.Serialize(testObject)
 			);
 		}
+
+		[TestMethod]
+		public void SerializeObjectToArray() {
+			var testObject = new MappedClass() {
+				English = "Hello world!",
+				German = "Hallo Welt!",
+				It = "Ciao mondo!"
+			};
+
+			Assert.AreEqual(
+				"a:3:{s:2:\"en\";s:12:\"Hello world!\";s:2:\"de\";s:11:\"Hallo Welt!\";s:4:\"Guid\";a:1:{s:5:\"Empty\";N;}}",
+				PhpSerialization.Serialize(testObject)
+			);
+		}
+
+		[TestMethod]
+		public void SerializeObjectToObject() {
+			var testObject = new UnnamedClass() {
+				Foo = 1,
+				Bar = 2,
+			};
+
+			Assert.AreEqual(
+				"O:8:\"stdClass\":2:{s:3:\"Foo\";d:1;s:3:\"Bar\";d:2;}",
+				PhpSerialization.Serialize(testObject)
+			);
+		}
 	}
 }

@@ -1,4 +1,4 @@
-# 1.0 (Future)
+# 0.11.0
 
 **Deserialization:**
 - Added `string Serialize(object? input, PhpSerializiationOptions? options = null)` to `PhpSerialization` so the target type can be specified at run time.

@@ -11,14 +11,14 @@ This is a .NET library for working with the [PHP serialization format](https://e
 
 Usage is rather simple:
 
-[Serializing](./docs/Usage/Usage/Serializing.md)
+[Serializing](./docs/Usage/Serializing.md)
 ```c#
 using PhpSerializerNET;
 
 string serializedData = PhpSerialization.Serialize(myObject);
 ```
 
-and [Deserializing](./docs/Usage/Usage/Deserializing.md)
+and [Deserializing](./docs/Usage/Deserializing.md)
 
 ```c#
 using PhpSerializerNET;

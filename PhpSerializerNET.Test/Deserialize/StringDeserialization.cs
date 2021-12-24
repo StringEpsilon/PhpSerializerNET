@@ -7,6 +7,7 @@
 
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PhpSerializerNET.Test.DataTypes;
 
 namespace PhpSerializerNET.Test.Deserialize {
 	[TestClass]
@@ -82,6 +83,17 @@ namespace PhpSerializerNET.Test.Deserialize {
 		public void ExplicitToGuid() {
 			Guid guid = PhpSerialization.Deserialize<Guid>("s:36:\"82e2ebf0-43e6-4c10-82cf-57d60383a6be\";");
 			Assert.AreEqual("82e2ebf0-43e6-4c10-82cf-57d60383a6be", guid.ToString());
+		}
+
+		[TestMethod]
+		public void DeserializesStringToGuidProperty() {
+			var result = PhpSerialization.Deserialize<MappedClass>(
+				"a:1:{s:4:\"Guid\";s:36:\"82e2ebf0-43e6-4c10-82cf-57d60383a6be\";}"
+			);
+			Assert.AreEqual(
+				new Guid("82e2ebf0-43e6-4c10-82cf-57d60383a6be"),
+				result.Guid
+			);
 		}
 	}
 }

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PhpSerializerNET.Test.DataTypes;
+using static PhpSerializerNET.Test.DataTypes.DeserializeObjects;
 
 namespace PhpSerializerNET.Test.Deserialize {
 	[TestClass]
@@ -199,6 +200,39 @@ namespace PhpSerializerNET.Test.Deserialize {
 			Assert.AreEqual(1.2345, dictionary["ADouble"]);
 			Assert.AreEqual(true, dictionary["True"]);
 			Assert.AreEqual(false, dictionary["False"]);
+		}
+
+		[TestMethod]
+		public void ExcplicitToNestedObject() {
+			var result = PhpSerialization.Deserialize<CircularTest>("a:2:{s:3:\"Foo\";s:5:\"First\";s:3:\"Bar\";a:2:{s:3:\"Foo\";s:6:\"Second\";s:3:\"Bar\";N;}}");
+
+			Assert.AreEqual(
+				"First",
+				result.Foo
+			);
+			Assert.IsNotNull(
+				result.Bar
+			);
+			Assert.AreEqual(
+				"Second",
+				result.Bar.Foo
+			);
+		}
+
+		[TestMethod]
+		public void Test_Issue11() {
+			// See https://github.com/StringEpsilon/PhpSerializerNET/issues/11
+			var deserializedObject = PhpSerialization.Deserialize(
+				"a:1:{i:0;a:7:{s:1:\"A\";N;s:1:\"B\";N;s:1:\"C\";s:1:\"C\";s:5:\"odSdr\";i:1;s:1:\"D\";d:1;s:1:\"E\";N;s:1:\"F\";a:3:{s:1:\"X\";i:8;s:1:\"Y\";N;s:1:\"Z\";N;}}}"
+			);
+			Assert.IsNotNull(deserializedObject);
+		}
+
+		[TestMethod]
+		public void Test_Issue12() {
+			// See https://github.com/StringEpsilon/PhpSerializerNET/issues/12
+			var result = PhpSerialization.Deserialize("a:1:{i:0;a:4:{s:1:\"A\";s:2:\"63\";s:1:\"B\";a:2:{i:558710;s:1:\"2\";i:558709;s:1:\"2\";}s:1:\"C\";s:2:\"71\";s:1:\"G\";a:3:{s:1:\"x\";s:6:\"446368\";s:1:\"y\";s:1:\"0\";s:1:\"z\";s:5:\"1.029\";}}}");
+			Assert.IsNotNull(result);
 		}
 	}
 }

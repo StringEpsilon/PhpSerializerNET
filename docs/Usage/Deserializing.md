@@ -106,7 +106,16 @@ If you always want to use dictionaries, you can set `UseLists` to [`ListOptions.
 
 ## Deserializing Objects
 
-**TODO**
+This highly depends on the settings. Please refer to:
+
+- [`StdClass`](../Options/PhpDeserializationOptions.md#StdClass).
+- [`EnableTypeLookup`](../Options/PhpDeserializationOptions.md#EnableTypeLookup).
+
+And to an extend also:
+
+- [`AllowExcessKeys`](../Options/PhpDeserializationOptions.md#EnableTypeLookup).
+
+The default is that type lookup is enabled and `stdClass` will be deserialized into [`PhpObjectDictionary`](../Types/PhpObjectDictionary.md).
 
 ## Explicetly typed
 

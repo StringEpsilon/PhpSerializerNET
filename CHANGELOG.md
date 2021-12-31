@@ -1,3 +1,7 @@
+# 1.0.0
+
+This is just 0.11.0 packaged as a new version to mark it as stable.
+
 # 0.11.0
 
 **Deserialization:**

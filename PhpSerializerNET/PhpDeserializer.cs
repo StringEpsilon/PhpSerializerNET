@@ -246,21 +246,24 @@ namespace PhpSerializerNET {
 			if (targetType.IsEnum) {
 				// Enums are converted by name if the token is a string and by underlying value if they are not
 
+				if (token.Value == "" && this._options.EmptyStringToDefault) {
+					return Activator.CreateInstance(targetType);
+				}
+
 				if (token.Type != PhpSerializerType.String) {
 					return Enum.Parse(targetType, token.Value);
 				}
+
 				var foundFieldInfo = targetType
 					.GetFields()
-					.FirstOrDefault(y => y.Name == token.Value);
+					.Select(fieldInfo => new { fieldInfo, phpPropertyAttribute = fieldInfo.GetCustomAttribute<PhpPropertyAttribute>() })
+					.FirstOrDefault(c => c.fieldInfo.Name == token.Value || c.phpPropertyAttribute != null && c.phpPropertyAttribute.Name == token.Value)
+					?.fieldInfo;
 
 				if (foundFieldInfo == null) {
-					if (_options.EmptyStringToDefault) {
-						return Activator.CreateInstance(targetType);
-					} else {
 						throw new DeserializationException(
 							$"Exception encountered while trying to assign '{token.Value}' to type '{targetType.Name}'. " +
 							$"The value could not be matched to an enum member.");
-					}
 				}
 
 				return foundFieldInfo.GetRawConstantValue();

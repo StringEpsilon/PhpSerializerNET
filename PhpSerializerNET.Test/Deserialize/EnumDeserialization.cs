@@ -38,6 +38,24 @@ namespace PhpSerializerNET.Test.Deserialize {
 		}
 
 		[TestMethod]
+		public void DeserializeFromStringWithPropertyName() {
+			Assert.AreEqual(
+				IntEnumWithPropertyName.A,
+				PhpSerialization.Deserialize<IntEnumWithPropertyName>("s:1:\"a\";")
+			);
+
+			Assert.AreEqual(
+				IntEnumWithPropertyName.B,
+				PhpSerialization.Deserialize<IntEnumWithPropertyName>("s:1:\"c\";")
+			);
+
+			Assert.AreEqual(
+				IntEnumWithPropertyName.C,
+				PhpSerialization.Deserialize<IntEnumWithPropertyName>("s:1:\"C\";")
+			);
+		}
+
+		[TestMethod]
 		public void DeserializeToNullable() {
 			LongEnum? result = PhpSerialization.Deserialize<LongEnum?>("i:1;");
 			Assert.AreEqual(

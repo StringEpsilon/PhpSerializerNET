@@ -1,5 +1,6 @@
 # vNext
 - Added support for PhpProperty on enums, allowing consumers to specify different field names
+- Performance: Cache enum field information with `TypeCacheFlag.PropertyInfo`.
 
 # 1.0.0
 

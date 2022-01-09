@@ -22,6 +22,7 @@ namespace PhpSerializerNET {
 		private static readonly Dictionary<Type, Dictionary<string, PropertyInfo>> PropertyInfoCache = new();
 
 		private static Dictionary<Type, Dictionary<string, FieldInfo>> FieldInfoCache { get; set; } = new();
+		private static Dictionary<Type, Dictionary<string, FieldInfo>> EnumInfoCache { get; set; } = new();
 
 		public PhpDeserializer(string input, PhpDeserializationOptions options) {
 			_options = options;
@@ -58,6 +59,7 @@ namespace PhpSerializerNET {
 		/// </summary>
 		public static void ClearPropertyInfoCache() {
 			PropertyInfoCache.Clear();
+			EnumInfoCache.Clear();
 		}
 
 		private object DeserializeToken(PhpSerializeToken token) {
@@ -254,16 +256,32 @@ namespace PhpSerializerNET {
 					return Enum.Parse(targetType, token.Value);
 				}
 
-				var foundFieldInfo = targetType
-					.GetFields()
-					.Select(fieldInfo => new { fieldInfo, phpPropertyAttribute = fieldInfo.GetCustomAttribute<PhpPropertyAttribute>() })
-					.FirstOrDefault(c => c.fieldInfo.Name == token.Value || c.phpPropertyAttribute != null && c.phpPropertyAttribute.Name == token.Value)
-					?.fieldInfo;
+
+				FieldInfo foundFieldInfo = null;
+				if (this._options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
+					if (!EnumInfoCache.ContainsKey(targetType)) {
+						EnumInfoCache.Add(targetType, new());
+					}
+					if (EnumInfoCache[targetType].ContainsKey(token.Value)) {
+						foundFieldInfo = EnumInfoCache[targetType][token.Value];
+					}
+				}
 
 				if (foundFieldInfo == null) {
-						throw new DeserializationException(
-							$"Exception encountered while trying to assign '{token.Value}' to type '{targetType.Name}'. " +
-							$"The value could not be matched to an enum member.");
+					foundFieldInfo = targetType
+						.GetFields()
+						.Select(fieldInfo => new { fieldInfo, phpPropertyAttribute = fieldInfo.GetCustomAttribute<PhpPropertyAttribute>() })
+						.FirstOrDefault(c => c.fieldInfo.Name == token.Value || c.phpPropertyAttribute != null && c.phpPropertyAttribute.Name == token.Value)
+						?.fieldInfo;
+					if (this._options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
+						EnumInfoCache[targetType].Add(token.Value, foundFieldInfo);
+					}
+				}
+
+				if (foundFieldInfo == null) {
+					throw new DeserializationException(
+						$"Exception encountered while trying to assign '{token.Value}' to type '{targetType.Name}'. " +
+						$"The value could not be matched to an enum member.");
 				}
 
 				return foundFieldInfo.GetRawConstantValue();

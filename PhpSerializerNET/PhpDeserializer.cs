@@ -14,15 +14,21 @@ using System.Reflection;
 namespace PhpSerializerNET {
 	internal class PhpDeserializer {
 		private readonly PhpDeserializationOptions _options;
-		private PhpSerializeToken _token;
+		private readonly PhpSerializeToken _token;
+
 		private static readonly Dictionary<string, Type> TypeLookupCache = new() {
 			{ "DateTime", typeof(PhpDateTime) }
 		};
+		private static readonly object TypeLookupCacheSyncObject = new();
 
 		private static readonly Dictionary<Type, Dictionary<string, PropertyInfo>> PropertyInfoCache = new();
+		private static readonly object PropertyInfoCacheSyncObject = new();
 
 		private static Dictionary<Type, Dictionary<string, FieldInfo>> FieldInfoCache { get; set; } = new();
+		private static readonly object FieldInfoCacheCacheSyncObject = new();
+
 		private static Dictionary<Type, Dictionary<string, FieldInfo>> EnumInfoCache { get; set; } = new();
+		private static readonly object EnumInfoCacheSyncObject = new();
 
 		public PhpDeserializer(string input, PhpDeserializationOptions options) {
 			_options = options;
@@ -49,8 +55,10 @@ namespace PhpSerializerNET {
 		/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
 		/// </summary>
 		public static void ClearTypeCache() {
-			TypeLookupCache.Clear();
-			TypeLookupCache.Add("DateTime", typeof(PhpDateTime));
+			lock (TypeLookupCache) {
+				TypeLookupCache.Clear();
+				TypeLookupCache.Add("DateTime", typeof(PhpDateTime));
+			}
 		}
 
 		/// <summary>
@@ -58,8 +66,13 @@ namespace PhpSerializerNET {
 		/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
 		/// </summary>
 		public static void ClearPropertyInfoCache() {
-			PropertyInfoCache.Clear();
-			EnumInfoCache.Clear();
+			lock (PropertyInfoCacheSyncObject) {
+				PropertyInfoCache.Clear();
+			}
+
+			lock (EnumInfoCacheSyncObject) {
+				EnumInfoCache.Clear();
+			}
 		}
 
 		private object DeserializeToken(PhpSerializeToken token) {
@@ -89,21 +102,30 @@ namespace PhpSerializerNET {
 			var typeName = token.Value;
 			object constructedObject;
 			Type targetType = null;
-			if (typeName != "sdtClass" && this._options.EnableTypeLookup) {
-				if (TypeLookupCache.ContainsKey(typeName)) {
-					targetType = TypeLookupCache[typeName];
-				} else {
-					foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic)) {
-						// TODO: PhpClass attribute should win over classes who happen to have the name...?
-						targetType = assembly
-							.GetExportedTypes()
-							.FirstOrDefault(y => y.Name == typeName || y.GetCustomAttribute<PhpClass>()?.Name == typeName);
-						if (targetType != null) {
-							break;
+			if (typeName != "stdClass" && this._options.EnableTypeLookup) {
+				lock (TypeLookupCacheSyncObject)
+				{
+					if (TypeLookupCache.ContainsKey(typeName)) {
+						targetType = TypeLookupCache[typeName];
+					} else {
+						foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic)) {
+
+							targetType = assembly
+								.GetExportedTypes()
+								.Select(type => new { type, attribute = type.GetCustomAttribute<PhpClass>() })
+								// PhpClass attribute should win over classes who happen to have the name
+								.OrderBy(c => c.attribute != null ? 0 : 1)
+								.Where(y => y.type.Name == typeName || y.attribute?.Name == typeName)
+								.Select(c => c.type)
+								.FirstOrDefault();
+
+							if (targetType != null) {
+								break;
+							}
 						}
-					}
-					if (this._options.TypeCache.HasFlag(TypeCacheFlag.ClassNames)) {
-						TypeLookupCache.Add(typeName, targetType);
+						if (this._options.TypeCache.HasFlag(TypeCacheFlag.ClassNames)) {
+							TypeLookupCache.Add(typeName, targetType);
+						}
 					}
 				}
 			}
@@ -198,7 +220,8 @@ namespace PhpSerializerNET {
 		private object DeserializeDouble(Type targetType, PhpSerializeToken token) {
 			if (targetType == typeof(double) || targetType == typeof(float)) {
 				return token.ToDouble();
-			};
+			}
+
 			token.Value = token.Value switch {
 				"INF" => double.PositiveInfinity.ToString(CultureInfo.InvariantCulture),
 				"-INF" => double.NegativeInfinity.ToString(CultureInfo.InvariantCulture),
@@ -259,11 +282,13 @@ namespace PhpSerializerNET {
 
 				FieldInfo foundFieldInfo = null;
 				if (this._options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
-					if (!EnumInfoCache.ContainsKey(targetType)) {
-						EnumInfoCache.Add(targetType, new());
-					}
-					if (EnumInfoCache[targetType].ContainsKey(token.Value)) {
-						foundFieldInfo = EnumInfoCache[targetType][token.Value];
+					lock (EnumInfoCacheSyncObject) {
+						if (!EnumInfoCache.ContainsKey(targetType)) {
+							EnumInfoCache.Add(targetType, new());
+						}
+						if (EnumInfoCache[targetType].ContainsKey(token.Value)) {
+							foundFieldInfo = EnumInfoCache[targetType][token.Value];
+						}
 					}
 				}
 
@@ -274,7 +299,9 @@ namespace PhpSerializerNET {
 						.FirstOrDefault(c => c.fieldInfo.Name == token.Value || c.phpPropertyAttribute != null && c.phpPropertyAttribute.Name == token.Value)
 						?.fieldInfo;
 					if (this._options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
-						EnumInfoCache[targetType].Add(token.Value, foundFieldInfo);
+						lock (EnumInfoCacheSyncObject) {
+							EnumInfoCache[targetType].Add(token.Value, foundFieldInfo);
+						}
 					}
 				}
 
@@ -326,12 +353,14 @@ namespace PhpSerializerNET {
 		private object MakeStruct(Type targetType, PhpSerializeToken token) {
 			var result = Activator.CreateInstance(targetType);
 			Dictionary<string, FieldInfo> fields;
-			if (FieldInfoCache.ContainsKey(targetType)) {
-				fields = FieldInfoCache[targetType];
-			} else {
-				fields = targetType.GetFields().GetAllFields(this._options);
-				if (this._options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
-					FieldInfoCache.Add(targetType, fields);
+			lock (FieldInfoCacheCacheSyncObject) {
+				if (FieldInfoCache.ContainsKey(targetType)) {
+					fields = FieldInfoCache[targetType];
+				} else {
+					fields = targetType.GetFields().GetAllFields(this._options);
+					if (this._options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
+						FieldInfoCache.Add(targetType, fields);
+					}
 				}
 			}
 
@@ -365,12 +394,14 @@ namespace PhpSerializerNET {
 		private object MakeObject(Type targetType, PhpSerializeToken token) {
 			var result = Activator.CreateInstance(targetType);
 			Dictionary<string, PropertyInfo> properties;
-			if (PropertyInfoCache.ContainsKey(targetType)) {
-				properties = PropertyInfoCache[targetType];
-			} else {
-				properties = targetType.GetProperties().GetAllProperties(this._options);
-				if (this._options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
-					PropertyInfoCache.Add(targetType, properties);
+			lock (PropertyInfoCacheSyncObject) {
+				if (PropertyInfoCache.ContainsKey(targetType)) {
+					properties = PropertyInfoCache[targetType];
+				} else {
+					properties = targetType.GetProperties().GetAllProperties(this._options);
+					if (this._options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
+						PropertyInfoCache.Add(targetType, properties);
+					}
 				}
 			}
 
@@ -405,7 +436,7 @@ namespace PhpSerializerNET {
 		}
 
 		private object MakeArray(Type targetType, PhpSerializeToken token) {
-			var elementType = targetType.GetElementType();
+			var elementType = targetType.GetElementType() ?? throw new InvalidOperationException("targetType.GetElementType() returned null");
 			Array result = System.Array.CreateInstance(elementType, token.Children.Length / 2);
 
 			var arrayIndex = 0;

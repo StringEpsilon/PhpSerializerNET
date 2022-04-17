@@ -21,7 +21,7 @@ namespace PhpSerializerNET {
 		};
 		private static readonly object TypeLookupCacheSyncObject = new();
 
-		private static readonly Dictionary<Type, Dictionary<string, PropertyInfo>> PropertyInfoCache = new();
+		private static readonly Dictionary<Type, Dictionary<object, PropertyInfo>> PropertyInfoCache = new();
 		private static readonly object PropertyInfoCacheSyncObject = new();
 
 		private static Dictionary<Type, Dictionary<string, FieldInfo>> FieldInfoCache { get; set; } = new();
@@ -103,8 +103,7 @@ namespace PhpSerializerNET {
 			object constructedObject;
 			Type targetType = null;
 			if (typeName != "stdClass" && this._options.EnableTypeLookup) {
-				lock (TypeLookupCacheSyncObject)
-				{
+				lock (TypeLookupCacheSyncObject) {
 					if (TypeLookupCache.ContainsKey(typeName)) {
 						targetType = TypeLookupCache[typeName];
 					} else {
@@ -393,7 +392,7 @@ namespace PhpSerializerNET {
 
 		private object MakeObject(Type targetType, PhpSerializeToken token) {
 			var result = Activator.CreateInstance(targetType);
-			Dictionary<string, PropertyInfo> properties;
+			Dictionary<object, PropertyInfo> properties;
 			lock (PropertyInfoCacheSyncObject) {
 				if (PropertyInfoCache.ContainsKey(targetType)) {
 					properties = PropertyInfoCache[targetType];
@@ -406,7 +405,18 @@ namespace PhpSerializerNET {
 			}
 
 			for (int i = 0; i < token.Children.Length; i += 2) {
-				var propertyName = this._options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();
+				object propertyName;
+				if (token.Children[i].Type == PhpSerializerType.String) {
+					propertyName = this._options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();
+				} else if (token.Children[i].Type == PhpSerializerType.Integer) {
+					propertyName = token.Children[i].ToLong();
+				} else {
+					throw new DeserializationException(
+						$"Error encountered deserizalizing an object of type '{targetType.FullName}': " +
+						$"The key '{token.Children[i].Value}' (from the token at position {token.Children[i].Position}) has an unsupported type of '{token.Children[i].Type}'."
+					);
+				}
+
 				var valueToken = token.Children[i + 1];
 
 				if (!properties.ContainsKey(propertyName)) {

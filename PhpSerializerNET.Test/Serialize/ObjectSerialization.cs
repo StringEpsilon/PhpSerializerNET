@@ -61,5 +61,20 @@ namespace PhpSerializerNET.Test.Serialize {
 				PhpSerialization.Serialize(testObject)
 			);
 		}
+
+		[TestMethod]
+		public void ObjectIntoMixedKeyArray() {
+			var data = new MixedKeysPhpClass() {
+				Foo = "Foo",
+				Bar = "Bar",
+				Baz = "A",
+				Dummy = "B",
+			};
+
+			Assert.AreEqual(
+				"O:8:\"stdClass\":4:{i:0;s:3:\"Foo\";i:1;s:3:\"Bar\";s:1:\"a\";s:1:\"A\";s:1:\"b\";s:1:\"B\";}",
+				PhpSerialization.Serialize(data)
+			);
+		}
 	}
 }

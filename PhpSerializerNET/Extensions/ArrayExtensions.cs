@@ -29,8 +29,8 @@ namespace PhpSerializerNET {
 			}
 		}
 
-		public static Dictionary<string, PropertyInfo> GetAllProperties(this PropertyInfo[] properties, PhpDeserializationOptions options) {
-			var result = new Dictionary<string, PropertyInfo>(properties.Length);
+		public static Dictionary<object, PropertyInfo> GetAllProperties(this PropertyInfo[] properties, PhpDeserializationOptions options) {
+			var result = new Dictionary<object, PropertyInfo>(properties.Length);
 			foreach (var property in properties) {
 				var isIgnored = false;
 				var attributes = PhpPropertyAttribute.GetCustomAttributes(property, false);
@@ -45,10 +45,14 @@ namespace PhpSerializerNET {
 					}
 				}
 				if (phpPropertyAttribute != null) {
-					var attributeName = options.CaseSensitiveProperties
-						? phpPropertyAttribute.Name
-						: phpPropertyAttribute.Name.ToLower();
-					result.Add(attributeName, isIgnored ? null : property);
+					if (phpPropertyAttribute.IsInteger) {
+						result.Add(phpPropertyAttribute.Key, isIgnored ? null : property);
+					} else {
+						var attributeName = options.CaseSensitiveProperties
+							? phpPropertyAttribute.Name
+							: phpPropertyAttribute.Name.ToLower();
+						result.Add(attributeName, isIgnored ? null : property);
+					}
 				}
 				var propertyName = options.CaseSensitiveProperties
 						? property.Name

@@ -167,7 +167,7 @@ namespace PhpSerializerNET.Test.Deserialize {
 		public void ExplicitToArray() {
 			var result = PhpSerialization.Deserialize<string[]>("a:3:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}");
 
-			CollectionAssert.AreEqual(new string[]{ "Hello", "World", "12345" }, result);
+			CollectionAssert.AreEqual(new string[] { "Hello", "World", "12345" }, result);
 		}
 
 		[TestMethod]
@@ -186,7 +186,7 @@ namespace PhpSerializerNET.Test.Deserialize {
 		}
 
 		[TestMethod]
-		public void ImplicitToDictionary(){
+		public void ImplicitToDictionary() {
 			var result = PhpSerialization.Deserialize(
 				"a:5:{s:7:\"AString\";s:22:\"this is a string value\";s:9:\"AnInteger\";i:10;s:7:\"ADouble\";d:1.2345;s:4:\"True\";b:1;s:5:\"False\";b:0;}"
 			);
@@ -233,6 +233,18 @@ namespace PhpSerializerNET.Test.Deserialize {
 			// See https://github.com/StringEpsilon/PhpSerializerNET/issues/12
 			var result = PhpSerialization.Deserialize("a:1:{i:0;a:4:{s:1:\"A\";s:2:\"63\";s:1:\"B\";a:2:{i:558710;s:1:\"2\";i:558709;s:1:\"2\";}s:1:\"C\";s:2:\"71\";s:1:\"G\";a:3:{s:1:\"x\";s:6:\"446368\";s:1:\"y\";s:1:\"0\";s:1:\"z\";s:5:\"1.029\";}}}");
 			Assert.IsNotNull(result);
+		}
+
+		[TestMethod]
+		public void MixedKeyArrayIntoObject() {
+			var result = PhpSerialization.Deserialize<MixedKeysObject>(
+				"a:4:{i:0;s:3:\"Foo\";i:1;s:3:\"Bar\";s:1:\"a\";s:1:\"A\";s:1:\"b\";s:1:\"B\";}"
+			);
+
+			Assert.AreEqual("Foo", result.Foo);
+			Assert.AreEqual("Bar", result.Bar);
+			Assert.AreEqual("A", result.Baz);
+			Assert.AreEqual("B", result.Dummy);
 		}
 	}
 }

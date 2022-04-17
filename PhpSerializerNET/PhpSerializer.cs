@@ -242,17 +242,20 @@ namespace PhpSerializerNET {
 			return output.ToString();
 		}
 
-		private string SerializeMember(MemberInfo member, object input) {
+		private string SerializeMember(MemberInfo member, object input, bool isObjectMember = false) {
 			PhpPropertyAttribute attribute = (PhpPropertyAttribute)Attribute.GetCustomAttribute(
 				member,
 				typeof(PhpPropertyAttribute),
 				false
 			);
 
-			var propertyName = attribute != null
-				? attribute.Name
-				: member.Name;
-			return $"{this.Serialize(propertyName)}{this.Serialize(member.GetValue(input))}";
+			if (attribute != null) {
+				if (attribute.IsInteger == true) {
+					return $"{this.Serialize(attribute.Key)}{this.Serialize(member.GetValue(input))}";
+				}
+				return $"{this.Serialize(attribute.Name)}{this.Serialize(member.GetValue(input))}";
+			}
+			return $"{this.Serialize(member.Name)}{this.Serialize(member.GetValue(input))}";
 		}
 	}
 }

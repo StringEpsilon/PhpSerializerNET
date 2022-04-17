@@ -6,6 +6,7 @@
 
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PhpSerializerNET.Test.DataTypes;
 
 namespace PhpSerializerNET.Test.Deserialize.Validation {
 	[TestClass]
@@ -51,6 +52,26 @@ namespace PhpSerializerNET.Test.Deserialize.Validation {
 			);
 
 			Assert.AreEqual(expected, ex.Message);
+		}
+
+
+		[TestMethod]
+		public void ThrowOnIllegalKeyType() {
+			var ex = Assert.ThrowsException<DeserializationException>(
+				() => PhpSerialization.Deserialize<MyPhpObject>("O:8:\"stdClass\":1:{b:1;s:4:\"true\";}")
+			);
+			Assert.AreEqual(
+				"Error encountered deserizalizing an object of type 'PhpSerializerNET.Test.DataTypes.MyPhpObject': " +
+				"The key '1' (from the token at position 18) has an unsupported type of 'Boolean'.",
+				ex.Message
+			);
+		}
+
+		[TestMethod]
+		public void ThrowOnIntegerKeyPhpObject() {
+			var ex = Assert.ThrowsException<ArgumentException>(
+				() => PhpSerialization.Deserialize<PhpObjectDictionary>("O:8:\"stdClass\":1:{i:0;s:4:\"true\";}")
+			);
 		}
 	}
 }

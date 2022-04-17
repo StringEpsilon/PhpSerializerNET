@@ -211,7 +211,7 @@ namespace PhpSerializerNET {
 							while (this._input[this._position] != '}') {
 								result.Children[i++] = this.GetToken();
 							}
-						} catch (System.IndexOutOfRangeException ex) {
+						} catch (IndexOutOfRangeException ex) {
 							throw new DeserializationException(
 								$"Array at position {result.Position} should be of length {length}, " +
 								$"but actual length is {(int)((i + 1) / 2)} or more.",

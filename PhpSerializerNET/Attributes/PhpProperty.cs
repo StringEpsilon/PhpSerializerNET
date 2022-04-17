@@ -14,14 +14,20 @@ namespace PhpSerializerNET {
 		public long Key { get; set; }
 		public bool IsInteger { get; private set; } = false;
 
+		/// <summary>
+		/// Define the property key, as a string, for de/serialization.
+		/// </summary>
 		public PhpPropertyAttribute(string name) {
 			this.Name = name;
 		}
 
 		/// <summary>
-		/// Define an integer key for a given property.
+		/// Define an integer key for de/serialization.
 		/// Note: This also affects serialization into object notation, as that is a legal way of representing an object.
 		/// </summary>
+		/// <remark>
+		/// Deserialization of objects and arrays with mixed keys may yield unexpected results and or exceptions on certain target types.
+		/// </remarks>
 		public PhpPropertyAttribute(long key) {
 			this.Key = key;
 			this.IsInteger = true;

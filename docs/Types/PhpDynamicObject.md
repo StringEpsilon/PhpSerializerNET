@@ -9,6 +9,10 @@ Implements [`IPhpObject`](./IPhpObject.md).
 
 A dynamic object that can hold any property, used for deserializing object notation while providing a way to access the specified classname.
 
+**Important**:
+
+`PhpObjectDictionary` only supports string keys. You can not deserialize PHP objects with integer keys using this type. This may be addressed in future releases.
+
 ## Methods
 
 ### SetClassName
@@ -46,3 +50,4 @@ myObject.SetClassName("Person");
 PhpSerialization.Serialize(myObject);
 // O:6:"Person":2:{s:9:"firstname";s:6:"Joseph";s:8:"lastname";s:6:"Bishop";}
 ```
+

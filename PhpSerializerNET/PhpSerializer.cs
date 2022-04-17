@@ -242,12 +242,16 @@ namespace PhpSerializerNET {
 			return output.ToString();
 		}
 
-		private string SerializeMember(MemberInfo member, object input) {
+		private string SerializeMember(MemberInfo member, object input, bool isObjectMember = false) {
 			PhpPropertyAttribute attribute = (PhpPropertyAttribute)Attribute.GetCustomAttribute(
 				member,
 				typeof(PhpPropertyAttribute),
 				false
 			);
+
+			if (attribute?.IsInteger == true) {
+				return $"{this.Serialize(attribute.Key)}{this.Serialize(member.GetValue(input))}";
+			}
 
 			var propertyName = attribute != null
 				? attribute.Name

@@ -1,3 +1,7 @@
+# 1.2.0
+- Added overload of `[PhpProperty()]` that accepts integer / long keys. See [#32](https://github.com/StringEpsilon/PhpSerializerNET/issues/32)
+- Allow deserialization of Objects with integer keys
+
 # 1.1.0
 - Made type information caches thread safe.
 - Added support for PhpProperty on enums, allowing consumers to specify different field names

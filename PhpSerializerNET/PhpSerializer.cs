@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
@@ -191,11 +190,18 @@ namespace PhpSerializerNET {
 							}
 						}
 
-						output.Append($"a:{members.Count}:");
-						output.Append('{');
+						int memberCount = 0;
+						StringBuilder memberData = new();
 						foreach (var member in members) {
-							output.Append(this.SerializeMember(member, input));
+							var memberString = this.SerializeMember(member, input);
+							if (memberString != null) {
+								memberData.Append(memberString);
+								memberCount++;
+							}
 						}
+						output.Append($"a:{memberCount}:");
+						output.Append('{');
+						output.Append(memberData);
 						output.Append('}');
 						return output.ToString();
 					}
@@ -249,13 +255,20 @@ namespace PhpSerializerNET {
 				false
 			);
 
+			object key;
+			object value = member.GetValue(input);
 			if (attribute != null) {
-				if (attribute.IsInteger == true) {
-					return $"{this.Serialize(attribute.Key)}{this.Serialize(member.GetValue(input))}";
-				}
-				return $"{this.Serialize(attribute.Name)}{this.Serialize(member.GetValue(input))}";
+				key = attribute.IsInteger
+					? attribute.Key
+					: attribute.Name;
+			} else {
+				key = member.Name;
+			};
+			var filter = member.GetCustomAttribute<PhpSerializationFilter>();
+			if (filter != null) {
+				return filter.Serialize(key, value, this._options);
 			}
-			return $"{this.Serialize(member.Name)}{this.Serialize(member.GetValue(input))}";
+			return $"{this.Serialize(key)}{this.Serialize(value)}";
 		}
 	}
 }

@@ -16,14 +16,6 @@ namespace PhpSerializerNET {
 		private readonly PhpDeserializationOptions _options;
 		private readonly PhpSerializeToken _token;
 
-		private static readonly Dictionary<string, Type> TypeLookupCache = new() {
-			{ "DateTime", typeof(PhpDateTime) }
-		};
-		private static readonly object TypeLookupCacheSyncObject = new();
-
-		private static readonly Dictionary<Type, Dictionary<object, PropertyInfo>> PropertyInfoCache = new();
-		private static readonly object PropertyInfoCacheSyncObject = new();
-
 		private static Dictionary<Type, Dictionary<string, FieldInfo>> FieldInfoCache { get; set; } = new();
 		private static readonly object FieldInfoCacheCacheSyncObject = new();
 
@@ -55,10 +47,7 @@ namespace PhpSerializerNET {
 		/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
 		/// </summary>
 		public static void ClearTypeCache() {
-			lock (TypeLookupCache) {
-				TypeLookupCache.Clear();
-				TypeLookupCache.Add("DateTime", typeof(PhpDateTime));
-			}
+			TypeLookup.ClearTypeCache();
 		}
 
 		/// <summary>
@@ -66,9 +55,7 @@ namespace PhpSerializerNET {
 		/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
 		/// </summary>
 		public static void ClearPropertyInfoCache() {
-			lock (PropertyInfoCacheSyncObject) {
-				PropertyInfoCache.Clear();
-			}
+			TypeLookup.ClearPropertyInfoCache();
 
 			lock (EnumInfoCacheSyncObject) {
 				EnumInfoCache.Clear();
@@ -103,30 +90,7 @@ namespace PhpSerializerNET {
 			object constructedObject;
 			Type targetType = null;
 			if (typeName != "stdClass" && this._options.EnableTypeLookup) {
-				lock (TypeLookupCacheSyncObject) {
-					if (TypeLookupCache.ContainsKey(typeName)) {
-						targetType = TypeLookupCache[typeName];
-					} else {
-						foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(p => !p.IsDynamic)) {
-
-							targetType = assembly
-								.GetExportedTypes()
-								.Select(type => new { type, attribute = type.GetCustomAttribute<PhpClass>() })
-								// PhpClass attribute should win over classes who happen to have the name
-								.OrderBy(c => c.attribute != null ? 0 : 1)
-								.Where(y => y.type.Name == typeName || y.attribute?.Name == typeName)
-								.Select(c => c.type)
-								.FirstOrDefault();
-
-							if (targetType != null) {
-								break;
-							}
-						}
-						if (this._options.TypeCache.HasFlag(TypeCacheFlag.ClassNames)) {
-							TypeLookupCache.Add(typeName, targetType);
-						}
-					}
-				}
+				targetType = TypeLookup.FindTypeInAssymbly(typeName, this._options.TypeCache.HasFlag(TypeCacheFlag.ClassNames));
 			}
 			if (targetType != null && typeName != "stdClass") {
 				constructedObject = this.DeserializeToken(targetType, token);
@@ -392,17 +356,7 @@ namespace PhpSerializerNET {
 
 		private object MakeObject(Type targetType, PhpSerializeToken token) {
 			var result = Activator.CreateInstance(targetType);
-			Dictionary<object, PropertyInfo> properties;
-			lock (PropertyInfoCacheSyncObject) {
-				if (PropertyInfoCache.ContainsKey(targetType)) {
-					properties = PropertyInfoCache[targetType];
-				} else {
-					properties = targetType.GetProperties().GetAllProperties(this._options);
-					if (this._options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
-						PropertyInfoCache.Add(targetType, properties);
-					}
-				}
-			}
+			Dictionary<object, PropertyInfo> properties = TypeLookup.GetPropertyInfos(targetType, this._options);
 
 			for (int i = 0; i < token.Children.Length; i += 2) {
 				object propertyName;

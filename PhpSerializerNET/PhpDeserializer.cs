@@ -16,11 +16,7 @@ namespace PhpSerializerNET {
 		private readonly PhpDeserializationOptions _options;
 		private readonly PhpSerializeToken _token;
 
-		private static Dictionary<Type, Dictionary<string, FieldInfo>> FieldInfoCache { get; set; } = new();
-		private static readonly object FieldInfoCacheCacheSyncObject = new();
 
-		private static Dictionary<Type, Dictionary<string, FieldInfo>> EnumInfoCache { get; set; } = new();
-		private static readonly object EnumInfoCacheSyncObject = new();
 
 		public PhpDeserializer(string input, PhpDeserializationOptions options) {
 			_options = options;
@@ -56,10 +52,6 @@ namespace PhpSerializerNET {
 		/// </summary>
 		public static void ClearPropertyInfoCache() {
 			TypeLookup.ClearPropertyInfoCache();
-
-			lock (EnumInfoCacheSyncObject) {
-				EnumInfoCache.Clear();
-			}
 		}
 
 		private object DeserializeToken(PhpSerializeToken token) {
@@ -233,7 +225,6 @@ namespace PhpSerializerNET {
 
 			if (targetType.IsEnum) {
 				// Enums are converted by name if the token is a string and by underlying value if they are not
-
 				if (token.Value == "" && this._options.EmptyStringToDefault) {
 					return Activator.CreateInstance(targetType);
 				}
@@ -242,31 +233,7 @@ namespace PhpSerializerNET {
 					return Enum.Parse(targetType, token.Value);
 				}
 
-
-				FieldInfo foundFieldInfo = null;
-				if (this._options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
-					lock (EnumInfoCacheSyncObject) {
-						if (!EnumInfoCache.ContainsKey(targetType)) {
-							EnumInfoCache.Add(targetType, new());
-						}
-						if (EnumInfoCache[targetType].ContainsKey(token.Value)) {
-							foundFieldInfo = EnumInfoCache[targetType][token.Value];
-						}
-					}
-				}
-
-				if (foundFieldInfo == null) {
-					foundFieldInfo = targetType
-						.GetFields()
-						.Select(fieldInfo => new { fieldInfo, phpPropertyAttribute = fieldInfo.GetCustomAttribute<PhpPropertyAttribute>() })
-						.FirstOrDefault(c => c.fieldInfo.Name == token.Value || c.phpPropertyAttribute != null && c.phpPropertyAttribute.Name == token.Value)
-						?.fieldInfo;
-					if (this._options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
-						lock (EnumInfoCacheSyncObject) {
-							EnumInfoCache[targetType].Add(token.Value, foundFieldInfo);
-						}
-					}
-				}
+				FieldInfo foundFieldInfo = TypeLookup.GetEnumInfo(targetType, token.Value, this._options);
 
 				if (foundFieldInfo == null) {
 					throw new DeserializationException(
@@ -315,17 +282,7 @@ namespace PhpSerializerNET {
 
 		private object MakeStruct(Type targetType, PhpSerializeToken token) {
 			var result = Activator.CreateInstance(targetType);
-			Dictionary<string, FieldInfo> fields;
-			lock (FieldInfoCacheCacheSyncObject) {
-				if (FieldInfoCache.ContainsKey(targetType)) {
-					fields = FieldInfoCache[targetType];
-				} else {
-					fields = targetType.GetFields().GetAllFields(this._options);
-					if (this._options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo)) {
-						FieldInfoCache.Add(targetType, fields);
-					}
-				}
-			}
+			Dictionary<string, FieldInfo> fields = TypeLookup.GetFieldInfos(targetType, this._options);
 
 			for (int i = 0; i < token.Children.Length; i += 2) {
 				var fieldName = this._options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();
@@ -401,7 +358,7 @@ namespace PhpSerializerNET {
 
 		private object MakeArray(Type targetType, PhpSerializeToken token) {
 			var elementType = targetType.GetElementType() ?? throw new InvalidOperationException("targetType.GetElementType() returned null");
-			Array result = System.Array.CreateInstance(elementType, token.Children.Length / 2);
+			Array result = Array.CreateInstance(elementType, token.Children.Length / 2);
 
 			var arrayIndex = 0;
 			for (int i = 1; i < token.Children.Length; i += 2) {

@@ -20,6 +20,8 @@ namespace PhpSerializerNET {
 		};
 
 		private static readonly Dictionary<Type, Dictionary<object, PropertyInfo>> PropertyInfoCache = new();
+		private static Dictionary<Type, Dictionary<string, FieldInfo>> FieldInfoCache { get; set; } = new();
+		private static Dictionary<Type, Dictionary<string, FieldInfo>> EnumInfoCache { get; set; } = new();
 
 
 		/// <summary>
@@ -41,10 +43,9 @@ namespace PhpSerializerNET {
 			lock (PropertyInfoCache) {
 				PropertyInfoCache.Clear();
 			}
-
-			// lock (EnumInfoCacheSyncObject) {
-			// 	EnumInfoCache.Clear();
-			// }
+			lock (EnumInfoCache) {
+				EnumInfoCache.Clear();
+			}
 		}
 
 		public static Type FindTypeInAssymbly(string typeName, bool cacheEnabled) {
@@ -96,5 +97,51 @@ namespace PhpSerializerNET {
 			}
 			return properties;
 		}
+
+		public static Dictionary<string, FieldInfo> GetFieldInfos(Type targetType, PhpDeserializationOptions options) {
+			bool cacheEnabled = options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo);
+			if (cacheEnabled) {
+				lock (FieldInfoCache) {
+					if (FieldInfoCache.ContainsKey(targetType)) {
+						return FieldInfoCache[targetType];
+					}
+				}
+			}
+
+			Dictionary<string, FieldInfo> fields = targetType.GetFields().GetAllFields(options);
+			if (cacheEnabled) {
+				lock (FieldInfoCache) {
+					FieldInfoCache.Add(targetType, fields);
+				}
+			}
+			return fields;
+		}
+
+		public static FieldInfo GetEnumInfo(Type targetType, string value, PhpDeserializationOptions options) {
+			bool cacheEnabled = options.TypeCache.HasFlag(TypeCacheFlag.PropertyInfo);
+			if (cacheEnabled) {
+				lock (EnumInfoCache) {
+					if (!EnumInfoCache.ContainsKey(targetType)) {
+						EnumInfoCache.Add(targetType, new());
+					}
+					if (EnumInfoCache[targetType].ContainsKey(value)) {
+						return EnumInfoCache[targetType][value];
+					}
+				}
+			}
+
+			FieldInfo foundFieldInfo = targetType
+				.GetFields()
+				.Select(fieldInfo => new { fieldInfo, phpPropertyAttribute = fieldInfo.GetCustomAttribute<PhpPropertyAttribute>() })
+				.FirstOrDefault(c => c.fieldInfo.Name == value || c.phpPropertyAttribute != null && c.phpPropertyAttribute.Name == value)
+				?.fieldInfo;
+			if (cacheEnabled) {
+				lock (EnumInfoCache) {
+					EnumInfoCache[targetType].Add(value, foundFieldInfo);
+				}
+			}
+			return foundFieldInfo;
+		}
 	}
 }
+

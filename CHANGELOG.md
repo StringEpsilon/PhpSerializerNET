@@ -1,3 +1,6 @@
+# 1.3.0
+- Removed net5 support and added net7 support
+
 # 1.2.0
 - Added overload of `[PhpProperty()]` that accepts integer / long keys. See [#32](https://github.com/StringEpsilon/PhpSerializerNET/issues/32)
 - Allow deserialization of Objects with integer keys

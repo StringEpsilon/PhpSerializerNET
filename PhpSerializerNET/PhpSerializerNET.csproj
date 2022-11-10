@@ -14,8 +14,10 @@
 		<PackageProjectUrl>https://github.com/StringEpsilon/PhpSerializerNET</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/StringEpsilon/PhpSerializerNET</RepositoryUrl>
 		<RespositoryType>git</RespositoryType>
+		<PackageIcon>icon.png</PackageIcon>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="..\LICENSE" Pack="true" PackagePath="/"/>
+		<None Include="..\assets\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 </Project>

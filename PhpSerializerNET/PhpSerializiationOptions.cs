@@ -5,24 +5,23 @@
 **/
 using System;
 
-namespace PhpSerializerNET {
+namespace PhpSerializerNET;
+
+/// <summary>
+/// Options for serializing objects.
+/// </summary>
+public class PhpSerializiationOptions {
+	/// <summary>
+	/// Whether or not to throw on encountering a circular reference or to terminate it with null.
+	/// Default false.
+	/// </summary>
+	public bool ThrowOnCircularReferences { get; set; } = false;
 
 	/// <summary>
-	/// Options for serializing objects.
+	/// Whether to serialize enums as numeric values (integers) or using their string representation
+	/// (via <see cref="Enum.ToString()"/>)
 	/// </summary>
-	public class PhpSerializiationOptions {
-		/// <summary>
-		/// Whether or not to throw on encountering a circular reference or to terminate it with null.
-		/// Default false.
-		/// </summary>
-		public bool ThrowOnCircularReferences { get; set; } = false;
+	public bool NumericEnums { get; set; } = true;
 
-		/// <summary>
-		/// Whether to serialize enums as numeric values (integers) or using their string representation
-		/// (via <see cref="Enum.ToString()"/>)
-		/// </summary>
-		public bool NumericEnums { get; set; } = true;
-
-		internal static PhpSerializiationOptions DefaultOptions = new();
-	}
+	internal static PhpSerializiationOptions DefaultOptions = new();
 }

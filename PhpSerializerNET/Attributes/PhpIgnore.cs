@@ -7,9 +7,9 @@
 
 using System;
 
-namespace PhpSerializerNET {
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public class PhpIgnoreAttribute : Attribute {
-		public PhpIgnoreAttribute() { }
-	}
+namespace PhpSerializerNET;
+
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+public class PhpIgnoreAttribute : Attribute {
+	public PhpIgnoreAttribute() { }
 }

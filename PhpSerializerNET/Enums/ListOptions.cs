@@ -4,24 +4,24 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-namespace PhpSerializerNET {
+namespace PhpSerializerNET;
+
+/// <summary>
+/// Available behaviors for dealing with associative arrays and their conversion to Lists.
+/// </summary>
+public enum ListOptions {
 	/// <summary>
-	/// Available behaviors for dealing with associative arrays and their conversion to Lists.
+	/// Convert associative array to list when all keys are consecutive integers
 	/// </summary>
-	public enum ListOptions {
-		/// <summary>
-		/// Convert associative array to list when all keys are consecutive integers
-		/// </summary>
-		Default,
+	Default,
 
-		/// <summary>
-		/// Convert associative array to list when all keys are integers, consecutiveh or not.
-		/// </summary>
-		OnAllIntegerKeys,
+	/// <summary>
+	/// Convert associative array to list when all keys are integers, consecutiveh or not.
+	/// </summary>
+	OnAllIntegerKeys,
 
-		/// <summary>
-		/// Always use dictionaries.
-		/// </summary>
-		Never
-	}
+	/// <summary>
+	/// Always use dictionaries.
+	/// </summary>
+	Never
 }

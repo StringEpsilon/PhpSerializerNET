@@ -7,30 +7,30 @@
 
 using System;
 
-namespace PhpSerializerNET {
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public class PhpPropertyAttribute : Attribute {
-		public string Name { get; set; }
-		public long Key { get; set; }
-		public bool IsInteger { get; private set; } = false;
+namespace PhpSerializerNET;
 
-		/// <summary>
-		/// Define the property key, as a string, for de/serialization.
-		/// </summary>
-		public PhpPropertyAttribute(string name) {
-			this.Name = name;
-		}
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+public class PhpPropertyAttribute : Attribute {
+	public string Name { get; set; }
+	public long Key { get; set; }
+	public bool IsInteger { get; private set; } = false;
 
-		/// <summary>
-		/// Define an integer key for de/serialization.
-		/// Note: This also affects serialization into object notation, as that is a legal way of representing an object.
-		/// </summary>
-		/// <remark>
-		/// Deserialization of objects and arrays with mixed keys may yield unexpected results and or exceptions on certain target types.
-		/// </remarks>
-		public PhpPropertyAttribute(long key) {
-			this.Key = key;
-			this.IsInteger = true;
-		}
+	/// <summary>
+	/// Define the property key, as a string, for de/serialization.
+	/// </summary>
+	public PhpPropertyAttribute(string name) {
+		this.Name = name;
+	}
+
+	/// <summary>
+	/// Define an integer key for de/serialization.
+	/// Note: This also affects serialization into object notation, as that is a legal way of representing an object.
+	/// </summary>
+	/// <remark>
+	/// Deserialization of objects and arrays with mixed keys may yield unexpected results and or exceptions on certain target types.
+	/// </remarks>
+	public PhpPropertyAttribute(long key) {
+		this.Key = key;
+		this.IsInteger = true;
 	}
 }

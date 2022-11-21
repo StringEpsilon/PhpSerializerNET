@@ -8,88 +8,88 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-namespace PhpSerializerNET {
-	internal static class ArrayExtensions {
+namespace PhpSerializerNET;
 
-		public static string Utf8Substring(this byte[] array, int start, int length, Encoding encoding) {
-			if (length > array.Length - start) {
-				return "";
-			}
+internal static class ArrayExtensions {
 
-			if (encoding == Encoding.UTF8) {
-				// Using the ReadonlySpan<> saves some copying:
-				return Encoding.UTF8.GetString(new System.ReadOnlySpan<byte>(array, start, length));
-			} else {
-				// Sadly, Encoding.Convert does not accept a Span.
-				byte[] substring = new byte[length];
-				System.Buffer.BlockCopy(array, start, substring, 0, length);
-				return Encoding.UTF8.GetString(
-					Encoding.Convert(encoding, Encoding.UTF8, substring)
-				);
-			}
+	public static string Utf8Substring(this byte[] array, int start, int length, Encoding encoding) {
+		if (length > array.Length - start) {
+			return "";
 		}
 
-		public static Dictionary<object, PropertyInfo> GetAllProperties(this PropertyInfo[] properties, PhpDeserializationOptions options) {
-			var result = new Dictionary<object, PropertyInfo>(properties.Length);
-			foreach (var property in properties) {
-				var isIgnored = false;
-				var attributes = PhpPropertyAttribute.GetCustomAttributes(property, false);
-				PhpPropertyAttribute phpPropertyAttribute = null;
-				foreach (var attribute in attributes) {
-					if (attribute is PhpIgnoreAttribute) {
-						isIgnored = true;
-						break;
-					}
-					if (attribute is PhpPropertyAttribute foundAttribute) {
-						phpPropertyAttribute = foundAttribute;
-					}
-				}
-				if (phpPropertyAttribute != null) {
-					if (phpPropertyAttribute.IsInteger) {
-						result.Add(phpPropertyAttribute.Key, isIgnored ? null : property);
-					} else {
-						var attributeName = options.CaseSensitiveProperties
-							? phpPropertyAttribute.Name
-							: phpPropertyAttribute.Name.ToLower();
-						result.Add(attributeName, isIgnored ? null : property);
-					}
-				}
-				var propertyName = options.CaseSensitiveProperties
-						? property.Name
-						: property.Name.ToLower();
-				result.Add(propertyName, isIgnored ? null : property);
-			}
-			return result;
+		if (encoding == Encoding.UTF8) {
+			// Using the ReadonlySpan<> saves some copying:
+			return Encoding.UTF8.GetString(new System.ReadOnlySpan<byte>(array, start, length));
+		} else {
+			// Sadly, Encoding.Convert does not accept a Span.
+			byte[] substring = new byte[length];
+			System.Buffer.BlockCopy(array, start, substring, 0, length);
+			return Encoding.UTF8.GetString(
+				Encoding.Convert(encoding, Encoding.UTF8, substring)
+			);
 		}
+	}
 
-		public static Dictionary<string, FieldInfo> GetAllFields(this FieldInfo[] fields, PhpDeserializationOptions options) {
-			var result = new Dictionary<string, FieldInfo>(fields.Length);
-			foreach (var field in fields) {
-				var isIgnored = false;
-				var attributes = PhpPropertyAttribute.GetCustomAttributes(field, false);
-				PhpPropertyAttribute phpPropertyAttribute = null;
-				foreach (var attribute in attributes) {
-					if (attribute is PhpIgnoreAttribute) {
-						isIgnored = true;
-						break;
-					}
-					if (attribute is PhpPropertyAttribute foundAttribute) {
-						phpPropertyAttribute = foundAttribute;
-					}
+	public static Dictionary<object, PropertyInfo> GetAllProperties(this PropertyInfo[] properties, PhpDeserializationOptions options) {
+		var result = new Dictionary<object, PropertyInfo>(properties.Length);
+		foreach (var property in properties) {
+			var isIgnored = false;
+			var attributes = PhpPropertyAttribute.GetCustomAttributes(property, false);
+			PhpPropertyAttribute phpPropertyAttribute = null;
+			foreach (var attribute in attributes) {
+				if (attribute is PhpIgnoreAttribute) {
+					isIgnored = true;
+					break;
 				}
-				if (phpPropertyAttribute != null) {
+				if (attribute is PhpPropertyAttribute foundAttribute) {
+					phpPropertyAttribute = foundAttribute;
+				}
+			}
+			if (phpPropertyAttribute != null) {
+				if (phpPropertyAttribute.IsInteger) {
+					result.Add(phpPropertyAttribute.Key, isIgnored ? null : property);
+				} else {
 					var attributeName = options.CaseSensitiveProperties
 						? phpPropertyAttribute.Name
 						: phpPropertyAttribute.Name.ToLower();
-					result.Add(attributeName, isIgnored ? null : field);
+					result.Add(attributeName, isIgnored ? null : property);
 				}
-
-				var fieldName = options.CaseSensitiveProperties
-						? field.Name
-						: field.Name.ToLower();
-				result.Add(fieldName, isIgnored ? null : field);
 			}
-			return result;
+			var propertyName = options.CaseSensitiveProperties
+					? property.Name
+					: property.Name.ToLower();
+			result.Add(propertyName, isIgnored ? null : property);
 		}
+		return result;
+	}
+
+	public static Dictionary<string, FieldInfo> GetAllFields(this FieldInfo[] fields, PhpDeserializationOptions options) {
+		var result = new Dictionary<string, FieldInfo>(fields.Length);
+		foreach (var field in fields) {
+			var isIgnored = false;
+			var attributes = PhpPropertyAttribute.GetCustomAttributes(field, false);
+			PhpPropertyAttribute phpPropertyAttribute = null;
+			foreach (var attribute in attributes) {
+				if (attribute is PhpIgnoreAttribute) {
+					isIgnored = true;
+					break;
+				}
+				if (attribute is PhpPropertyAttribute foundAttribute) {
+					phpPropertyAttribute = foundAttribute;
+				}
+			}
+			if (phpPropertyAttribute != null) {
+				var attributeName = options.CaseSensitiveProperties
+					? phpPropertyAttribute.Name
+					: phpPropertyAttribute.Name.ToLower();
+				result.Add(attributeName, isIgnored ? null : field);
+			}
+
+			var fieldName = options.CaseSensitiveProperties
+					? field.Name
+					: field.Name.ToLower();
+			result.Add(fieldName, isIgnored ? null : field);
+		}
+		return result;
 	}
 }

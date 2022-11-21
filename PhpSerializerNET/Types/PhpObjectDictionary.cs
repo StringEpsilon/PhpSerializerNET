@@ -6,20 +6,19 @@
 
 using System.Collections.Generic;
 
-namespace PhpSerializerNET {
+namespace PhpSerializerNET;
 
-	/// <summary>
-	/// Represents a php object as a <see cref="Dictionary{string,object}"/> where TKey = <see cref="string"/> and TValue = <see cref="object"/>.
-	/// </summary>
-	public class PhpObjectDictionary : Dictionary<string, object>, IPhpObject {
-		private string _className;
+/// <summary>
+/// Represents a php object as a <see cref="Dictionary{string,object}"/> where TKey = <see cref="string"/> and TValue = <see cref="object"/>.
+/// </summary>
+public class PhpObjectDictionary : Dictionary<string, object>, IPhpObject {
+	private string _className;
 
-		public string GetClassName() {
-			return this._className;
-		}
+	public string GetClassName() {
+		return this._className;
+	}
 
-		public void SetClassName(string className) {
-			this._className = className;
-		}
+	public void SetClassName(string className) {
+		this._className = className;
 	}
 }

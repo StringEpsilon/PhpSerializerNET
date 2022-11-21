@@ -7,31 +7,31 @@
 using System.Collections.Generic;
 using System.Dynamic;
 
-namespace PhpSerializerNET {
-	public class PhpDynamicObject : DynamicObject, IPhpObject {
-		private readonly PhpObjectDictionary _dictionary = new();
+namespace PhpSerializerNET;
 
-		public PhpDynamicObject() { }
+public class PhpDynamicObject : DynamicObject, IPhpObject {
+	private readonly PhpObjectDictionary _dictionary = new();
 
-		public void SetClassName(string className) => this._dictionary.SetClassName(className);
-		public string GetClassName() => this._dictionary.GetClassName();
+	public PhpDynamicObject() { }
 
-		internal void TryAdd(string key, object value) => this._dictionary.TryAdd(key, value);
+	public void SetClassName(string className) => this._dictionary.SetClassName(className);
+	public string GetClassName() => this._dictionary.GetClassName();
 
-		internal object GetMember(string name) {
-			return this._dictionary[name];
-		}
+	internal void TryAdd(string key, object value) => this._dictionary.TryAdd(key, value);
 
-		public override IEnumerable<string> GetDynamicMemberNames() {
-			return this._dictionary.Keys;
-		}
+	internal object GetMember(string name) {
+		return this._dictionary[name];
+	}
 
-		public override bool TryGetMember(GetMemberBinder binder, out object result) {
-			return this._dictionary.TryGetValue(binder.Name, out result);
-		}
-		public override bool TrySetMember(SetMemberBinder binder, object value) {
-			this._dictionary[binder.Name] = value;
-			return true;
-		}
+	public override IEnumerable<string> GetDynamicMemberNames() {
+		return this._dictionary.Keys;
+	}
+
+	public override bool TryGetMember(GetMemberBinder binder, out object result) {
+		return this._dictionary.TryGetValue(binder.Name, out result);
+	}
+	public override bool TrySetMember(SetMemberBinder binder, object value) {
+		this._dictionary[binder.Name] = value;
+		return true;
 	}
 }

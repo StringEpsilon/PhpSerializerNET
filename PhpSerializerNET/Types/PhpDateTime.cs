@@ -6,25 +6,24 @@
 
 using System;
 
-namespace PhpSerializerNET {
+namespace PhpSerializerNET;
 
-	[PhpClass("DateTime")]
-	public class PhpDateTime : IPhpObject {
-		[PhpProperty("date")]
-		public string Date { get; set; }
+[PhpClass("DateTime")]
+public class PhpDateTime : IPhpObject {
+	[PhpProperty("date")]
+	public string Date { get; set; }
 
-		[PhpProperty("timezone_type")]
-		public int TimezoneType { get; set; }
+	[PhpProperty("timezone_type")]
+	public int TimezoneType { get; set; }
 
-		[PhpProperty("timezone")]
-		public string Timezone { get; set; }
+	[PhpProperty("timezone")]
+	public string Timezone { get; set; }
 
-		public string GetClassName() {
-			return "DateTime";
-		}
+	public string GetClassName() {
+		return "DateTime";
+	}
 
-		public void SetClassName(string className) {
-			throw new InvalidOperationException("Cannot set name on object of type " + nameof(PhpDateTime) + " name is of constant " + this.GetClassName());
-		}
+	public void SetClassName(string className) {
+		throw new InvalidOperationException("Cannot set name on object of type " + nameof(PhpDateTime) + " name is of constant " + this.GetClassName());
 	}
 }

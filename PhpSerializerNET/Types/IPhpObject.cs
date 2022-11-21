@@ -4,21 +4,21 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-namespace PhpSerializerNET {
-	[PhpClass()]
-	public interface IPhpObject {
-		/// <summary>
-		/// Get the class name that was specified in the serialization data of the object.
-		/// </summary>
-		/// <returns>
-		/// The class name.
-		/// </returns>
-		public string GetClassName();
+namespace PhpSerializerNET;
 
-		/// <summary>
-		/// Set the class name of the object for serialization.
-		/// </summary>
-		/// <param name="className">The class name.</param>
-		public void SetClassName(string className);
-	}
+[PhpClass()]
+public interface IPhpObject {
+	/// <summary>
+	/// Get the class name that was specified in the serialization data of the object.
+	/// </summary>
+	/// <returns>
+	/// The class name.
+	/// </returns>
+	public string GetClassName();
+
+	/// <summary>
+	/// Set the class name of the object for serialization.
+	/// </summary>
+	/// <param name="className">The class name.</param>
+	public void SetClassName(string className);
 }

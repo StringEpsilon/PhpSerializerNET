@@ -5,6 +5,7 @@
 **/
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace PhpSerializerNET;
@@ -33,6 +34,7 @@ public class PhpTokenizer {
 		this._lastIndex = this._input.Length - 1;
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void CheckBounds(string expectation) {
 		if (this._lastIndex < this._position) {
 			throw new DeserializationException(
@@ -41,6 +43,7 @@ public class PhpTokenizer {
 		}
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void CheckBounds(char expectation) {
 		if (this._lastIndex < this._position) {
 			throw new DeserializationException(
@@ -49,6 +52,7 @@ public class PhpTokenizer {
 		}
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 	private PhpSerializerType GetDataType() {
 		var result = (char)this._input[this._position] switch {
 			'N' => PhpSerializerType.Null,
@@ -74,14 +78,16 @@ public class PhpTokenizer {
 		this._position++;
 	}
 
+	// [MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetTerminator() {
 		this.GetCharacter(';');
 	}
-
+	// [MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetDelimiter() {
 		this.GetCharacter(':');
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private string GetNumbers(bool isFloating) {
 		bool valid = true;
 		int start = this._position;
@@ -116,6 +122,7 @@ public class PhpTokenizer {
 	}
 
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private int GetLength(PhpSerializerType dataType) {
 		int length = 0;
 
@@ -130,6 +137,7 @@ public class PhpTokenizer {
 		return length;
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private string GetBoolean() {
 		this.CheckBounds("0' or '1");
 
@@ -144,14 +152,18 @@ public class PhpTokenizer {
 		return result;
 	}
 
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetBracketClose() {
 		this.GetCharacter('}');
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetBracketOpen() {
 		this.GetCharacter('{');
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private string GetNCharacters(int length) {
 		if (this._position + length > this._lastIndex) {
 			throw new DeserializationException(
@@ -163,93 +175,120 @@ public class PhpTokenizer {
 		return this._input.Utf8Substring(start, length, this._inputEncoding);
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	internal PhpSerializeToken GetToken() {
-		var result = new PhpSerializeToken {
-			Position = this._position,
-			Type = this.GetDataType()
+		return this.GetDataType() switch {
+			PhpSerializerType.Boolean => this.GetBooleanToken(),
+			PhpSerializerType.Null => this.GetNullToken(),
+			PhpSerializerType.String => this.GetStringToken(),
+			PhpSerializerType.Integer => this.GetIntegerToken(),
+			PhpSerializerType.Floating => this.GetFloatingToken(),
+			PhpSerializerType.Array => this.GetArrayToken(),
+			PhpSerializerType.Object => this.GetObjectToken(),
+			_ => new PhpSerializeToken()
 		};
-		switch (result.Type) {
-			case PhpSerializerType.Boolean: {
-					this.GetDelimiter();
-					result.Value = this.GetBoolean();
-					this.GetTerminator();
-					break;
-				}
-			case PhpSerializerType.Null: {
-					this.GetTerminator();
-					break;
-				}
-			case PhpSerializerType.String: {
-					this.GetDelimiter();
-					int length = this.GetLength(result.Type);
-					this.GetDelimiter();
-					this.GetCharacter('"');
-					result.Value = this.GetNCharacters(length);
-					this.GetCharacter('"');
-					this.GetTerminator();
-					break;
-				}
-			case PhpSerializerType.Integer: {
-					this.GetDelimiter();
-					result.Value = this.GetNumbers(false);
-					this.GetTerminator();
-					break;
-				}
-			case PhpSerializerType.Floating: {
-					this.GetDelimiter();
-					result.Value = this.GetNumbers(true);
-					this.GetTerminator();
-					break;
-				}
-			case PhpSerializerType.Array: {
-					this.GetDelimiter();
-					int length = this.GetLength(result.Type);
-					this.GetDelimiter();
-					this.GetBracketOpen();
-					result.Children = new PhpSerializeToken[length * 2];
-					int i = 0;
-					try {
-						while (this._input[this._position] != '}') {
-							result.Children[i++] = this.GetToken();
-						}
-					} catch (IndexOutOfRangeException ex) {
-						throw new DeserializationException(
-							$"Array at position {result.Position} should be of length {length}, " +
-							$"but actual length is {(int)((i + 1) / 2)} or more.",
-							ex
-						);
-					}
-					this.GetBracketClose();
-					break;
-				}
-			case PhpSerializerType.Object: {
-					this.GetDelimiter();
-					int classNamelength = this.GetLength(result.Type);
-					this.GetDelimiter();
-					this.GetCharacter('"');
-					result.Value = this.GetNCharacters(classNamelength);
-					this.GetCharacter('"');
-					this.GetDelimiter();
-					int propertyCount = this.GetLength(result.Type);
-					this.GetDelimiter();
-					this.GetBracketOpen();
-					result.Children = new PhpSerializeToken[propertyCount * 2];
-					int i = 0;
-					try {
-						while (this._input[this._position] != '}') {
-							result.Children[i++] = this.GetToken();
-						}
-					} catch (System.IndexOutOfRangeException ex) {
-						throw new DeserializationException(
-							$"Object at position {result.Position} should have {propertyCount} properties, " +
-							$"but actually has {(int)((i + 1) / 2)} or more properties.",
-							ex
-						);
-					}
-					this.GetBracketClose();
-					break;
-				}
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private PhpSerializeToken GetObjectToken() {
+		var result = new PhpSerializeToken() {
+			Type = PhpSerializerType.Object,
+			Position = _position - 1,
+		};
+		this.GetDelimiter();
+		int classNamelength = this.GetLength(PhpSerializerType.Object);
+		this.GetDelimiter();
+		this.GetCharacter('"');
+		result.Value = this.GetNCharacters(classNamelength);
+		this.GetCharacter('"');
+		this.GetDelimiter();
+		int propertyCount = this.GetLength(PhpSerializerType.Object);
+		this.GetDelimiter();
+		this.GetBracketOpen();
+		result.Children = new PhpSerializeToken[propertyCount * 2];
+		int i = 0;
+		try {
+			while (this._input[this._position] != '}') {
+				result.Children[i++] = this.GetToken();
+			}
+		} catch (System.IndexOutOfRangeException ex) {
+			throw new DeserializationException(
+				$"Object at position {result.Position} should have {propertyCount} properties, " +
+				$"but actually has {(int)((i + 1) / 2)} or more properties.",
+				ex
+			);
 		}
+		this.GetBracketClose();
+		return result;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private PhpSerializeToken GetArrayToken() {
+		var result = new PhpSerializeToken() { Type = PhpSerializerType.Array, Position = _position - 1 };
+		this.GetDelimiter();
+		int length = this.GetLength(PhpSerializerType.Array);
+		this.GetDelimiter();
+		this.GetBracketOpen();
+		result.Children = new PhpSerializeToken[length * 2];
+		int i = 0;
+		try {
+			while (this._input[this._position] != '}') {
+				result.Children[i++] = this.GetToken();
+			}
+		} catch (IndexOutOfRangeException ex) {
+			throw new DeserializationException(
+				$"Array at position {result.Position} should be of length {length}, " +
+				$"but actual length is {(int)((i + 1) / 2)} or more.",
+				ex
+			);
+		}
+		this.GetBracketClose();
+		return result;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private PhpSerializeToken GetFloatingToken() {
+		var result = new PhpSerializeToken() { Type = PhpSerializerType.Floating, Position = _position - 1 };
+		this.GetDelimiter();
+		result.Value = this.GetNumbers(true);
+		this.GetTerminator();
+		return result;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private PhpSerializeToken GetIntegerToken() {
+		var result = new PhpSerializeToken() { Type = PhpSerializerType.Integer, Position = _position - 1 };
+		this.GetDelimiter();
+		result.Value = this.GetNumbers(false);
+		this.GetTerminator();
+		return result;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private PhpSerializeToken GetStringToken() {
+		var result = new PhpSerializeToken() { Type = PhpSerializerType.String, Position = _position - 1 };
+		this.GetDelimiter();
+		int length = this.GetLength(result.Type);
+		this.GetDelimiter();
+		this.GetCharacter('"');
+		result.Value = this.GetNCharacters(length);
+		this.GetCharacter('"');
+		this.GetTerminator();
+		return result;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private PhpSerializeToken GetNullToken() {
+		this.GetTerminator();
+		return new PhpSerializeToken() { Type = PhpSerializerType.Null, Position = _position - 2 };
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private PhpSerializeToken GetBooleanToken() {
+		var result = new PhpSerializeToken() { Type = PhpSerializerType.Boolean, Position = _position - 1 };
+		this.GetDelimiter();
+		result.Value = this.GetBoolean();
+		this.GetTerminator();
 		return result;
 	}
 

@@ -1,3 +1,7 @@
+# Future
+- Improved tokenization performance by allowing and forcing more aggresive inlining.
+  - In my benchmark, this is about 8 to 9% faster
+
 # 1.3.0
 - Removed net5 support and added net7 support
 

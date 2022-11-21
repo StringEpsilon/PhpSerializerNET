@@ -56,14 +56,14 @@ internal class PhpDeserializer {
 	private object DeserializeToken(PhpSerializeToken token) {
 		switch (token.Type) {
 			case PhpSerializerType.Boolean:
-				return token.ToBool();
+				return token.Value.PhpToBool();
 			case PhpSerializerType.Integer:
-				return token.ToLong();
+				return token.Value.PhpToLong();
 			case PhpSerializerType.Floating:
-				return token.ToDouble();
+				return token.Value.PhpToDouble();
 			case PhpSerializerType.String:
 				if (this._options.NumberStringToBool && (token.Value == "0" || token.Value == "1")) {
-					return token.ToBool();
+					return token.Value.PhpToBool();
 				}
 				return token.Value;
 			case PhpSerializerType.Array:
@@ -173,7 +173,7 @@ internal class PhpDeserializer {
 
 	private object DeserializeDouble(Type targetType, PhpSerializeToken token) {
 		if (targetType == typeof(double) || targetType == typeof(float)) {
-			return token.ToDouble();
+			return token.Value.PhpToDouble();
 		}
 
 		token.Value = token.Value switch {
@@ -186,7 +186,7 @@ internal class PhpDeserializer {
 
 	private static object DeserializeBoolean(Type targetType, PhpSerializeToken token) {
 		if (targetType == typeof(bool) || targetType == typeof(bool?)) {
-			return token.ToBool();
+			return token.Value.PhpToBool();
 		}
 		Type underlyingType = targetType;
 		if (targetType.IsNullableReferenceType()) {
@@ -194,7 +194,7 @@ internal class PhpDeserializer {
 		}
 
 		if (underlyingType.IsIConvertible()) {
-			return ((IConvertible)token.ToBool()).ToType(underlyingType, CultureInfo.InvariantCulture);
+			return ((IConvertible)token.Value.PhpToBool()).ToType(underlyingType, CultureInfo.InvariantCulture);
 		} else {
 			throw new DeserializationException(
 				$"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}."
@@ -250,7 +250,7 @@ internal class PhpDeserializer {
 
 			if (targetType == typeof(bool)) {
 				if (_options.NumberStringToBool && token.Value is "0" or "1") {
-					return token.ToBool();
+					return token.Value.PhpToBool();
 				}
 			}
 
@@ -319,7 +319,7 @@ internal class PhpDeserializer {
 			if (token.Children[i].Type == PhpSerializerType.String) {
 				propertyName = this._options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();
 			} else if (token.Children[i].Type == PhpSerializerType.Integer) {
-				propertyName = token.Children[i].ToLong();
+				propertyName = token.Children[i].Value.PhpToLong();
 			} else {
 				throw new DeserializationException(
 					$"Error encountered deserizalizing an object of type '{targetType.FullName}': " +
@@ -450,7 +450,7 @@ internal class PhpDeserializer {
 				isList = false;
 				break;
 			} else {
-				var key = token.Children[i].ToLong();
+				var key = token.Children[i].Value.PhpToLong();
 				if (i == 0 || key == previousKey + 1) {
 					previousKey = key;
 				} else {

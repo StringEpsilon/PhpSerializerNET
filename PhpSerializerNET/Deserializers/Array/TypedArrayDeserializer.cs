@@ -9,6 +9,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 
 namespace PhpSerializerNET;
 
@@ -17,14 +19,11 @@ internal class TypedArrayDeserializer : ArrayDeserializer {
 	}
 
 	internal override object Deserialize(PhpSerializeToken token) {
-		switch (token.Type) {
-			case PhpSerializerType.Array:
-				return this.DeserializeArray(token);
-			case PhpSerializerType.Object:
-				return this.ObjectDeserializer.Deserialize(token);
-			default:
-				return this.PrimitiveDeserializer.Deserialize(token);
-		}
+		return token.Type switch {
+			PhpSerializerType.Array => this.DeserializeArray(token),
+			PhpSerializerType.Object => this.ObjectDeserializer.Deserialize(token),
+			_ => this.PrimitiveDeserializer.Deserialize(token),
+		};
 	}
 
 	internal override object Deserialize(PhpSerializeToken token, Type targetType) {
@@ -50,25 +49,22 @@ internal class TypedArrayDeserializer : ArrayDeserializer {
 		var result = Activator.CreateInstance(targetType);
 		Dictionary<object, PropertyInfo> properties = TypeLookup.GetPropertyInfos(targetType, this._options);
 
-		for (int i = 0; i < token.Children.Length; i += 2) {
+		foreach(var item in token.Children) {
 			object propertyName;
-			if (token.Children[i].Type == PhpSerializerType.String) {
-				propertyName = this._options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();
-			} else if (token.Children[i].Type == PhpSerializerType.Integer) {
-				propertyName = token.Children[i].Value.PhpToLong();
+			if (item.Key.Type == PhpSerializerType.String) {
+				propertyName = this._options.CaseSensitiveProperties ? item.Key.Value : item.Key.Value.ToLower();
+			} else if (item.Key.Type == PhpSerializerType.Integer) {
+				propertyName = item.Key.Value.PhpToLong();
 			} else {
 				throw new DeserializationException(
 					$"Error encountered deserizalizing an object of type '{targetType.FullName}': " +
-					$"The key '{token.Children[i].Value}' (from the token at position {token.Children[i].Position}) has an unsupported type of '{token.Children[i].Type}'."
+					$"The key '{item.Key.Value}' (from the token at position {item.Key.Position}) has an unsupported type of '{item.Key.Type}'."
 				);
 			}
-
-			var valueToken = token.Children[i + 1];
-
 			if (!properties.ContainsKey(propertyName)) {
 				if (!this._options.AllowExcessKeys) {
 					throw new DeserializationException(
-						$"Could not bind the key \"{token.Children[i].Value}\" to object of type {targetType.Name}: No such property."
+						$"Could not bind the key \"{item.Key.Value}\" to object of type {targetType.Name}: No such property."
 					);
 				}
 				continue;
@@ -78,11 +74,11 @@ internal class TypedArrayDeserializer : ArrayDeserializer {
 				try {
 					property.SetValue(
 						result,
-						this.Deserialize(valueToken, property.PropertyType)
+						this.Deserialize(item.Value, property.PropertyType)
 					);
 				} catch (Exception exception) {
 					throw new DeserializationException(
-						$"Exception encountered while trying to assign '{valueToken.Value}' to {targetType.Name}.{property.Name}. See inner exception for details.",
+						$"Exception encountered while trying to assign '{item.Value.Value}' to {targetType.Name}.{property.Name}. See inner exception for details.",
 						exception
 					);
 				}
@@ -98,12 +94,10 @@ internal class TypedArrayDeserializer : ArrayDeserializer {
 			throw new NullReferenceException($"Activator.CreateInstance({targetType.FullName}) returned null");
 		}
 		if (!targetType.GenericTypeArguments.Any()) {
-			for (int i = 0; i < token.Children.Length; i += 2) {
-				var keyToken = token.Children[i];
-				var valueToken = token.Children[i + 1];
+				foreach(var item in token.Children) {
 				result.Add(
-					this.Deserialize(keyToken),
-					this.Deserialize(valueToken)
+					this.Deserialize(item.Key),
+					this.Deserialize(item.Value)
 				);
 			}
 			return result;
@@ -111,16 +105,14 @@ internal class TypedArrayDeserializer : ArrayDeserializer {
 		Type keyType = targetType.GenericTypeArguments[0];
 		Type valueType = targetType.GenericTypeArguments[1];
 
-		for (int i = 0; i < token.Children.Length; i += 2) {
-			var keyToken = token.Children[i];
-			var valueToken = token.Children[i + 1];
+		foreach(var item in token.Children) {
 			result.Add(
 				keyType == typeof(object)
-					? this.Deserialize(keyToken)
-					: this.Deserialize(keyToken, keyType),
+					? this.Deserialize(item.Key)
+					: this.Deserialize(item.Key, keyType),
 				valueType == typeof(object)
-					? this.Deserialize(valueToken)
-					: this.Deserialize(valueToken, valueType)
+					? this.Deserialize(item.Value)
+					: this.Deserialize(item.Value, valueType)
 			);
 		}
 		return result;
@@ -129,10 +121,10 @@ internal class TypedArrayDeserializer : ArrayDeserializer {
 	public object DeserializeArray(PhpSerializeToken token) {
 		if (this._options.UseLists == ListOptions.Never) {
 			var result = new Dictionary<object, object>();
-			for (int i = 0; i < token.Children.Length; i += 2) {
+			foreach(var item in token.Children) {
 				result.Add(
-					this.Deserialize(token.Children[i]),
-					this.Deserialize(token.Children[i + 1])
+					this.Deserialize(item.Key),
+					this.Deserialize(item.Value)
 				);
 			}
 			return result;
@@ -140,12 +132,13 @@ internal class TypedArrayDeserializer : ArrayDeserializer {
 		long previousKey = -1;
 		bool isList = true;
 		bool consecutive = true;
-		for (int i = 0; i < token.Children.Length; i += 2) {
-			if (token.Children[i].Type != PhpSerializerType.Integer) {
+		for (int i = 0; i < token.Children.Length; i ++) {
+			var item = token.Children[i];
+			if (item.Key.Type != PhpSerializerType.Integer) {
 				isList = false;
 				break;
 			} else {
-				var key = token.Children[i].Value.PhpToLong();
+				var key = item.Key.Value.PhpToLong();
 				if (i == 0 || key == previousKey + 1) {
 					previousKey = key;
 				} else {
@@ -155,17 +148,17 @@ internal class TypedArrayDeserializer : ArrayDeserializer {
 		}
 		if (!isList || (this._options.UseLists == ListOptions.Default && consecutive == false)) {
 			var result = new Dictionary<object, object>();
-			for (int i = 0; i < token.Children.Length; i += 2) {
+			foreach(var item in token.Children) {
 				result.Add(
-					this.Deserialize(token.Children[i]),
-					this.Deserialize(token.Children[i + 1])
+					this.Deserialize(item.Key),
+					this.Deserialize(item.Value)
 				);
 			}
 			return result;
 		} else {
 			var result = new List<object>();
-			for (int i = 1; i < token.Children.Length; i += 2) {
-				result.Add(this.Deserialize(token.Children[i]));
+			foreach(var item in token.Children) {
+				result.Add(this.Deserialize(item.Value));
 			}
 			return result;
 		}
@@ -173,14 +166,14 @@ internal class TypedArrayDeserializer : ArrayDeserializer {
 
 	private object MakeArray(Type targetType, PhpSerializeToken token) {
 		var elementType = targetType.GetElementType() ?? throw new InvalidOperationException("targetType.GetElementType() returned null");
-		Array result = Array.CreateInstance(elementType, token.Children.Length / 2);
+		Array result = Array.CreateInstance(elementType, token.Children.Length);
 
 		var arrayIndex = 0;
-		for (int i = 1; i < token.Children.Length; i += 2) {
+		foreach(var item in token.Children) {
 			result.SetValue(
 				elementType == typeof(object)
-					? this.Deserialize(token.Children[i])
-					: this.Deserialize(token.Children[i], elementType),
+					? this.Deserialize(item.Value)
+					: this.Deserialize(item.Value, elementType),
 				arrayIndex
 			);
 			arrayIndex++;
@@ -189,11 +182,12 @@ internal class TypedArrayDeserializer : ArrayDeserializer {
 	}
 
 	private object MakeList(Type targetType, PhpSerializeToken token) {
-		for (int i = 0; i < token.Children.Length; i += 2) {
-			if (token.Children[i].Type != PhpSerializerType.Integer) {
+		for (int i = 0; i < token.Children.Length; i ++) {
+			var item = token.Children[i];
+			if (item.Key.Type != PhpSerializerType.Integer) {
 				throw new DeserializationException(
 					$"Can not deserialize array at position {token.Position} to list: " +
-					$"It has a non-integer key '{token.Children[i].Value}' at element {i} (position {token.Children[i].Position})."
+					$"It has a non-integer key '{item.Key.Value}' at element {i} (position {item.Key.Position})."
 				);
 			}
 		}
@@ -210,11 +204,11 @@ internal class TypedArrayDeserializer : ArrayDeserializer {
 			itemType = targetType.GenericTypeArguments[0];
 		}
 
-		for (int i = 1; i < token.Children.Length; i += 2) {
+		foreach(var item in token.Children) {
 			result.Add(
 				itemType == typeof(object)
-					? this.Deserialize(token.Children[i])
-					: this.Deserialize(token.Children[i], itemType)
+					? this.Deserialize(item.Key)
+					: this.Deserialize(item.Value, itemType)
 			);
 		}
 		return result;
@@ -224,13 +218,12 @@ internal class TypedArrayDeserializer : ArrayDeserializer {
 		var result = Activator.CreateInstance(targetType);
 		Dictionary<string, FieldInfo> fields = TypeLookup.GetFieldInfos(targetType, this._options);
 
-		for (int i = 0; i < token.Children.Length; i += 2) {
-			var fieldName = this._options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();
-			var valueToken = token.Children[i + 1];
+		foreach(var item in token.Children) {
+			var fieldName = this._options.CaseSensitiveProperties ? item.Key.Value : item.Key.Value.ToLower();
 			if (!fields.ContainsKey(fieldName)) {
 				if (!this._options.AllowExcessKeys) {
 					throw new DeserializationException(
-						$"Could not bind the key \"{token.Children[i].Value}\" to struct of type {targetType.Name}: No such field."
+						$"Could not bind the key \"{item.Key.Value}\" to struct of type {targetType.Name}: No such field."
 					);
 				}
 				continue;
@@ -238,10 +231,10 @@ internal class TypedArrayDeserializer : ArrayDeserializer {
 			if (fields[fieldName] != null) {
 				var field = fields[fieldName];
 				try {
-					field.SetValue(result, this.Deserialize(valueToken, field.FieldType));
+					field.SetValue(result, this.Deserialize(item.Value, field.FieldType));
 				} catch (Exception exception) {
 					throw new DeserializationException(
-						$"Exception encountered while trying to assign '{valueToken.Value}' to {targetType.Name}.{field.Name}. " +
+						$"Exception encountered while trying to assign '{item.Value}' to {targetType.Name}.{field.Name}. " +
 						"See inner exception for details.",
 						exception
 					);

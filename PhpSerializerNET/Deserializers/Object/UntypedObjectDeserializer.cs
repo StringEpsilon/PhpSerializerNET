@@ -13,14 +13,11 @@ internal class UntypedObjectDeserializer : ObjectDeserializer {
 	}
 
 	internal override object Deserialize(PhpSerializeToken token) {
-		switch (token.Type) {
-			case PhpSerializerType.Array:
-				return this.ArrayDeserializer.Deserialize(token);
-			case PhpSerializerType.Object:
-				return this.CreateObject(token);
-			default:
-				return this.PrimitiveDeserializer.Deserialize(token);
-		}
+		return token.Type switch {
+			PhpSerializerType.Array => this.ArrayDeserializer.Deserialize(token),
+			PhpSerializerType.Object => this.CreateObject(token),
+			_ => this.PrimitiveDeserializer.Deserialize(token),
+		};
 	}
 
 	private object CreateObject(PhpSerializeToken token) {
@@ -35,10 +32,10 @@ internal class UntypedObjectDeserializer : ObjectDeserializer {
 		} else {
 			throw new DeserializationException("Encountered 'stdClass' and the behavior 'Throw' was specified in deserialization options.");
 		}
-		for (int i = 0; i < token.Children.Length; i += 2) {
+		foreach(var item in token.Children) {
 			result.TryAdd(
-				token.Children[i].Value,
-				this.Deserialize(token.Children[i + 1])
+				item.Key.Value,
+				this.Deserialize(item.Value)
 			);
 		}
 		constructedObject = result;

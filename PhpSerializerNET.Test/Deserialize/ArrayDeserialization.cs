@@ -176,7 +176,7 @@ namespace PhpSerializerNET.Test.Deserialize {
 				PhpSerialization.Deserialize<List<string>>("a:3:{i:0;s:5:\"Hello\";s:1:\"a\";s:5:\"World\";i:2;i:12345;}")
 			);
 
-			Assert.AreEqual("Can not deserialize array at position 0 to list: It has a non-integer key 'a' at element 2 (position 21).", ex.Message);
+			Assert.AreEqual("Can not deserialize array at position 0 to list: It has a non-integer key 'a' at element 1 (position 21).", ex.Message);
 		}
 
 		[TestMethod]

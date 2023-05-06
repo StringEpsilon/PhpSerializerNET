@@ -5,6 +5,7 @@
 **/
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -205,19 +206,21 @@ public class PhpTokenizer {
 		int propertyCount = this.GetLength(PhpSerializerType.Object);
 		this.GetDelimiter();
 		this.GetBracketOpen();
-		result.Children = new PhpSerializeToken[propertyCount * 2];
-		int i = 0;
-		try {
-			while (this._input[this._position] != '}') {
-				result.Children[i++] = this.GetToken();
-			}
-		} catch (System.IndexOutOfRangeException ex) {
-			throw new DeserializationException(
-				$"Object at position {result.Position} should have {propertyCount} properties, " +
-				$"but actually has {(int)((i + 1) / 2)} or more properties.",
-				ex
+		result.Children = new KeyValuePair<PhpSerializeToken, PhpSerializeToken>[propertyCount];
+		int i;
+		for(i = 0; i < propertyCount; i++) {
+			result.Children[i] = new KeyValuePair<PhpSerializeToken, PhpSerializeToken>(
+				this.GetToken(),
+				this.GetToken()
 			);
 		}
+		if(this._input[this._position] != '}') {
+			throw new DeserializationException(
+				$"Object at position {result.Position} should have {propertyCount} properties, " +
+				$"but actually has {propertyCount + 1} or more properties."
+			);
+		}
+
 		this.GetBracketClose();
 		return result;
 	}
@@ -229,17 +232,18 @@ public class PhpTokenizer {
 		int length = this.GetLength(PhpSerializerType.Array);
 		this.GetDelimiter();
 		this.GetBracketOpen();
-		result.Children = new PhpSerializeToken[length * 2];
-		int i = 0;
-		try {
-			while (this._input[this._position] != '}') {
-				result.Children[i++] = this.GetToken();
-			}
-		} catch (IndexOutOfRangeException ex) {
+		result.Children = new KeyValuePair<PhpSerializeToken, PhpSerializeToken>[length];
+		int i;
+		for(i = 0; i < length; i++) {
+			result.Children[i] = new KeyValuePair<PhpSerializeToken, PhpSerializeToken>(
+				this.GetToken(),
+				this.GetToken()
+			);
+		}
+		if(this._input[this._position] != '}') {
 			throw new DeserializationException(
 				$"Array at position {result.Position} should be of length {length}, " +
-				$"but actual length is {(int)((i + 1) / 2)} or more.",
-				ex
+				$"but actual length is {length + 1} or more."
 			);
 		}
 		this.GetBracketClose();

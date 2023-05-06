@@ -4,6 +4,7 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System.Collections.Generic;
 using System.Linq;
 namespace PhpSerializerNET;
 
@@ -16,7 +17,7 @@ internal record struct PhpSerializeToken(
 	PhpSerializerType Type,
 	int Position,
 	string Value,
-	PhpSerializeToken[] Children
+	KeyValuePair<PhpSerializeToken, PhpSerializeToken>[] Children
 ) {
 	internal bool ContainsObjects() {
 		if (this.Type == PhpSerializerType.Object) {
@@ -25,6 +26,6 @@ internal record struct PhpSerializeToken(
 		if (this.Children == null) {
 			return false;
 		}
-		return this.Children.Any(y => y.ContainsObjects());
+		return this.Children.Any(y => y.Key.ContainsObjects() || y.Value.ContainsObjects());
 	}
 }

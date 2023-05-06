@@ -1,6 +1,11 @@
 # Future
 - Improved tokenization performance by allowing and forcing more aggresive inlining.
   - In my benchmark, this is about 8 to 9% faster
+- Some exception messages have changed in how they reference child items.
+	"Can not deserialize array at position 0 to list: It has a non-integer key 'a' at element 2"
+	Would now be
+	"Can not deserialize array at position 0 to list: It has a non-integer key 'a' at element 1".
+	This is because internally we now always treat array and object tokens as key value pairs instead of individual items.
 
 # 1.3.0
 - Removed net5 support and added net7 support

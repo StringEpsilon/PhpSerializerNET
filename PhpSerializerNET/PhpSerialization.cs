@@ -113,17 +113,17 @@ public static class PhpSerialization {
 			.Serialize(input) ?? throw new NullReferenceException($"{nameof(PhpSerializer)}.{nameof(Serialize)} returned null");
 	}
 
-	/// <summary>
-	/// Reset the type lookup cache.
-	/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
-	/// </summary>
+	// /// <summary>
+	// /// Reset the type lookup cache.
+	// /// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
+	// /// </summary>
 	public static void ClearTypeCache() =>
 		PhpDeserializer.ClearTypeCache();
 
-	/// <summary>
-	/// Reset the property info cache.
-	/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
-	/// </summary>
+	// /// <summary>
+	// /// Reset the property info cache.
+	// /// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
+	// /// </summary>
 	public static void ClearPropertyInfoCache() =>
 		PhpDeserializer.ClearPropertyInfoCache();
 }

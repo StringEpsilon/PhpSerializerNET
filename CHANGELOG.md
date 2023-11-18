@@ -1,4 +1,5 @@
-# Future
+# 1.4.0
+- Now targets .NET 6.0, 7.0 and 8.0
 - Improved tokenization performance by allowing and forcing more aggresive inlining.
   - In my benchmark, this is about 8 to 9% faster
 

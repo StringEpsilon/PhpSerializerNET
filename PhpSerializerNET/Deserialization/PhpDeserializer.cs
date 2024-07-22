@@ -67,6 +67,8 @@ internal ref struct PhpDeserializer {
 			targetType = TypeLookup.FindTypeInAssymbly(typeName, this._options.TypeCache.HasFlag(TypeCacheFlag.ClassNames));
 		}
 		if (targetType != null && typeName != "stdClass") {
+			_currentToken--; // go back one because we're basically re-entering the object-token from the top.
+			// If we don't decrement the pointer, we'd start with the first child token instead of the object token.
 			constructedObject = this.DeserializeToken(targetType);
 		} else {
 			dynamic result;
@@ -308,7 +310,7 @@ internal ref struct PhpDeserializer {
 
 		for (int i = 0; i < token.Length; i++) {
 			object propertyName;
-			var nameToken = this._tokens[_currentToken];
+			var nameToken = this._tokens[_currentToken++];
 			if (nameToken.Type == PhpDataType.String) {
 				propertyName = this._options.CaseSensitiveProperties
 					? nameToken.Value
@@ -327,9 +329,9 @@ internal ref struct PhpDeserializer {
 						$"Could not bind the key \"{propertyName}\" to object of type {targetType.Name}: No such property."
 					);
 				}
+				_currentToken++;
 				continue;
 			}
-			_currentToken++;
 			var property = properties[propertyName];
 			if (property != null) { // null if PhpIgnore'd
 				try {
@@ -344,6 +346,8 @@ internal ref struct PhpDeserializer {
 						exception
 					);
 				}
+			} else {
+				_currentToken++;
 			}
 		}
 		return result;

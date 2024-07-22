@@ -4,6 +4,7 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -11,22 +12,15 @@ using System.Text;
 namespace PhpSerializerNET;
 
 internal static class ArrayExtensions {
-
-	public static string Utf8Substring(this byte[] array, int start, int length, Encoding encoding) {
-		if (length > array.Length - start) {
+	public static string Utf8Substring(this ReadOnlySpan<byte> array, Encoding encoding) {
+		if (array.Length == 0) {
 			return "";
 		}
-
 		if (encoding == Encoding.UTF8) {
-			// Using the ReadonlySpan<> saves some copying:
-			return Encoding.UTF8.GetString(new System.ReadOnlySpan<byte>(array, start, length));
+			return Encoding.UTF8.GetString(array);
 		} else {
 			// Sadly, Encoding.Convert does not accept a Span.
-			byte[] substring = new byte[length];
-			System.Buffer.BlockCopy(array, start, substring, 0, length);
-			return Encoding.UTF8.GetString(
-				Encoding.Convert(encoding, Encoding.UTF8, substring)
-			);
+			return Encoding.UTF8.GetString(Encoding.Convert(encoding, Encoding.UTF8, array.ToArray()));
 		}
 	}
 

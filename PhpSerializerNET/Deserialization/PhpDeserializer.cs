@@ -3,7 +3,6 @@
   License, v. 2.0. If a copy of the MPL was not distributed with this
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,70 +12,54 @@ using System.Reflection;
 
 namespace PhpSerializerNET;
 
-internal class PhpDeserializer {
+internal ref struct PhpDeserializer {
 	private readonly PhpDeserializationOptions _options;
-	private readonly PhpSerializeToken _token;
+	private readonly Span<PhpToken> _tokens;
+	private int _currentToken = 0;
 
-	public PhpDeserializer(string input, PhpDeserializationOptions options) {
+	internal PhpDeserializer(Span<PhpToken> tokens, PhpDeserializationOptions options) {
 		_options = options;
-		if (_options == null) {
-			_options = PhpDeserializationOptions.DefaultOptions;
-		}
-		this._token = new PhpTokenizer(input, this._options.InputEncoding).Tokenize();
+		_tokens = tokens;
 	}
 
-	public object Deserialize() {
-		return this.DeserializeToken(this._token);
+	internal object Deserialize() {
+		return this.DeserializeToken();
 	}
 
-	public object Deserialize(Type targetType) {
-		return this.DeserializeToken(targetType, this._token);
+	internal object Deserialize(Type targetType) {
+		return this.DeserializeToken(targetType);
 	}
 
-	public T Deserialize<T>() {
+	internal T Deserialize<T>() {
 		return (T)this.Deserialize(typeof(T));
 	}
 
-	/// <summary>
-	/// Reset the type lookup cache.
-	/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
-	/// </summary>
-	public static void ClearTypeCache() {
-		TypeLookup.ClearTypeCache();
-	}
-
-	/// <summary>
-	/// Reset the property info cache.
-	/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
-	/// </summary>
-	public static void ClearPropertyInfoCache() {
-		TypeLookup.ClearPropertyInfoCache();
-	}
-
-	private object DeserializeToken(PhpSerializeToken token) {
+	private object DeserializeToken() {
+		var token = this._tokens[this._currentToken];
+		this._currentToken++;
 		switch (token.Type) {
-			case PhpSerializerType.Boolean:
+			case PhpDataType.Boolean:
 				return token.Value.PhpToBool();
-			case PhpSerializerType.Integer:
+			case PhpDataType.Integer:
 				return token.Value.PhpToLong();
-			case PhpSerializerType.Floating:
+			case PhpDataType.Floating:
 				return token.Value.PhpToDouble();
-			case PhpSerializerType.String:
+			case PhpDataType.String:
 				if (this._options.NumberStringToBool && (token.Value == "0" || token.Value == "1")) {
 					return token.Value.PhpToBool();
 				}
 				return token.Value;
-			case PhpSerializerType.Array:
+			case PhpDataType.Array:
 				return MakeCollection(token);
-			case PhpSerializerType.Object:
+			case PhpDataType.Object:
 				return MakeClass(token);
-			case PhpSerializerType.Null:
+			case PhpDataType.Null:
 			default:
 				return null;
 		}
 	}
 
-	private object MakeClass(PhpSerializeToken token) {
+	private object MakeClass(PhpToken token) {
 		var typeName = token.Value;
 		object constructedObject;
 		Type targetType = null;
@@ -84,7 +67,7 @@ internal class PhpDeserializer {
 			targetType = TypeLookup.FindTypeInAssymbly(typeName, this._options.TypeCache.HasFlag(TypeCacheFlag.ClassNames));
 		}
 		if (targetType != null && typeName != "stdClass") {
-			constructedObject = this.DeserializeToken(targetType, token);
+			constructedObject = this.DeserializeToken(targetType);
 		} else {
 			dynamic result;
 			if (_options.StdClass == StdClassOption.Dynamic) {
@@ -94,10 +77,12 @@ internal class PhpDeserializer {
 			} else {
 				throw new DeserializationException("Encountered 'stdClass' and the behavior 'Throw' was specified in deserialization options.");
 			}
-			for (int i = 0; i < token.Children.Length; i += 2) {
+			for (int i = 0; i < token.Length; i++) {
+				var key = this.DeserializeToken();
+				var value = this.DeserializeToken();
 				result.TryAdd(
-					token.Children[i].Value,
-					this.DeserializeToken(token.Children[i + 1])
+					(string)key,
+					value
 				);
 			}
 			constructedObject = result;
@@ -108,22 +93,22 @@ internal class PhpDeserializer {
 		return constructedObject;
 	}
 
-	private object DeserializeToken(Type targetType, PhpSerializeToken token) {
+	private object DeserializeToken(Type targetType) {
 		if (targetType == null) {
 			throw new ArgumentNullException(nameof(targetType));
 		}
-
+		var token = this._tokens[this._currentToken];
+		this._currentToken++;
 		switch (token.Type) {
-			case PhpSerializerType.Boolean: {
-					return DeserializeBoolean(targetType, token);
-				}
-			case PhpSerializerType.Integer:
+			case PhpDataType.Boolean:
+				return DeserializeBoolean(targetType, token);
+			case PhpDataType.Integer:
 				return DeserializeInteger(targetType, token);
-			case PhpSerializerType.Floating:
+			case PhpDataType.Floating:
 				return DeserializeDouble(targetType, token);
-			case PhpSerializerType.String:
-				return DeserializeTokenFromSimpleType(targetType, token);
-			case PhpSerializerType.Object: {
+			case PhpDataType.String:
+				return DeserializeTokenFromSimpleType(targetType, token.Type, token.Value, token.Position);
+			case PhpDataType.Object: {
 					object result;
 					if (typeof(IDictionary).IsAssignableFrom(targetType)) {
 						result = MakeDictionary(targetType, token);
@@ -137,7 +122,7 @@ internal class PhpDeserializer {
 					}
 					return result;
 				}
-			case PhpSerializerType.Array: {
+			case PhpDataType.Array: {
 					if (targetType.IsAssignableTo(typeof(IList))) {
 						return this.MakeList(targetType, token);
 					} else if (targetType.IsAssignableTo(typeof(IDictionary))) {
@@ -148,7 +133,7 @@ internal class PhpDeserializer {
 						return this.MakeStruct(targetType, token);
 					}
 				}
-			case PhpSerializerType.Null:
+			case PhpDataType.Null:
 			default:
 				if (targetType.IsValueType) {
 					return Activator.CreateInstance(targetType);
@@ -158,7 +143,7 @@ internal class PhpDeserializer {
 		}
 	}
 
-	private object DeserializeInteger(Type targetType, PhpSerializeToken token) {
+	private object DeserializeInteger(Type targetType, PhpToken token) {
 		return Type.GetTypeCode(targetType) switch {
 			TypeCode.Int16 => short.Parse(token.Value),
 			TypeCode.Int32 => int.Parse(token.Value),
@@ -167,24 +152,24 @@ internal class PhpDeserializer {
 			TypeCode.UInt32 => uint.Parse(token.Value),
 			TypeCode.UInt64 => ulong.Parse(token.Value),
 			TypeCode.SByte => sbyte.Parse(token.Value),
-			_ => this.DeserializeTokenFromSimpleType(targetType, token),
+			_ => this.DeserializeTokenFromSimpleType(targetType, token.Type, token.Value, token.Position),
 		};
 	}
 
-	private object DeserializeDouble(Type targetType, PhpSerializeToken token) {
+	private object DeserializeDouble(Type targetType, PhpToken token) {
 		if (targetType == typeof(double) || targetType == typeof(float)) {
 			return token.Value.PhpToDouble();
 		}
 
-		token.Value = token.Value switch {
+		string value = token.Value switch {
 			"INF" => double.PositiveInfinity.ToString(CultureInfo.InvariantCulture),
 			"-INF" => double.NegativeInfinity.ToString(CultureInfo.InvariantCulture),
 			_ => token.Value,
 		};
-		return this.DeserializeTokenFromSimpleType(targetType, token);
+		return this.DeserializeTokenFromSimpleType(targetType, token.Type, value, token.Position);
 	}
 
-	private static object DeserializeBoolean(Type targetType, PhpSerializeToken token) {
+	private static object DeserializeBoolean(Type targetType, PhpToken token) {
 		if (targetType == typeof(bool) || targetType == typeof(bool?)) {
 			return token.Value.PhpToBool();
 		}
@@ -202,41 +187,45 @@ internal class PhpDeserializer {
 		}
 	}
 
-	private object DeserializeTokenFromSimpleType(Type givenType, PhpSerializeToken token) {
-		var targetType = givenType;
+	private object DeserializeTokenFromSimpleType(
+		Type targetType,
+		PhpDataType dataType,
+		string value,
+		int tokenPosition
+	) {
 		if (!targetType.IsPrimitive && targetType.IsNullableReferenceType()) {
-			if (token.Value == "" && _options.EmptyStringToDefault) {
+			if (value == "" && _options.EmptyStringToDefault) {
 				return null;
 			}
 
 			targetType = targetType.GenericTypeArguments[0];
 			if (targetType == null) {
-				throw new NullReferenceException("Could not get underlying type for nullable reference type " + givenType);
+				throw new NullReferenceException("Could not get underlying type for nullable reference type " + targetType);
 			}
 		}
 
 		// Short-circuit strings:
 		if (targetType == typeof(string)) {
-			return token.Value == "" && _options.EmptyStringToDefault
+			return value == "" && _options.EmptyStringToDefault
 				? default
-				: token.Value;
+				: value;
 		}
 
 		if (targetType.IsEnum) {
 			// Enums are converted by name if the token is a string and by underlying value if they are not
-			if (token.Value == "" && this._options.EmptyStringToDefault) {
+			if (value == "" && this._options.EmptyStringToDefault) {
 				return Activator.CreateInstance(targetType);
 			}
 
-			if (token.Type != PhpSerializerType.String) {
-				return Enum.Parse(targetType, token.Value);
+			if (dataType != PhpDataType.String) {
+				return Enum.Parse(targetType, value);
 			}
 
-			FieldInfo foundFieldInfo = TypeLookup.GetEnumInfo(targetType, token.Value, this._options);
+			FieldInfo foundFieldInfo = TypeLookup.GetEnumInfo(targetType, value, this._options);
 
 			if (foundFieldInfo == null) {
 				throw new DeserializationException(
-					$"Exception encountered while trying to assign '{token.Value}' to type '{targetType.Name}'. " +
+					$"Exception encountered while trying to assign '{value}' to type '{targetType.Name}'. " +
 					$"The value could not be matched to an enum member.");
 			}
 
@@ -244,52 +233,54 @@ internal class PhpDeserializer {
 		}
 
 		if (targetType.IsIConvertible()) {
-			if (token.Value == "" && _options.EmptyStringToDefault) {
+			if (value == "" && _options.EmptyStringToDefault) {
 				return Activator.CreateInstance(targetType);
 			}
 
 			if (targetType == typeof(bool)) {
-				if (_options.NumberStringToBool && token.Value is "0" or "1") {
-					return token.Value.PhpToBool();
+				if (_options.NumberStringToBool && value is "0" or "1") {
+					return value.PhpToBool();
 				}
 			}
 
 			try {
-				return ((IConvertible)token.Value).ToType(targetType, CultureInfo.InvariantCulture);
+				return ((IConvertible)value).ToType(targetType, CultureInfo.InvariantCulture);
 			} catch (Exception exception) {
 				throw new DeserializationException(
-					$"Exception encountered while trying to assign '{token.Value}' to type {targetType.Name}. See inner exception for details.",
+					$"Exception encountered while trying to assign '{value}' to type {targetType.Name}. See inner exception for details.",
 					exception
 				);
 			}
 		}
 
 		if (targetType == typeof(Guid)) {
-			return token.Value == "" && _options.EmptyStringToDefault
+			return value == "" && _options.EmptyStringToDefault
 				? default
-				: new Guid(token.Value);
+				: new Guid(value);
 		}
 
 		if (targetType == typeof(object)) {
-			return token.Value == "" && _options.EmptyStringToDefault
+			return value == "" && _options.EmptyStringToDefault
 				? default
-				: token.Value;
+				: value;
 		}
 
-		throw new DeserializationException($"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}.");
+		throw new DeserializationException($"Can not assign value \"{value}\" (at position {tokenPosition}) to target type of {targetType.Name}.");
 	}
 
-	private object MakeStruct(Type targetType, PhpSerializeToken token) {
+	private object MakeStruct(Type targetType, PhpToken token) {
 		var result = Activator.CreateInstance(targetType);
 		Dictionary<string, FieldInfo> fields = TypeLookup.GetFieldInfos(targetType, this._options);
 
-		for (int i = 0; i < token.Children.Length; i += 2) {
-			var fieldName = this._options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();
-			var valueToken = token.Children[i + 1];
+		for (int i = 0; i < token.Length; i++) {
+			var fieldName = this._options.CaseSensitiveProperties
+				? this._tokens[this._currentToken++].Value
+				: this._tokens[this._currentToken++].Value.ToLower();
+
 			if (!fields.ContainsKey(fieldName)) {
 				if (!this._options.AllowExcessKeys) {
 					throw new DeserializationException(
-						$"Could not bind the key \"{token.Children[i].Value}\" to struct of type {targetType.Name}: No such field."
+						$"Could not bind the key \"{fieldName}\" to struct of type {targetType.Name}: No such field."
 					);
 				}
 				continue;
@@ -297,8 +288,9 @@ internal class PhpDeserializer {
 			if (fields[fieldName] != null) {
 				var field = fields[fieldName];
 				try {
-					field.SetValue(result, DeserializeToken(field.FieldType, valueToken));
+					field.SetValue(result, DeserializeToken(field.FieldType));
 				} catch (Exception exception) {
+					var valueToken = this._tokens[this._currentToken];
 					throw new DeserializationException(
 						$"Exception encountered while trying to assign '{valueToken.Value}' to {targetType.Name}.{field.Name}. " +
 						"See inner exception for details.",
@@ -310,41 +302,43 @@ internal class PhpDeserializer {
 		return result;
 	}
 
-	private object MakeObject(Type targetType, PhpSerializeToken token) {
+	private object MakeObject(Type targetType, PhpToken token) {
 		var result = Activator.CreateInstance(targetType);
 		Dictionary<object, PropertyInfo> properties = TypeLookup.GetPropertyInfos(targetType, this._options);
 
-		for (int i = 0; i < token.Children.Length; i += 2) {
+		for (int i = 0; i < token.Length; i++) {
 			object propertyName;
-			if (token.Children[i].Type == PhpSerializerType.String) {
-				propertyName = this._options.CaseSensitiveProperties ? token.Children[i].Value : token.Children[i].Value.ToLower();
-			} else if (token.Children[i].Type == PhpSerializerType.Integer) {
-				propertyName = token.Children[i].Value.PhpToLong();
+			var nameToken = this._tokens[_currentToken];
+			if (nameToken.Type == PhpDataType.String) {
+				propertyName = this._options.CaseSensitiveProperties
+					? nameToken.Value
+					: nameToken.Value.ToLower();
+			} else if (nameToken.Type == PhpDataType.Integer) {
+				propertyName = nameToken.Value.PhpToLong();
 			} else {
 				throw new DeserializationException(
 					$"Error encountered deserizalizing an object of type '{targetType.FullName}': " +
-					$"The key '{token.Children[i].Value}' (from the token at position {token.Children[i].Position}) has an unsupported type of '{token.Children[i].Type}'."
+					$"The key '{nameToken.Value}' (from the token at position {nameToken.Position}) has an unsupported type of '{nameToken.Type}'."
 				);
 			}
-
-			var valueToken = token.Children[i + 1];
-
 			if (!properties.ContainsKey(propertyName)) {
 				if (!this._options.AllowExcessKeys) {
 					throw new DeserializationException(
-						$"Could not bind the key \"{token.Children[i].Value}\" to object of type {targetType.Name}: No such property."
+						$"Could not bind the key \"{propertyName}\" to object of type {targetType.Name}: No such property."
 					);
 				}
 				continue;
 			}
+			_currentToken++;
 			var property = properties[propertyName];
 			if (property != null) { // null if PhpIgnore'd
 				try {
 					property.SetValue(
 						result,
-						DeserializeToken(property.PropertyType, valueToken)
+						DeserializeToken(property.PropertyType)
 					);
 				} catch (Exception exception) {
+					var valueToken = _tokens[_currentToken-1];
 					throw new DeserializationException(
 						$"Exception encountered while trying to assign '{valueToken.Value}' to {targetType.Name}.{property.Name}. See inner exception for details.",
 						exception
@@ -355,16 +349,17 @@ internal class PhpDeserializer {
 		return result;
 	}
 
-	private object MakeArray(Type targetType, PhpSerializeToken token) {
+	private object MakeArray(Type targetType, PhpToken token) {
 		var elementType = targetType.GetElementType() ?? throw new InvalidOperationException("targetType.GetElementType() returned null");
-		Array result = Array.CreateInstance(elementType, token.Children.Length / 2);
+		Array result = Array.CreateInstance(elementType, token.Length);
 
 		var arrayIndex = 0;
-		for (int i = 1; i < token.Children.Length; i += 2) {
+		for (int i = 0; i < token.Length; i++) {
+			_currentToken++;
 			result.SetValue(
 				elementType == typeof(object)
-					? DeserializeToken(token.Children[i])
-					: DeserializeToken(elementType, token.Children[i]),
+					? DeserializeToken()
+					: DeserializeToken(elementType),
 				arrayIndex
 			);
 			arrayIndex++;
@@ -372,12 +367,13 @@ internal class PhpDeserializer {
 		return result;
 	}
 
-	private object MakeList(Type targetType, PhpSerializeToken token) {
-		for (int i = 0; i < token.Children.Length; i += 2) {
-			if (token.Children[i].Type != PhpSerializerType.Integer) {
+	private object MakeList(Type targetType, PhpToken token) {
+		for (int i = 0; i < token.Length; i += 2) {
+			if (this._tokens[_currentToken+i].Type != PhpDataType.Integer) {
+				var badToken = this._tokens[_currentToken+i];
 				throw new DeserializationException(
 					$"Can not deserialize array at position {token.Position} to list: " +
-					$"It has a non-integer key '{token.Children[i].Value}' at element {i} (position {token.Children[i].Position})."
+					$"It has a non-integer key '{badToken.Value}' at element {i} (position {badToken.Position})."
 				);
 			}
 		}
@@ -389,33 +385,34 @@ internal class PhpDeserializer {
 		if (result == null) {
 			throw new NullReferenceException("Activator.CreateInstance(targetType) returned null");
 		}
-		Type itemType = typeof(object);
+		Type itemType;
 		if (targetType.GenericTypeArguments.Length >= 1) {
 			itemType = targetType.GenericTypeArguments[0];
+		} else {
+			itemType = typeof(object);
 		}
 
-		for (int i = 1; i < token.Children.Length; i += 2) {
+		for (int i = 0; i < token.Length; i++) {
+			_currentToken++;
 			result.Add(
 				itemType == typeof(object)
-					? DeserializeToken(token.Children[i])
-					: DeserializeToken(itemType, token.Children[i])
+					? DeserializeToken()
+					: DeserializeToken(itemType)
 			);
 		}
 		return result;
 	}
 
-	private object MakeDictionary(Type targetType, PhpSerializeToken token) {
+	private object MakeDictionary(Type targetType, PhpToken token) {
 		var result = (IDictionary)Activator.CreateInstance(targetType);
 		if (result == null) {
 			throw new NullReferenceException($"Activator.CreateInstance({targetType.FullName}) returned null");
 		}
 		if (!targetType.GenericTypeArguments.Any()) {
-			for (int i = 0; i < token.Children.Length; i += 2) {
-				var keyToken = token.Children[i];
-				var valueToken = token.Children[i + 1];
+			for (int i = 0; i < token.Length; i++) {
 				result.Add(
-					DeserializeToken(keyToken),
-					DeserializeToken(valueToken)
+					DeserializeToken(),
+					DeserializeToken()
 				);
 			}
 			return result;
@@ -423,34 +420,32 @@ internal class PhpDeserializer {
 		Type keyType = targetType.GenericTypeArguments[0];
 		Type valueType = targetType.GenericTypeArguments[1];
 
-		for (int i = 0; i < token.Children.Length; i += 2) {
-			var keyToken = token.Children[i];
-			var valueToken = token.Children[i + 1];
+		for (int i = 0; i < token.Length; i++) {
 			result.Add(
 				keyType == typeof(object)
-					? DeserializeToken(keyToken)
-					: DeserializeToken(keyType, keyToken),
+					? DeserializeToken()
+					: DeserializeToken(keyType),
 				valueType == typeof(object)
-					? DeserializeToken(valueToken)
-					: DeserializeToken(valueType, valueToken)
+					? DeserializeToken()
+					: DeserializeToken(valueType)
 			);
 		}
 		return result;
 	}
 
-	private object MakeCollection(PhpSerializeToken token) {
+	private object MakeCollection(PhpToken token) {
 		if (this._options.UseLists == ListOptions.Never) {
 			return this.MakeDictionary(typeof(Dictionary<object, object>), token);
 		}
 		long previousKey = -1;
 		bool isList = true;
 		bool consecutive = true;
-		for (int i = 0; i < token.Children.Length; i += 2) {
-			if (token.Children[i].Type != PhpSerializerType.Integer) {
+		for (int i = 0; i < token.Length*2; i+=2) {
+			if (this._tokens[_currentToken+i].Type != PhpDataType.Integer) {
 				isList = false;
 				break;
 			} else {
-				var key = token.Children[i].Value.PhpToLong();
+				var key = this._tokens[_currentToken+i].Value.PhpToLong();
 				if (i == 0 || key == previousKey + 1) {
 					previousKey = key;
 				} else {
@@ -460,17 +455,18 @@ internal class PhpDeserializer {
 		}
 		if (!isList || (this._options.UseLists == ListOptions.Default && consecutive == false)) {
 			var result = new Dictionary<object, object>();
-			for (int i = 0; i < token.Children.Length; i += 2) {
+			for (int i = 0; i < token.Length; i++) {
 				result.Add(
-					this.DeserializeToken(token.Children[i]),
-					this.DeserializeToken(token.Children[i + 1])
+					this.DeserializeToken(),
+					this.DeserializeToken()
 				);
 			}
 			return result;
 		} else {
 			var result = new List<object>();
-			for (int i = 1; i < token.Children.Length; i += 2) {
-				result.Add(this.DeserializeToken(token.Children[i]));
+			for (int i = 0; i < token.Length; i++) {
+				_currentToken++;
+				result.Add(this.DeserializeToken());
 			}
 			return result;
 		}

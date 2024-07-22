@@ -160,6 +160,7 @@ namespace PhpSerializerNET.Test.Deserialize {
 		public void ExplicitToList() {
 			var result = PhpSerialization.Deserialize<List<string>>("a:3:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}");
 
+			Assert.AreEqual(3, result.Count);
 			CollectionAssert.AreEqual(new List<string>() { "Hello", "World", "12345" }, result);
 		}
 

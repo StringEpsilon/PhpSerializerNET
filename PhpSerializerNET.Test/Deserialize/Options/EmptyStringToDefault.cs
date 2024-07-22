@@ -164,7 +164,7 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 
 		[TestMethod]
 		public void Enabled_StringArrayToNullableIntList() {
-			var result = PhpSerialization.Deserialize<List<int?>>("a:1:{i:0;s:0:\"\";}");
+			var result = PhpSerialization.Deserialize<List<int?>>("a:1:{i:1;s:0:\"\";}");
 			CollectionAssert.AreEqual(new List<int?> { default }, result);
 		}
 

@@ -52,6 +52,7 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 				}
 			);
 
+			Assert.AreEqual(typeof (Dictionary<object, object>), result.GetType());
 			var dictionary = result as Dictionary<object, object>;
 			Assert.IsNotNull(dictionary);
 			Assert.AreEqual(2, dictionary.Count);

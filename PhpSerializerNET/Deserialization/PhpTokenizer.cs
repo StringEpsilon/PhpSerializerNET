@@ -52,24 +52,22 @@ public ref struct PhpTokenizer {
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private string GetNumbers() {
 		int start = this._position;
-		int length = this._input.Slice(this._position).IndexOf((byte)';');
-		this._position += length;
-		return this._inputEncoding.GetString(this._input.Slice(start, length));
+		while (this._input[this._position] != (byte)';') {
+			this._position++;
+		}
+		return this._inputEncoding.GetString(this._input.Slice(start, this._position-start));
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private int GetLength() {
-		int length = 0;
-		for (; this._input[this._position] != ':'; this._position++) {
-			length = length * 10 + (_input[_position] - 48);
+		if (this._input[this._position+1] == ':') {
+			return _input[_position++] - 48;
 		}
-		return length;
-	}
-
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private string GetNCharacters(int length) {
-		return _inputEncoding.GetString(this._input.Slice(this._position, length));
+		int start = this._position;
+		while (this._input[this._position] != (byte)':') {
+			this._position++;
+		}
+		return int.Parse(this._input.Slice(start, this._position-start));
 	}
 
 	internal void GetToken() {
@@ -127,7 +125,7 @@ public ref struct PhpTokenizer {
 		this._tokens[this._tokenPosition++] = new PhpToken(
 			PhpDataType.String,
 			position,
-			this.GetNCharacters(length)
+			_inputEncoding.GetString(this._input.Slice(this._position, length))
 		);
 		this.Advance(2+length);
 	}
@@ -178,7 +176,7 @@ public ref struct PhpTokenizer {
 		this.Advance();
 		int classNameLength = this.GetLength();
 		this.Advance(2);
-		string className = this.GetNCharacters(classNameLength);
+		string className = _inputEncoding.GetString(this._input.Slice(this._position, classNameLength));
 		this.Advance(2+classNameLength);
 		int propertyCount = this.GetLength();
 		this._tokens[this._tokenPosition++] = new PhpToken(

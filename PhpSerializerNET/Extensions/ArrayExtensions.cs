@@ -12,19 +12,7 @@ using System.Text;
 namespace PhpSerializerNET;
 
 internal static class ArrayExtensions {
-	public static string Utf8Substring(this ReadOnlySpan<byte> array, Encoding encoding) {
-		if (array.Length == 0) {
-			return "";
-		}
-		if (encoding == Encoding.UTF8) {
-			return Encoding.UTF8.GetString(array);
-		} else {
-			// Sadly, Encoding.Convert does not accept a Span.
-			return Encoding.UTF8.GetString(Encoding.Convert(encoding, Encoding.UTF8, array.ToArray()));
-		}
-	}
-
-	public static Dictionary<object, PropertyInfo> GetAllProperties(this PropertyInfo[] properties, PhpDeserializationOptions options) {
+	internal static Dictionary<object, PropertyInfo> GetAllProperties(this PropertyInfo[] properties, PhpDeserializationOptions options) {
 		var result = new Dictionary<object, PropertyInfo>(properties.Length);
 		foreach (var property in properties) {
 			var isIgnored = false;
@@ -57,7 +45,7 @@ internal static class ArrayExtensions {
 		return result;
 	}
 
-	public static Dictionary<string, FieldInfo> GetAllFields(this FieldInfo[] fields, PhpDeserializationOptions options) {
+	internal static Dictionary<string, FieldInfo> GetAllFields(this FieldInfo[] fields, PhpDeserializationOptions options) {
 		var result = new Dictionary<string, FieldInfo>(fields.Length);
 		foreach (var field in fields) {
 			var isIgnored = false;

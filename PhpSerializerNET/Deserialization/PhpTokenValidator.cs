@@ -5,9 +5,7 @@
 **/
 
 using System;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace PhpSerializerNET;
 
@@ -23,27 +21,8 @@ internal ref struct PhpTokenValidator {
 		this._lastIndex = this._input.Length - 1;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void CheckBounds(string expectation) {
-		if (this._lastIndex < this._position) {
-			throw new DeserializationException(
-				$"Unexpected end of input. Expected '{expectation}' at index {this._position}, but input ends at index {this._lastIndex}"
-			);
-		}
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void CheckBounds(char expectation) {
-		if (this._lastIndex < this._position) {
-			throw new DeserializationException(
-				$"Unexpected end of input. Expected '{expectation}' at index {this._position}, but input ends at index {this._lastIndex}"
-			);
-		}
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-	private PhpDataType GetDataType() {
-		var result = this._input[this._position] switch {
+	internal void GetToken() {
+		PhpDataType dataType = this._input[this._position++] switch {
 			(byte)'N' => PhpDataType.Null,
 			(byte)'b' => PhpDataType.Boolean,
 			(byte)'s' => PhpDataType.String,
@@ -51,48 +30,80 @@ internal ref struct PhpTokenValidator {
 			(byte)'d' => PhpDataType.Floating,
 			(byte)'a' => PhpDataType.Array,
 			(byte)'O' => PhpDataType.Object,
-			_ => throw new DeserializationException($"Unexpected token '{(char)this._input[this._position]}' at position {this._position}.")
+			_ => throw new DeserializationException($"Unexpected token '{this.GetCharAt(this._position - 1)}' at position {this._position - 1}.")
 		};
-		this._position++;
-		return result;
+		switch (dataType) {
+			case PhpDataType.Boolean:
+				this.GetCharacter(':');
+				this.GetBoolean();
+				this.GetCharacter(';');
+				break;
+			case PhpDataType.Null:
+				this.GetCharacter(';');
+				break;
+			case PhpDataType.String:
+				this.GetCharacter(':');
+				int length = this.GetLength(PhpDataType.String);
+				this.GetCharacter(':');
+				this.GetCharacter('"');
+				this.GetNCharacters(length);
+				this.GetCharacter('"');
+				this.GetCharacter(';');
+				break;
+			case PhpDataType.Integer:
+				this.GetCharacter(':');
+				this.GetInteger();
+				this.GetCharacter(';');
+				break;
+			case PhpDataType.Floating:
+				this.GetCharacter(':');
+				this.GetFloat();
+				this.GetCharacter(';');
+				break;
+			case PhpDataType.Array:
+				this.GetArrayToken();
+				break;
+			case PhpDataType.Object:
+				this.GetObjectToken();
+				break;
+		};
+		this._tokenCount++;
+	}
+
+	private char GetCharAt(int position) {
+		return (char)this._input[position];
 	}
 
 	private void GetCharacter(char character) {
-		this.CheckBounds(character);
-		if (this._input[this._position] != character) {
+		if (this._lastIndex < this._position) {
 			throw new DeserializationException(
-				$"Unexpected token at index {this._position}. Expected '{character}' but found '{(char)this._input[this._position]}' instead."
+				$"Unexpected end of input. Expected '{character}' at index {this._position}, but input ends at index {this._lastIndex}"
 			);
 		}
-		this._position++;
-	}
-
-
-	private void GetTerminator() {
-		this.GetCharacter(';');
-	}
-
-	private void GetDelimiter() {
-		this.GetCharacter(':');
+		if (this._input[this._position++] != character) {
+			throw new DeserializationException(
+				$"Unexpected token at index {this._position - 1}. Expected '{character}' but found '{this.GetCharAt(this._position - 1)}' instead."
+			);
+		}
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void GetNumbers(bool isFloating) {
+	private void GetFloat() {
 		bool valid = true;
 		int end = this._position;
 
 		for (; this._input[this._position] != ';' && this._position < this._lastIndex && valid; this._position++) {
-			_ = (char)this._input[this._position] switch {
-				>= '0' and <= '9' => true,
-				'+' => true,
-				'-' => true,
-				'.' => isFloating,
-				'E' or 'e' => isFloating, // exponents.
-				'I' or 'N' or 'F' => isFloating, // infinity.
-				'N' or 'A' => isFloating, // NaN.
+			_ = this._input[this._position] switch {
+				>= (byte)'0' and <= (byte)'9' => true,
+				(byte)'+' => true,
+				(byte)'-' => true,
+				(byte)'.' => true,
+				(byte)'E' or (byte)'e' => true, // exponents.
+				(byte)'I' or (byte)'F' => true, // infinity.
+				(byte)'N' or (byte)'A' => true, // NaN.
 				_ => throw new DeserializationException(
 					$"Unexpected token at index {this._position}. " +
-					$"'{(char)this._input[this._position]}' is not a valid part of a {(isFloating ? "floating point " : "")}number."
+					$"'{(char)this._input[this._position]}' is not a valid part of a floating point number."
 				),
 			};
 			end++;
@@ -107,15 +118,39 @@ internal ref struct PhpTokenValidator {
 			);
 		}
 	}
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private void GetInteger() {
+		int end = this._position;
+		for (; this._input[this._position] != ';' && this._position < this._lastIndex; this._position++) {
+			_ = this._input[this._position] switch {
+				>= (byte)'0' and <= (byte)'9' => true,
+				(byte)'+' => true,
+				(byte)'-' => true,
+				_ => throw new DeserializationException(
+					$"Unexpected token at index {this._position}. " +
+					$"'{(char)this._input[this._position]}' is not a valid part of a number."
+				),
+			};
+			end++;
+		}
 
+		this._position = end;
+
+		// Edgecase: input ends here without a delimeter following. Normal handling would give a misleading exception:
+		if (this._lastIndex == this._position && this._input[this._position] != (byte)';') {
+			throw new DeserializationException(
+				$"Unexpected end of input. Expected ':' at index {this._position}, but input ends at index {this._lastIndex}"
+			);
+		}
+	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private int GetLength(PhpDataType dataType) {
 		int length = 0;
 
 		for (; this._input[this._position] != ':' && this._position < this._lastIndex; this._position++) {
-			length = (char)this._input[this._position] switch {
-				>= '0' and <= '9' => length * 10 + (_input[_position] - 48),
+			length = this._input[this._position] switch {
+				>= (byte)'0' and <= (byte)'9' => length * 10 + (_input[_position] - 48),
 				_ => throw new DeserializationException(
 					$"{dataType} at position {this._position} has illegal, missing or malformed length."
 				),
@@ -124,26 +159,23 @@ internal ref struct PhpTokenValidator {
 		return length;
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetBoolean() {
-
-		this.CheckBounds("0' or '1");
-		var item = this._input[this._position];
-		if (item !=  48 && item != 49) {
+		if (this._lastIndex < this._position) {
 			throw new DeserializationException(
-				$"Unexpected token in boolean at index {this._position}. Expected either '1' or '0', but found '{(char)item}' instead."
+				$"Unexpected end of input. Expected '0' or '1' at index {this._position}, but input ends at index {this._lastIndex}"
 			);
 		}
-		this._position++;
+		var item = this._input[this._position++];
+		if (item != 48 && item != 49) {
+			throw new DeserializationException(
+				$"Unexpected token in boolean at index {this._position - 1}. "
+				+ $"Expected either '1' or '0', but found '{(char)item}' instead."
+			);
+		}
 	}
 
-	private void GetBracketClose() {
-		this.GetCharacter('}');
-	}
-
-	private void GetBracketOpen() {
-		this.GetCharacter('{');
-	}
-
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetNCharacters(int length) {
 		if (this._position + length > this._lastIndex) {
 			throw new DeserializationException(
@@ -154,68 +186,39 @@ internal ref struct PhpTokenValidator {
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	internal void GetToken() {
-		switch (this.GetDataType()) {
-			case PhpDataType.Boolean:
-				this.GetBooleanToken();
-				break;
-			case PhpDataType.Null:
-				this.GetNullToken();
-				break;
-			case PhpDataType.String:
-				this.GetStringToken();
-				break;
-			case PhpDataType.Integer:
-				this.GetIntegerToken();
-				break;
-			case PhpDataType.Floating:
-				this.GetFloatingToken();
-				break;
-			case PhpDataType.Array:
-				this.GetArrayToken();
-				break;
-			case PhpDataType.Object:
-				this.GetObjectToken();
-				break;
-		};
-		this._tokenCount++;
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetObjectToken() {
 		int position = _position - 1;
-		this.GetDelimiter();
+		this.GetCharacter(':');
 		int classNamelength = this.GetLength(PhpDataType.Object);
-		this.GetDelimiter();
+		this.GetCharacter(':');
 		this.GetCharacter('"');
 		this.GetNCharacters(classNamelength);
 		this.GetCharacter('"');
-		this.GetDelimiter();
+		this.GetCharacter(':');
 		int propertyCount = this.GetLength(PhpDataType.Object);
-		this.GetDelimiter();
-		this.GetBracketOpen();
+		this.GetCharacter(':');
+		this.GetCharacter('{');
 		int i = 0;
 		while (this._input[this._position] != '}') {
 			this.GetToken();
 			i++;
-			if (i > propertyCount*2) {
+			if (i > propertyCount * 2) {
 				throw new DeserializationException(
 					$"Object at position {position} should have {propertyCount} properties, " +
 					$"but actually has {(i + 1) / 2} or more properties."
 				);
 			}
 		}
-
-		this.GetBracketClose();
+		this.GetCharacter('}');
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetArrayToken() {
 		int position = _position - 1;
-		this.GetDelimiter();
+		this.GetCharacter(':');
 		int length = this.GetLength(PhpDataType.Array);
-		this.GetDelimiter();
-		this.GetBracketOpen();
+		this.GetCharacter(':');
+		this.GetCharacter('{');
 		int maxTokenCount = length * 2;
 		int i = 0;
 		while (this._input[this._position] != '}') {
@@ -224,48 +227,11 @@ internal ref struct PhpTokenValidator {
 			if (i > maxTokenCount) {
 				throw new DeserializationException(
 					$"Array at position {position} should be of length {length}, " +
-					$"but actual length is {(int)((i + 1) / 2)} or more."
+					$"but actual length is {(i + 1) / 2} or more."
 				);
 			}
 		}
-		this.GetBracketClose();
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void GetFloatingToken() {
-		this.GetDelimiter();
-		this.GetNumbers(true);
-		this.GetTerminator();
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void GetIntegerToken() {
-		this.GetDelimiter();
-		this.GetNumbers(false);
-		this.GetTerminator();
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void GetStringToken() {
-		this.GetDelimiter();
-		int length = this.GetLength(PhpDataType.String);
-		this.GetDelimiter();
-		this.GetCharacter('"');
-		this.GetNCharacters(length);
-		this.GetCharacter('"');
-		this.GetTerminator();
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void GetNullToken() {
-		this.GetTerminator();
-	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void GetBooleanToken() {
-		this.GetDelimiter();
-		this.GetBoolean();
-		this.GetTerminator();
+		this.GetCharacter('}');
 	}
 
 	/// <summary>

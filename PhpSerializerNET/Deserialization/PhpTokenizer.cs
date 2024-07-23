@@ -12,23 +12,23 @@ using System.Text;
 namespace PhpSerializerNET;
 
 public ref struct PhpTokenizer {
-	private int _position;
 	private readonly Encoding _inputEncoding;
-	private Span<PhpToken> _tokens;
-	private int _tokenPosition = 0;
-
 	private readonly ReadOnlySpan<byte> _input;
+	private Span<PhpToken> _tokens;
+	private int _position;
+	private int _tokenPosition;
 
 	private PhpTokenizer(ReadOnlySpan<byte> input, Encoding inputEncoding, Span<PhpToken> array) {
-		this._tokens = array;
 		this._inputEncoding = inputEncoding;
 		this._input = input;
+		this._tokens = array;
 		this._position = 0;
+		this._tokenPosition = 0;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private PhpDataType GetDataType() {
-		var result = this._input[this._position] switch {
+		return this._input[this._position++] switch {
 			(byte)'N' => PhpDataType.Null,
 			(byte)'b' => PhpDataType.Boolean,
 			(byte)'s' => PhpDataType.String,
@@ -38,8 +38,6 @@ public ref struct PhpTokenizer {
 			(byte)'O' => PhpDataType.Object,
 			_ => throw new UnreachableException(),
 		};
-		this._position++;
-		return result;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -54,10 +52,9 @@ public ref struct PhpTokenizer {
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private string GetNumbers() {
 		int start = this._position;
-		var span = this._input.Slice(this._position);
-		span = span.Slice(0, span.IndexOf((byte)';'));
-		this._position += span.Length;
-		return span.Utf8Substring(this._inputEncoding);
+		int length = this._input.Slice(this._position).IndexOf((byte)';');
+		this._position += length;
+		return this._inputEncoding.GetString(this._input.Slice(start, length));
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -69,22 +66,10 @@ public ref struct PhpTokenizer {
 		return length;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private string GetBoolean() {
-		string result = this._input[this._position] switch {
-			(byte)'1' => "1",
-			(byte)'0' => "0",
-			_ => throw new UnreachableException()
-		};
-		this._position++;
-		return result;
-	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private string GetNCharacters(int length) {
-		int start = this._position;
-		this._position += length;
-		return this._input.Slice(start, length).Utf8Substring(this._inputEncoding);
+		return _inputEncoding.GetString(this._input.Slice(this._position, length));
 	}
 
 	internal void GetToken() {
@@ -125,7 +110,9 @@ public ref struct PhpTokenizer {
 		this._tokens[this._tokenPosition++] = new PhpToken(
 			PhpDataType.Boolean,
 			_position - 2,
-			this.GetBoolean(),
+			this._input[this._position++] == (byte)'1'
+				? "1"
+				: "0",
 			0
 		);
 		this.Advance();
@@ -142,7 +129,7 @@ public ref struct PhpTokenizer {
 			position,
 			this.GetNCharacters(length)
 		);
-		this.Advance(2);
+		this.Advance(2+length);
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -189,10 +176,10 @@ public ref struct PhpTokenizer {
 	private void GetObjectToken() {
 		int position = _position -1;
 		this.Advance();
-		int classNamelength = this.GetLength();
+		int classNameLength = this.GetLength();
 		this.Advance(2);
-		string className = this.GetNCharacters(classNamelength);
-		this.Advance(2);
+		string className = this.GetNCharacters(classNameLength);
+		this.Advance(2+classNameLength);
 		int propertyCount = this.GetLength();
 		this._tokens[this._tokenPosition++] = new PhpToken(
 			PhpDataType.Object,

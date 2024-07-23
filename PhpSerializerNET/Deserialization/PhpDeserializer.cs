@@ -59,41 +59,7 @@ internal ref struct PhpDeserializer {
 		}
 	}
 
-	private object MakeClass(PhpToken token) {
-		var typeName = token.Value;
-		object constructedObject;
-		Type targetType = null;
-		if (typeName != "stdClass" && this._options.EnableTypeLookup) {
-			targetType = TypeLookup.FindTypeInAssymbly(typeName, this._options.TypeCache.HasFlag(TypeCacheFlag.ClassNames));
-		}
-		if (targetType != null && typeName != "stdClass") {
-			_currentToken--; // go back one because we're basically re-entering the object-token from the top.
-			// If we don't decrement the pointer, we'd start with the first child token instead of the object token.
-			constructedObject = this.DeserializeToken(targetType);
-		} else {
-			dynamic result;
-			if (_options.StdClass == StdClassOption.Dynamic) {
-				result = new PhpDynamicObject();
-			} else if (this._options.StdClass == StdClassOption.Dictionary) {
-				result = new PhpObjectDictionary();
-			} else {
-				throw new DeserializationException("Encountered 'stdClass' and the behavior 'Throw' was specified in deserialization options.");
-			}
-			for (int i = 0; i < token.Length; i++) {
-				var key = this.DeserializeToken();
-				var value = this.DeserializeToken();
-				result.TryAdd(
-					(string)key,
-					value
-				);
-			}
-			constructedObject = result;
-		}
-		if (constructedObject is IPhpObject phpObject and not PhpDateTime) {
-			phpObject.SetClassName(typeName);
-		}
-		return constructedObject;
-	}
+
 
 	private object DeserializeToken(Type targetType) {
 		if (targetType == null) {
@@ -270,6 +236,42 @@ internal ref struct PhpDeserializer {
 		throw new DeserializationException($"Can not assign value \"{value}\" (at position {tokenPosition}) to target type of {targetType.Name}.");
 	}
 
+private object MakeClass(PhpToken token) {
+		var typeName = token.Value;
+		object constructedObject;
+		Type targetType = null;
+		if (typeName != "stdClass" && this._options.EnableTypeLookup) {
+			targetType = TypeLookup.FindTypeInAssymbly(typeName, this._options.TypeCache.HasFlag(TypeCacheFlag.ClassNames));
+		}
+		if (targetType != null && typeName != "stdClass") {
+			_currentToken--; // go back one because we're basically re-entering the object-token from the top.
+			// If we don't decrement the pointer, we'd start with the first child token instead of the object token.
+			constructedObject = this.DeserializeToken(targetType);
+		} else {
+			dynamic result;
+			if (_options.StdClass == StdClassOption.Dynamic) {
+				result = new PhpDynamicObject();
+			} else if (this._options.StdClass == StdClassOption.Dictionary) {
+				result = new PhpObjectDictionary();
+			} else {
+				throw new DeserializationException("Encountered 'stdClass' and the behavior 'Throw' was specified in deserialization options.");
+			}
+			for (int i = 0; i < token.Length; i++) {
+				var key = this.DeserializeToken();
+				var value = this.DeserializeToken();
+				result.TryAdd(
+					(string)key,
+					value
+				);
+			}
+			constructedObject = result;
+		}
+		if (constructedObject is IPhpObject phpObject and not PhpDateTime) {
+			phpObject.SetClassName(typeName);
+		}
+		return constructedObject;
+	}
+
 	private object MakeStruct(Type targetType, PhpToken token) {
 		var result = Activator.CreateInstance(targetType);
 		Dictionary<string, FieldInfo> fields = TypeLookup.GetFieldInfos(targetType, this._options);
@@ -385,7 +387,7 @@ internal ref struct PhpDeserializer {
 		if (targetType.IsArray) {
 			return MakeArray(targetType, token);
 		}
-		var result = (IList)Activator.CreateInstance(targetType);
+		var result = (IList)Activator.CreateInstance(targetType, token.Length);
 		if (result == null) {
 			throw new NullReferenceException("Activator.CreateInstance(targetType) returned null");
 		}
@@ -458,7 +460,7 @@ internal ref struct PhpDeserializer {
 			}
 		}
 		if (!isList || (this._options.UseLists == ListOptions.Default && consecutive == false)) {
-			var result = new Dictionary<object, object>();
+			var result = new Dictionary<object, object>(token.Length);
 			for (int i = 0; i < token.Length; i++) {
 				result.Add(
 					this.DeserializeToken(),
@@ -467,7 +469,7 @@ internal ref struct PhpDeserializer {
 			}
 			return result;
 		} else {
-			var result = new List<object>();
+			var result = new List<object>(token.Length);
 			for (int i = 0; i < token.Length; i++) {
 				_currentToken++;
 				result.Add(this.DeserializeToken());

@@ -6,47 +6,45 @@
 **/
 
 using System.Dynamic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace PhpSerializerNET.Test.Serialize {
-	[TestClass]
-	public class DynamicSerializationTest {
-		[TestMethod]
-		public void SerializesPhpDynamicObject() {
-			dynamic data = new PhpDynamicObject();
-			data.Foo = "a";
-			data.Bar = 3.1415;
+namespace PhpSerializerNET.Test.Serialize;
 
-			Assert.AreEqual(
-				"O:8:\"stdClass\":2:{s:3:\"Foo\";s:1:\"a\";s:3:\"Bar\";d:3.1415;}",
-				PhpSerialization.Serialize(data)
-			);
-		}
+public class DynamicSerializationTest {
+	[Fact]
+	public void SerializesPhpDynamicObject() {
+		dynamic data = new PhpDynamicObject();
+		data.Foo = "a";
+		data.Bar = 3.1415;
 
-		[TestMethod]
-		public void SerializesPhpDynamicObjectWithClassname() {
-			dynamic data = new PhpDynamicObject();
-			data.SetClassName("phpDynamicObject");
-			data.Foo = "a";
-			data.Bar = 3.1415;
-			System.Console.WriteLine(data.Bar);
-			Assert.AreEqual(
-				"O:16:\"phpDynamicObject\":2:{s:3:\"Foo\";s:1:\"a\";s:3:\"Bar\";d:3.1415;}",
-				PhpSerialization.Serialize(data)
-			);
-		}
+		Assert.Equal(
+			"O:8:\"stdClass\":2:{s:3:\"Foo\";s:1:\"a\";s:3:\"Bar\";d:3.1415;}",
+			PhpSerialization.Serialize(data)
+		);
+	}
 
-		[TestMethod]
-		public void SerializesExpandoObject() {
-			dynamic data = new ExpandoObject();
-			data.Foo = "a";
-			data.Bar = 3.1415;
+	[Fact]
+	public void SerializesPhpDynamicObjectWithClassname() {
+		dynamic data = new PhpDynamicObject();
+		data.SetClassName("phpDynamicObject");
+		data.Foo = "a";
+		data.Bar = 3.1415;
+		System.Console.WriteLine(data.Bar);
+		Assert.Equal(
+			"O:16:\"phpDynamicObject\":2:{s:3:\"Foo\";s:1:\"a\";s:3:\"Bar\";d:3.1415;}",
+			PhpSerialization.Serialize(data)
+		);
+	}
 
-			Assert.AreEqual(
-				"O:8:\"stdClass\":2:{s:3:\"Foo\";s:1:\"a\";s:3:\"Bar\";d:3.1415;}",
-				PhpSerialization.Serialize(data)
-			);
-		}
+	[Fact]
+	public void SerializesExpandoObject() {
+		dynamic data = new ExpandoObject();
+		data.Foo = "a";
+		data.Bar = 3.1415;
 
+		Assert.Equal(
+			"O:8:\"stdClass\":2:{s:3:\"Foo\";s:1:\"a\";s:3:\"Bar\";d:3.1415;}",
+			PhpSerialization.Serialize(data)
+		);
 	}
 }

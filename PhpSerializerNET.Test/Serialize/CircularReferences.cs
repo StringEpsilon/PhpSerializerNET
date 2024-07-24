@@ -6,61 +6,60 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace PhpSerializerNET.Test.Serialize {
-	[TestClass]
-	public class CircularReferencesTest {
-		private class CircularClass {
-			public string Foo { get; set; }
-			public CircularClass Bar { get; set; }
-		}
+namespace PhpSerializerNET.Test.Serialize;
 
-		[TestMethod]
-		public void SerializeCircularObject() {
-			var testObject = new CircularClass() {
-				Foo = "First"
-			};
-			testObject.Bar = new CircularClass() {
-				Foo = "Second",
-				Bar = testObject
-			};
+public class CircularReferencesTest {
+	private class CircularClass {
+		public string Foo { get; set; }
+		public CircularClass Bar { get; set; }
+	}
 
-			Assert.AreEqual(
-				"a:2:{s:3:\"Foo\";s:5:\"First\";s:3:\"Bar\";a:2:{s:3:\"Foo\";s:6:\"Second\";s:3:\"Bar\";N;}}",
-				PhpSerialization.Serialize(testObject)
-			);
-		}
+	[Fact]
+	public void SerializeCircularObject() {
+		var testObject = new CircularClass() {
+			Foo = "First"
+		};
+		testObject.Bar = new CircularClass() {
+			Foo = "Second",
+			Bar = testObject
+		};
 
-		[TestMethod]
-		public void ThrowOnCircularReferencesOption() {
-			var testObject = new CircularClass() {
-				Foo = "First"
-			};
-			testObject.Bar = new CircularClass() {
-				Foo = "Second",
-				Bar = testObject
-			};
+		Assert.Equal(
+			"a:2:{s:3:\"Foo\";s:5:\"First\";s:3:\"Bar\";a:2:{s:3:\"Foo\";s:6:\"Second\";s:3:\"Bar\";N;}}",
+			PhpSerialization.Serialize(testObject)
+		);
+	}
 
-			var ex = Assert.ThrowsException<ArgumentException>(
-				() => PhpSerialization.Serialize(testObject, new PhpSerializiationOptions(){ ThrowOnCircularReferences = true})
-			);
-			Assert.AreEqual(
-				"Input object has a circular reference.",
-				ex.Message
-			);
-		}
+	[Fact]
+	public void ThrowOnCircularReferencesOption() {
+		var testObject = new CircularClass() {
+			Foo = "First"
+		};
+		testObject.Bar = new CircularClass() {
+			Foo = "Second",
+			Bar = testObject
+		};
 
-		[TestMethod]
-		public void SerializeCircularList() {
-			List<object> listA = new() { "A", "B" };
-			List<object> listB = new() { "C", "D", listA };
-			listA.Add(listB);
+		var ex = Assert.Throws<ArgumentException>(
+			() => PhpSerialization.Serialize(testObject, new PhpSerializiationOptions() { ThrowOnCircularReferences = true })
+		);
+		Assert.Equal(
+			"Input object has a circular reference.",
+			ex.Message
+		);
+	}
 
-			Assert.AreEqual( // strings:
-				"a:3:{i:0;s:1:\"A\";i:1;s:1:\"B\";i:2;a:3:{i:0;s:1:\"C\";i:1;s:1:\"D\";i:2;N;}}",
-				PhpSerialization.Serialize(listA)
-			);
-		}
+	[Fact]
+	public void SerializeCircularList() {
+		List<object> listA = new() { "A", "B" };
+		List<object> listB = new() { "C", "D", listA };
+		listA.Add(listB);
+
+		Assert.Equal( // strings:
+			"a:3:{i:0;s:1:\"A\";i:1;s:1:\"B\";i:2;a:3:{i:0;s:1:\"C\";i:1;s:1:\"D\";i:2;N;}}",
+			PhpSerialization.Serialize(listA)
+		);
 	}
 }

@@ -5,20 +5,19 @@
 **/
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace PhpSerializerNET.Test.Other {
-	[TestClass]
-	public class PhpDateTimeTest {
-		[TestMethod]
-		public void ThrowsOnSetClassName() {
-			var testObject = new PhpDateTime();
+namespace PhpSerializerNET.Test.Other;
 
-			var ex = Assert.ThrowsException<InvalidOperationException>(() => {
-				testObject.SetClassName("stdClass");
-			});
-			Assert.AreEqual("Cannot set name on object of type PhpDateTime name is of constant DateTime", ex.Message);
-		}
+public class PhpDateTimeTest {
+	[Fact]
+	public void ThrowsOnSetClassName() {
+		var testObject = new PhpDateTime();
 
+		var ex = Assert.Throws<InvalidOperationException>(() => {
+			testObject.SetClassName("stdClass");
+		});
+		Assert.Equal("Cannot set name on object of type PhpDateTime name is of constant DateTime", ex.Message);
 	}
+
 }

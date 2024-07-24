@@ -5,25 +5,15 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace PhpSerializerNET.Test.Serialize {
-	[TestClass]
-	public class BooleanSerializationTest {
-		[TestMethod]
-		public void SerializesTrue() {
-			Assert.AreEqual(
-				"b:1;",
-				PhpSerialization.Serialize(true)
-			);
-		}
-		
-		[TestMethod]
-		public void SerializesFalse() {
-			Assert.AreEqual(
-				"b:0;",
-				PhpSerialization.Serialize(false)
-			);
-		}
+namespace PhpSerializerNET.Test.Serialize;
+
+public class BooleanSerializationTest {
+	[Theory]
+	[InlineData(true, "b:1;")]
+	[InlineData(false, "b:0;")]
+	public void Serializes(bool input, string output) {
+		Assert.Equal(output, PhpSerialization.Serialize(input));
 	}
 }

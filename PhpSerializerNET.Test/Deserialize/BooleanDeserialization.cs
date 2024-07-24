@@ -5,72 +5,58 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace PhpSerializerNET.Test.Deserialize {
-	[TestClass]
-	public class DeserializeBooleansTest {
-		[TestMethod]
-		public void DeserializesTrue() {
-			Assert.AreEqual(
-				true,
-				PhpSerialization.Deserialize("b:1;")
-			);
-		}
+namespace PhpSerializerNET.Test.Deserialize;
 
-		[TestMethod]
-		public void DeserializesTrueExplicit() {
+public class DeserializeBooleansTest {
+	[Fact]
+	public void DeserializesTrue() {
+		Assert.Equal(true, PhpSerialization.Deserialize("b:1;"));
+	}
 
-			Assert.AreEqual(
-				true,
-				PhpSerialization.Deserialize<bool>("b:1;")
-			);
-		}
+	[Fact]
+	public void DeserializesTrueExplicit() {
+		Assert.True(PhpSerialization.Deserialize<bool>("b:1;"));
+	}
 
-		[TestMethod]
-		public void DeserializesFalse() {
-			Assert.AreEqual(
-				false,
-				PhpSerialization.Deserialize("b:0;")
-			);
-		}
+	[Fact]
+	public void DeserializesFalse() {
+		Assert.Equal(false, PhpSerialization.Deserialize("b:0;"));
+	}
 
-		[TestMethod]
-		public void DeserializesFalseExplicit() {
-			Assert.AreEqual(
-				false,
-				PhpSerialization.Deserialize<bool>("b:0;")
-			);
-		}
+	[Fact]
+	public void DeserializesFalseExplicit() {
+		Assert.False(PhpSerialization.Deserialize<bool>("b:0;"));
+	}
 
-		[TestMethod]
-		public void DeserializesToLong() {
-			var result = PhpSerialization.Deserialize<long>("b:0;");
+	[Fact]
+	public void DeserializesToLong() {
+		var result = PhpSerialization.Deserialize<long>("b:0;");
 
-			Assert.AreEqual(0, result);
+		Assert.Equal(0, result);
 
-			result = PhpSerialization.Deserialize<long>("b:1;");
+		result = PhpSerialization.Deserialize<long>("b:1;");
 
-			Assert.AreEqual(1, result);
-		}
+		Assert.Equal(1, result);
+	}
 
-		[TestMethod]
-		public void DeserializesToString() {
-			var result = PhpSerialization.Deserialize<string>("b:0;");
+	[Fact]
+	public void DeserializesToString() {
+		var result = PhpSerialization.Deserialize<string>("b:0;");
 
-			Assert.AreEqual("False", result);
+		Assert.Equal("False", result);
 
-			result = PhpSerialization.Deserialize<string>("b:1;");
+		result = PhpSerialization.Deserialize<string>("b:1;");
 
-			Assert.AreEqual("True", result);
-		}
+		Assert.Equal("True", result);
+	}
 
-		[TestMethod]
-		public void DeserializeToNullable() {
-			Assert.AreEqual(
-				false,
-				PhpSerialization.Deserialize<bool?>("b:0;")
-			);
-		}
+	[Fact]
+	public void DeserializeToNullable() {
+		Assert.Equal(
+			false,
+			PhpSerialization.Deserialize<bool?>("b:0;")
+		);
 	}
 }

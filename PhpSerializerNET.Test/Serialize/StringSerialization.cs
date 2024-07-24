@@ -5,42 +5,39 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace PhpSerializerNET.Test.Serialize {
-	[TestClass]
-	public class StringSerializationTest {
-		[TestMethod]
-		public void SerializeHelloWorld() {
-			Assert.AreEqual(
-				"s:12:\"Hello World!\";",
-				PhpSerialization.Serialize("Hello World!")
-			);
-		}
+namespace PhpSerializerNET.Test.Serialize;
+public class StringSerializationTest {
+	[Fact]
+	public void SerializeHelloWorld() {
+		Assert.Equal(
+			"s:12:\"Hello World!\";",
+			PhpSerialization.Serialize("Hello World!")
+		);
+	}
 
-		[TestMethod]
-		public void SerializeEmptyString() {
-			Assert.AreEqual(
-				"s:0:\"\";",
-				PhpSerialization.Serialize("")
-			);
-		}
+	[Fact]
+	public void SerializeEmptyString() {
+		Assert.Equal(
+			"s:0:\"\";",
+			PhpSerialization.Serialize("")
+		);
+	}
 
-		[TestMethod]
-		public void SerializeUmlauts() {
-			Assert.AreEqual(
-				"s:14:\"äöüßÄÖÜ\";",
-				PhpSerialization.Serialize("äöüßÄÖÜ")
-			);
-		}
+	[Fact]
+	public void SerializeUmlauts() {
+		Assert.Equal(
+			"s:14:\"äöüßÄÖÜ\";",
+			PhpSerialization.Serialize("äöüßÄÖÜ")
+		);
+	}
 
-		[TestMethod]
-		public void SerializeEmoji() {
-			Assert.AreEqual(
-				"s:4:\"👻\";",
-				PhpSerialization.Serialize("👻")
-			);
-		}
-
+	[Fact]
+	public void SerializeEmoji() {
+		Assert.Equal(
+			"s:4:\"👻\";",
+			PhpSerialization.Serialize("👻")
+		);
 	}
 }

@@ -4,25 +4,24 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace PhpSerializerNET.Test.Other {
-	[TestClass]
-	public class PhpDynamicObjectTest {
-		[TestMethod]
-		public void CanReadAndWriteProps() {
-			dynamic testObject = new PhpDynamicObject();
+namespace PhpSerializerNET.Test.Other;
 
-			testObject.foo = "Foo";
-			Assert.AreEqual("Foo", testObject.foo);
-		}
+public class PhpDynamicObjectTest {
+	[Fact]
+	public void CanReadAndWriteProps() {
+		dynamic testObject = new PhpDynamicObject();
 
-		[TestMethod]
-		public void GetAndSetClassname() {
-			dynamic testObject = new PhpDynamicObject();
+		testObject.foo = "Foo";
+		Assert.Equal("Foo", testObject.foo);
+	}
 
-			testObject.SetClassName("MyClass");
-			Assert.AreEqual("MyClass", testObject.GetClassName());
-		}
+	[Fact]
+	public void GetAndSetClassname() {
+		dynamic testObject = new PhpDynamicObject();
+
+		testObject.SetClassName("MyClass");
+		Assert.Equal("MyClass", testObject.GetClassName());
 	}
 }

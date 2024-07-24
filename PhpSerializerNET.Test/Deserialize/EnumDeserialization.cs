@@ -5,63 +5,61 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using PhpSerializerNET.Test.DataTypes;
 
-namespace PhpSerializerNET.Test.Deserialize {
+namespace PhpSerializerNET.Test.Deserialize;
 
-	[TestClass]
-	public class EnumDeserializationTest {
+public class EnumDeserializationTest {
 
-		[TestMethod]
-		public void DeserializeLongBasedEnum() {
-			Assert.AreEqual(
-				IntEnum.A,
-				PhpSerialization.Deserialize<IntEnum>("i:1;")
-			);
-		}
+	[Fact]
+	public void DeserializeLongBasedEnum() {
+		Assert.Equal(
+			IntEnum.A,
+			PhpSerialization.Deserialize<IntEnum>("i:1;")
+		);
+	}
 
-		[TestMethod]
-		public void DeserializeIntBasedEnum() {
-			Assert.AreEqual(
-				LongEnum.A,
-				PhpSerialization.Deserialize<LongEnum>("i:1;")
-			);
-		}
+	[Fact]
+	public void DeserializeIntBasedEnum() {
+		Assert.Equal(
+			LongEnum.A,
+			PhpSerialization.Deserialize<LongEnum>("i:1;")
+		);
+	}
 
-		[TestMethod]
-		public void DeserializeFromString() {
-			Assert.AreEqual(
-				LongEnum.A,
-				PhpSerialization.Deserialize<LongEnum>("s:1:\"A\";")
-			);
-		}
+	[Fact]
+	public void DeserializeFromString() {
+		Assert.Equal(
+			LongEnum.A,
+			PhpSerialization.Deserialize<LongEnum>("s:1:\"A\";")
+		);
+	}
 
-		[TestMethod]
-		public void DeserializeFromStringWithPropertyName() {
-			Assert.AreEqual(
-				IntEnumWithPropertyName.A,
-				PhpSerialization.Deserialize<IntEnumWithPropertyName>("s:1:\"a\";")
-			);
+	[Fact]
+	public void DeserializeFromStringWithPropertyName() {
+		Assert.Equal(
+			IntEnumWithPropertyName.A,
+			PhpSerialization.Deserialize<IntEnumWithPropertyName>("s:1:\"a\";")
+		);
 
-			Assert.AreEqual(
-				IntEnumWithPropertyName.B,
-				PhpSerialization.Deserialize<IntEnumWithPropertyName>("s:1:\"c\";")
-			);
+		Assert.Equal(
+			IntEnumWithPropertyName.B,
+			PhpSerialization.Deserialize<IntEnumWithPropertyName>("s:1:\"c\";")
+		);
 
-			Assert.AreEqual(
-				IntEnumWithPropertyName.C,
-				PhpSerialization.Deserialize<IntEnumWithPropertyName>("s:1:\"C\";")
-			);
-		}
+		Assert.Equal(
+			IntEnumWithPropertyName.C,
+			PhpSerialization.Deserialize<IntEnumWithPropertyName>("s:1:\"C\";")
+		);
+	}
 
-		[TestMethod]
-		public void DeserializeToNullable() {
-			LongEnum? result = PhpSerialization.Deserialize<LongEnum?>("i:1;");
-			Assert.AreEqual(
-				LongEnum.A,
-				result
-			);
-		}
+	[Fact]
+	public void DeserializeToNullable() {
+		LongEnum? result = PhpSerialization.Deserialize<LongEnum?>("i:1;");
+		Assert.Equal(
+			LongEnum.A,
+			result
+		);
 	}
 }

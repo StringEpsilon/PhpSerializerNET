@@ -5,27 +5,25 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using PhpSerializerNET.Test.DataTypes;
 
-namespace PhpSerializerNET.Test.Serialize {
+namespace PhpSerializerNET.Test.Serialize;
 
-	[TestClass]
-	public class EnumSerializationTest {
-		[TestMethod]
-		public void SerializeOne() {
-			Assert.AreEqual(
-				"i:1;",
-				PhpSerialization.Serialize(IntEnum.A)
-			);
-		}
+public class EnumSerializationTest {
+	[Fact]
+	public void SerializeOne() {
+		Assert.Equal(
+			"i:1;",
+			PhpSerialization.Serialize(IntEnum.A)
+		);
+	}
 
-		[TestMethod]
-		public void SerializeToString() {
-			Assert.AreEqual(
-				"s:1:\"A\";",
-				PhpSerialization.Serialize(IntEnum.A, new PhpSerializiationOptions{NumericEnums = false})
-			);
-		}
+	[Fact]
+	public void SerializeToString() {
+		Assert.Equal(
+			"s:1:\"A\";",
+			PhpSerialization.Serialize(IntEnum.A, new PhpSerializiationOptions { NumericEnums = false })
+		);
 	}
 }

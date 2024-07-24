@@ -4,57 +4,21 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace PhpSerializerNET.Test.Deserialize.Validation {
-	[TestClass]
-	public class TestStringValidation {
-		[TestMethod]
-		public void ThrowsOnTruncatedInput() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s"));
-			Assert.AreEqual("Unexpected end of input. Expected ':' at index 1, but input ends at index 0", ex.Message);
-		}
+namespace PhpSerializerNET.Test.Deserialize.Validation;
 
-		[TestMethod]
-		public void ThrowsOnMissingStartQuote() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s:3:abc\";"));
-			Assert.AreEqual(
-				"Unexpected token at index 4. Expected '\"' but found 'a' instead.",
-				ex.Message
-			);
-		}
-
-		[TestMethod]
-		public void ThrowsOnMissingEndQuote() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s:3:\"abc;"));
-			Assert.AreEqual(
-				"Unexpected token at index 8. Expected '\"' but found ';' instead.",
-				ex.Message
-			);
-		}
-
-		[TestMethod]
-		public void ThrowsOnInvalidLength() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s:3\"abc\";"));
-			Assert.AreEqual(
-				"String at position 3 has illegal, missing or malformed length.",
-				ex.Message
-			);
-		}
-
-		[TestMethod]
-		public void ThrowsOnOutOfBoundsLength() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s:10:\"abc\";"));
-			Assert.AreEqual(
-				"Illegal length of 10. The string at position 6 points to out of bounds index 16.",
-				ex.Message
-			);
-		}
-
-		[TestMethod]
-		public void ThrowsOnMissingSemicolon() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("s:3:\"abc\""));
-			Assert.AreEqual("Unexpected end of input. Expected ';' at index 9, but input ends at index 8", ex.Message);
-		}
+public class TestStringValidation {
+	[Theory]
+	[InlineData("s", "Unexpected end of input. Expected ':' at index 1, but input ends at index 0")]
+	[InlineData("s:3:abc\";", "Unexpected token at index 4. Expected '\"' but found 'a' instead.")]
+	[InlineData("s:3:\"abc;", "Unexpected token at index 8. Expected '\"' but found ';' instead.")]
+	[InlineData("s:3\"abc\";", "String at position 3 has illegal, missing or malformed length.")]
+	[InlineData("s:_:\"abc\";", "String at position 2 has illegal, missing or malformed length.")]
+	[InlineData("s:10:\"abc\";", "Illegal length of 10. The string at position 6 points to out of bounds index 16.")]
+	[InlineData("s:3:\"abc\"", "Unexpected end of input. Expected ';' at index 9, but input ends at index 8")]
+	public void ThrowsOnMalformedString(string input, string exceptionMessage) {
+		var ex = Assert.Throws<DeserializationException>(() => PhpSerialization.Deserialize(input));
+		Assert.Equal(exceptionMessage, ex.Message);
 	}
 }

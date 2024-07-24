@@ -4,60 +4,21 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace PhpSerializerNET.Test.Deserialize.Validation {
-	[TestClass]
-	public class TestArrayValidation {
+namespace PhpSerializerNET.Test.Deserialize.Validation;
 
-		[TestMethod]
-		public void ThrowsOnMalformedArray() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a"));
-			Assert.AreEqual("Unexpected end of input. Expected ':' at index 1, but input ends at index 0", ex.Message);
-
-		}
-
-
-		[TestMethod]
-		public void ThrowsOnInvalidLength() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a:-1:{};"));
-			Assert.AreEqual("Array at position 2 has illegal, missing or malformed length.", ex.Message);
-		}
-
-
-		[TestMethod]
-		public void ThrowsOnMissingBracket() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a:100:};"));
-			Assert.AreEqual("Unexpected token at index 6. Expected '{' but found '}' instead.", ex.Message);
-
-
-		}
-
-		[TestMethod]
-		public void ThrowsOnMissingColon() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a:10000   "));
-			Assert.AreEqual("Array at position 7 has illegal, missing or malformed length.", ex.Message);
-
-		}
-
-		[TestMethod]
-		public void ThrowsOnAbruptEOF() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a:10000:"));
-			Assert.AreEqual("Unexpected end of input. Expected '{' at index 8, but input ends at index 7", ex.Message);
-
-
-			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("a:1000000"));
-			Assert.AreEqual("Unexpected token at index 8. Expected ':' but found '0' instead.", ex.Message);
-
-		}
-
-		[TestMethod]
-		public void ThrowsOnFalseLength() {
-			var exception = Assert.ThrowsException<DeserializationException>(
-				() => PhpSerialization.Deserialize("a:2:{i:0;i:0;i:1;i:1;i:2;i:2;}")
-			);
-
-			Assert.AreEqual("Array at position 0 should be of length 2, but actual length is 3 or more.", exception.Message);
-		}
+public class TestArrayValidation {
+	[Theory]
+	[InlineData("a", "Unexpected end of input. Expected ':' at index 1, but input ends at index 0")]
+	[InlineData("a:-1:{};", "Array at position 2 has illegal, missing or malformed length.")]
+	[InlineData("a:100:};", "Unexpected token at index 6. Expected '{' but found '}' instead.")]
+	[InlineData("a:10000   ", "Array at position 7 has illegal, missing or malformed length.")]
+	[InlineData("a:10000:", "Unexpected end of input. Expected '{' at index 8, but input ends at index 7")]
+	[InlineData("a:1000000", "Unexpected token at index 8. Expected ':' but found '0' instead.")]
+	[InlineData("a:2:{i:0;i:0;i:1;i:1;i:2;i:2;}", "Array at position 0 should be of length 2, but actual length is 3 or more.")]
+	public void ThrowsOnMalformedArray(string input, string exceptionMessage) {
+		var ex = Assert.Throws<DeserializationException>(() => PhpSerialization.Deserialize(input));
+		Assert.Equal(exceptionMessage, ex.Message);
 	}
 }

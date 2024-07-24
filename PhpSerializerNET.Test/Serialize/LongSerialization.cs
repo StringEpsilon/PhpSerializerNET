@@ -4,24 +4,23 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace PhpSerializerNET.Test.Serialize {
-	[TestClass]
-	public class LongSerializationTest {
-		[TestMethod]
-		public void SerializeIntMaxValue() {
-			Assert.AreEqual(
-				"i:9223372036854775807;",
-				PhpSerialization.Serialize(long.MaxValue)
-			);
-		}
-		[TestMethod]
-		public void SerializeMinValue() {
-			Assert.AreEqual(
-				"i:-9223372036854775808;",
-				PhpSerialization.Serialize(long.MinValue)
-			);
-		}
+namespace PhpSerializerNET.Test.Serialize;
+
+public class LongSerializationTest {
+	[Fact]
+	public void SerializeIntMaxValue() {
+		Assert.Equal(
+			"i:9223372036854775807;",
+			PhpSerialization.Serialize(long.MaxValue)
+		);
+	}
+	[Fact]
+	public void SerializeMinValue() {
+		Assert.Equal(
+			"i:-9223372036854775808;",
+			PhpSerialization.Serialize(long.MinValue)
+		);
 	}
 }

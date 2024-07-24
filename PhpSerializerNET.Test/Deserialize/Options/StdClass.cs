@@ -6,88 +6,87 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using PhpSerializerNET.Test.DataTypes;
 
 namespace PhpSerializerNET.Test.Deserialize.Options {
-	[TestClass]
 	public class StdClassTest {
 		public struct MyStruct {
 			public double John;
 			public double Jane;
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Option_Throw() {
-			var ex = Assert.ThrowsException<DeserializationException>(
+			var ex = Assert.Throws<DeserializationException>(
 				() => PhpSerialization.Deserialize(
 					"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
 					new PhpDeserializationOptions() { StdClass = StdClassOption.Throw }
 				)
 			);
 
-			Assert.AreEqual(
+			Assert.Equal(
 				"Encountered 'stdClass' and the behavior 'Throw' was specified in deserialization options.",
 				ex.Message
 			);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Option_Dynamic() {
 			dynamic result = (PhpDynamicObject)PhpSerialization.Deserialize(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
 				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
 			);
 
-			Assert.AreEqual(3.14, result.John);
-			Assert.AreEqual(2.718, result.Jane);
-			Assert.AreEqual("stdClass", result.GetClassName());
+			Assert.Equal(3.14, result.John);
+			Assert.Equal(2.718, result.Jane);
+			Assert.Equal("stdClass", result.GetClassName());
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Option_Dictionary() {
 			var result = (IDictionary)PhpSerialization.Deserialize(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
 				new PhpDeserializationOptions() { StdClass = StdClassOption.Dictionary }
 			);
 
-			Assert.AreEqual(3.14, result["John"]);
-			Assert.AreEqual(2.718, result["Jane"]);
+			Assert.Equal(3.14, result["John"]);
+			Assert.Equal(2.718, result["Jane"]);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Overridden_By_Class() {
 			var result = PhpSerialization.Deserialize<NamedClass>(
 				"O:8:\"stdClass\":2:{s:3:\"Foo\";d:3.14;s:3:\"Bar\";d:2.718;}",
 				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
 			);
 
-			Assert.IsInstanceOfType(result, typeof(NamedClass));
-			Assert.AreEqual(3.14, result.Foo);
-			Assert.AreEqual(2.718, result.Bar);
+			Assert.IsType<NamedClass>(result);
+			Assert.Equal(3.14, result.Foo);
+			Assert.Equal(2.718, result.Bar);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Overridden_By_Struct() {
 			var result = PhpSerialization.Deserialize<MyStruct>(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
 				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
 			);
 
-			Assert.IsInstanceOfType(result, typeof(MyStruct));
-			Assert.AreEqual(3.14, result.John);
-			Assert.AreEqual(2.718, result.Jane);
+			Assert.IsType<MyStruct>(result);
+			Assert.Equal(3.14, result.John);
+			Assert.Equal(2.718, result.Jane);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Overridden_By_Dictionary() {
 			var result = PhpSerialization.Deserialize<Dictionary<string, object>>(
 				"O:8:\"stdClass\":2:{s:4:\"John\";d:3.14;s:4:\"Jane\";d:2.718;}",
 				new PhpDeserializationOptions() { StdClass = StdClassOption.Dynamic }
 			);
 
-			Assert.AreEqual(3.14, result["John"]);
-			Assert.AreEqual(2.718, result["Jane"]);
+			Assert.Equal(3.14, result["John"]);
+			Assert.Equal(2.718, result["Jane"]);
 		}
 	}
 }

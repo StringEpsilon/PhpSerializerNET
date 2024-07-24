@@ -4,37 +4,36 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace PhpSerializerNET.Test.Deserialize.Options {
-	[TestClass]
 	public class NumberStringToBoolTest {
-		[TestMethod]
+		[Fact]
 		public void Enabled_Deserializes_Implicit() {
 			var options = new PhpDeserializationOptions() { NumberStringToBool = true };
 
-			Assert.AreEqual(true, PhpSerialization.Deserialize("s:1:\"1\";", options));
-			Assert.AreEqual(false, PhpSerialization.Deserialize("s:1:\"0\";", options));
+			Assert.Equal(true, PhpSerialization.Deserialize("s:1:\"1\";", options));
+			Assert.Equal(false, PhpSerialization.Deserialize("s:1:\"0\";", options));
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Enabled_Deserializes_Explicit() {
 			var options = new PhpDeserializationOptions() { NumberStringToBool = true };
 
-			Assert.AreEqual(true, PhpSerialization.Deserialize<bool>("s:1:\"1\";", options));
-			Assert.AreEqual(false, PhpSerialization.Deserialize<bool>("s:1:\"0\";", options));
+			Assert.True(PhpSerialization.Deserialize<bool>("s:1:\"1\";", options));
+			Assert.False(PhpSerialization.Deserialize<bool>("s:1:\"0\";", options));
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Disabled_Throws() {
-			var exception = Assert.ThrowsException<DeserializationException>(
+			var exception = Assert.Throws<DeserializationException>(
 				() => PhpSerialization.Deserialize<bool>(
 					"s:1:\"0\";",
 					new PhpDeserializationOptions() { NumberStringToBool = false }
 				)
 			);
 
-			Assert.AreEqual(
+			Assert.Equal(
 				"Exception encountered while trying to assign '0' to type Boolean. See inner exception for details.",
 				exception.Message
 			);

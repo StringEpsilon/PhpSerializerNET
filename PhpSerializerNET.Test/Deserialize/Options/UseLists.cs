@@ -5,12 +5,11 @@
 **/
 
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace PhpSerializerNET.Test.Deserialize.Options {
-	[TestClass]
 	public class UseListsTest {
-		[TestMethod]
+		[Fact]
 		public void Option_Never() {
 			var test = PhpSerialization.Deserialize(
 				"a:2:{i:0;s:1:\"a\";i:1;s:1:\"b\";}",
@@ -20,13 +19,13 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 			);
 
 			var dictionary = test as Dictionary<object, object>;
-			Assert.IsNotNull(dictionary);
-			Assert.AreEqual(2, dictionary.Count);
-			Assert.AreEqual("a", dictionary[(long)0]);
-			Assert.AreEqual("b", dictionary[(long)1]);
+			Assert.NotNull(dictionary);
+			Assert.Equal(2, dictionary.Count);
+			Assert.Equal("a", dictionary[(long)0]);
+			Assert.Equal("b", dictionary[(long)1]);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Option_Default() {
 			var result = PhpSerialization.Deserialize(
 				"a:2:{i:0;s:1:\"a\";i:1;s:1:\"b\";}",
@@ -36,13 +35,13 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 			);
 
 			var list = result as List<object>;
-			Assert.IsNotNull(list);
-			Assert.AreEqual(2, list.Count);
-			Assert.AreEqual("a", list[0]);
-			Assert.AreEqual("b", list[1]);
+			Assert.NotNull(list);
+			Assert.Equal(2, list.Count);
+			Assert.Equal("a", list[0]);
+			Assert.Equal("b", list[1]);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Option_Default_NonConsequetive() {
 			// Same option, non-consecutive integer keys:
 			var result = PhpSerialization.Deserialize(
@@ -52,15 +51,15 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 				}
 			);
 
-			Assert.AreEqual(typeof (Dictionary<object, object>), result.GetType());
+			Assert.Equal(typeof (Dictionary<object, object>), result.GetType());
 			var dictionary = result as Dictionary<object, object>;
-			Assert.IsNotNull(dictionary);
-			Assert.AreEqual(2, dictionary.Count);
-			Assert.AreEqual("a", dictionary[(long)2]);
-			Assert.AreEqual("b", dictionary[(long)4]);
+			Assert.NotNull(dictionary);
+			Assert.Equal(2, dictionary.Count);
+			Assert.Equal("a", dictionary[(long)2]);
+			Assert.Equal("b", dictionary[(long)4]);
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Option_OnAllIntegerKeys() {
 			var test = PhpSerialization.Deserialize(
 				"a:2:{i:0;s:1:\"a\";i:1;s:1:\"b\";}",
@@ -70,14 +69,14 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 			);
 
 			var list = test as List<object>;
-			Assert.IsNotNull(list);
-			Assert.AreEqual(2, list.Count);
-			Assert.AreEqual("a", list[0]);
-			Assert.AreEqual("b", list[1]);
+			Assert.NotNull(list);
+			Assert.Equal(2, list.Count);
+			Assert.Equal("a", list[0]);
+			Assert.Equal("b", list[1]);
 
 		}
 
-		[TestMethod]
+		[Fact]
 		public void Option_OnAllIntegerKeys_NonConsequetive() {
 			// Same option, non-consecutive integer keys:
 			var result = PhpSerialization.Deserialize(
@@ -88,10 +87,10 @@ namespace PhpSerializerNET.Test.Deserialize.Options {
 			);
 
 			var list = result as List<object>;
-			Assert.IsNotNull(list);
-			Assert.AreEqual(2, list.Count);
-			Assert.AreEqual("a", list[0]);
-			Assert.AreEqual("b", list[1]);
+			Assert.NotNull(list);
+			Assert.Equal(2, list.Count);
+			Assert.Equal("a", list[0]);
+			Assert.Equal("b", list[1]);
 		}
 	}
 }

@@ -5,33 +5,32 @@
 **/
 
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace PhpSerializerNET.Test.Serialize {
-	[TestClass]
-	public class ListSerializationTest {
-		[TestMethod]
-		public void SerializeListOfStrings() {
-			Assert.AreEqual( // strings:
-				"a:2:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";}",
-				PhpSerialization.Serialize(new List<string>() { "Hello", "World" })
-			);
-		}
+namespace PhpSerializerNET.Test.Serialize;
 
-		[TestMethod]
-		public void SerializeListOfBools() {
-			Assert.AreEqual( // booleans:
-				"a:2:{i:0;b:1;i:1;b:0;}",
-				PhpSerialization.Serialize(new List<object>() { true, false })
-			);
-		}
+public class ListSerializationTest {
+	[Fact]
+	public void SerializeListOfStrings() {
+		Assert.Equal( // strings:
+			"a:2:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";}",
+			PhpSerialization.Serialize(new List<string>() { "Hello", "World" })
+		);
+	}
 
-		[TestMethod]
-		public void SerializeMixedList() {
-			Assert.AreEqual( // mixed types:
-				"a:5:{i:0;b:1;i:1;i:1;i:2;d:1.23;i:3;s:3:\"end\";i:4;N;}",
-				PhpSerialization.Serialize(new List<object>() { true, 1, 1.23, "end", null })
-			);
-		}
+	[Fact]
+	public void SerializeListOfBools() {
+		Assert.Equal( // booleans:
+			"a:2:{i:0;b:1;i:1;b:0;}",
+			PhpSerialization.Serialize(new List<object>() { true, false })
+		);
+	}
+
+	[Fact]
+	public void SerializeMixedList() {
+		Assert.Equal( // mixed types:
+			"a:5:{i:0;b:1;i:1;i:1;i:2;d:1.23;i:3;s:3:\"end\";i:4;N;}",
+			PhpSerialization.Serialize(new List<object>() { true, 1, 1.23, "end", null })
+		);
 	}
 }

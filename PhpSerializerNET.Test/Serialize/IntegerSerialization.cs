@@ -5,41 +5,40 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace PhpSerializerNET.Test.Serialize {
-	[TestClass]
-	public class IntegerSerializationTest {
-		[TestMethod]
-		public void SerializeZero() {
-			Assert.AreEqual(
-				"i:0;",
-				PhpSerialization.Serialize(0)
-			);
-		}
+namespace PhpSerializerNET.Test.Serialize;
 
-		[TestMethod]
-		public void SerializeOne() {
-			Assert.AreEqual(
-				"i:1;",
-				PhpSerialization.Serialize(1)
-			);
-		}
+public class IntegerSerializationTest {
+	[Fact]
+	public void SerializeZero() {
+		Assert.Equal(
+			"i:0;",
+			PhpSerialization.Serialize(0)
+		);
+	}
 
-		[TestMethod]
-		public void SerializeIntMaxValue() {
-			Assert.AreEqual(
-				"i:2147483647;",
-				PhpSerialization.Serialize(int.MaxValue)
-			);
-		}
+	[Fact]
+	public void SerializeOne() {
+		Assert.Equal(
+			"i:1;",
+			PhpSerialization.Serialize(1)
+		);
+	}
 
-		[TestMethod]
-		public void SerializeIntMinValue() {
-			Assert.AreEqual(
-				"i:-2147483648;",
-				PhpSerialization.Serialize(int.MinValue)
-			);
-		}
+	[Fact]
+	public void SerializeIntMaxValue() {
+		Assert.Equal(
+			"i:2147483647;",
+			PhpSerialization.Serialize(int.MaxValue)
+		);
+	}
+
+	[Fact]
+	public void SerializeIntMinValue() {
+		Assert.Equal(
+			"i:-2147483648;",
+			PhpSerialization.Serialize(int.MinValue)
+		);
 	}
 }

@@ -5,73 +5,72 @@
 **/
 
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using PhpSerializerNET.Test.DataTypes;
 
-namespace PhpSerializerNET.Test.Deserialize.Validation {
-	[TestClass]
-	public class TestOtherErrors {
-		[TestMethod]
-		public void ThrowsOnUnexpectedToken() {
-			var ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("_"));
-			Assert.AreEqual("Unexpected token '_' at position 0.", ex.Message);
+namespace PhpSerializerNET.Test.Deserialize.Validation;
 
-			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("i:42;_"));
-			Assert.AreEqual("Unexpected token '_' at position 5.", ex.Message);
+public class TestOtherErrors {
+	[Fact]
+	public void ThrowsOnUnexpectedToken() {
+		var ex = Assert.Throws<DeserializationException>(() => PhpSerialization.Deserialize("_"));
+		Assert.Equal("Unexpected token '_' at position 0.", ex.Message);
 
-			ex = Assert.ThrowsException<DeserializationException>(() => PhpSerialization.Deserialize("_i:42;"));
-			Assert.AreEqual("Unexpected token '_' at position 0.", ex.Message);
-		}
+		ex = Assert.Throws<DeserializationException>(() => PhpSerialization.Deserialize("i:42;_"));
+		Assert.Equal("Unexpected token '_' at position 5.", ex.Message);
 
-		[TestMethod]
-		public void ErrorOnTuple() {
-			var ex = Assert.ThrowsException<DeserializationException>(
-				() => PhpSerialization.Deserialize("s:7:\"AString\";s:7:\"AString\";")
-			);
+		ex = Assert.Throws<DeserializationException>(() => PhpSerialization.Deserialize("_i:42;"));
+		Assert.Equal("Unexpected token '_' at position 0.", ex.Message);
+	}
 
-			Assert.AreEqual("Unexpected token 's' at position 14.", ex.Message);
-		}
+	[Fact]
+	public void ErrorOnTuple() {
+		var ex = Assert.Throws<DeserializationException>(
+			() => PhpSerialization.Deserialize("s:7:\"AString\";s:7:\"AString\";")
+		);
 
-		[TestMethod]
-		public void ErrorOnEmptyInput() {
-			var ex = Assert.ThrowsException<ArgumentOutOfRangeException>(
-				() => PhpSerialization.Deserialize("")
-			);
+		Assert.Equal("Unexpected token 's' at position 14.", ex.Message);
+	}
 
-			const string expected = "PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty. (Parameter 'input')";
-			Assert.AreEqual(expected, ex.Message);
+	[Fact]
+	public void ErrorOnEmptyInput() {
+		var ex = Assert.Throws<ArgumentOutOfRangeException>(
+			() => PhpSerialization.Deserialize("")
+		);
 
-			ex = Assert.ThrowsException<ArgumentOutOfRangeException>(
-				() => PhpSerialization.Deserialize<string>("")
-			);
+		const string expected = "PhpSerialization.Deserialize(): Parameter 'input' must not be null or empty. (Parameter 'input')";
+		Assert.Equal(expected, ex.Message);
 
-			Assert.AreEqual(expected, ex.Message);
+		ex = Assert.Throws<ArgumentOutOfRangeException>(
+			() => PhpSerialization.Deserialize<string>("")
+		);
 
-			ex = Assert.ThrowsException<ArgumentOutOfRangeException>(
-				() => PhpSerialization.Deserialize("", typeof(string))
-			);
+		Assert.Equal(expected, ex.Message);
 
-			Assert.AreEqual(expected, ex.Message);
-		}
+		ex = Assert.Throws<ArgumentOutOfRangeException>(
+			() => PhpSerialization.Deserialize("", typeof(string))
+		);
+
+		Assert.Equal(expected, ex.Message);
+	}
 
 
-		[TestMethod]
-		public void ThrowOnIllegalKeyType() {
-			var ex = Assert.ThrowsException<DeserializationException>(
-				() => PhpSerialization.Deserialize<MyPhpObject>("O:8:\"stdClass\":1:{b:1;s:4:\"true\";}")
-			);
-			Assert.AreEqual(
-				"Error encountered deserizalizing an object of type 'PhpSerializerNET.Test.DataTypes.MyPhpObject': " +
-				"The key '1' (from the token at position 18) has an unsupported type of 'Boolean'.",
-				ex.Message
-			);
-		}
+	[Fact]
+	public void ThrowOnIllegalKeyType() {
+		var ex = Assert.Throws<DeserializationException>(
+			() => PhpSerialization.Deserialize<MyPhpObject>("O:8:\"stdClass\":1:{b:1;s:4:\"true\";}")
+		);
+		Assert.Equal(
+			"Error encountered deserizalizing an object of type 'PhpSerializerNET.Test.DataTypes.MyPhpObject': " +
+			"The key '1' (from the token at position 18) has an unsupported type of 'Boolean'.",
+			ex.Message
+		);
+	}
 
-		[TestMethod]
-		public void ThrowOnIntegerKeyPhpObject() {
-			var ex = Assert.ThrowsException<ArgumentException>(
-				() => PhpSerialization.Deserialize<PhpObjectDictionary>("O:8:\"stdClass\":1:{i:0;s:4:\"true\";}")
-			);
-		}
+	[Fact]
+	public void ThrowOnIntegerKeyPhpObject() {
+		var ex = Assert.Throws<ArgumentException>(
+			() => PhpSerialization.Deserialize<PhpObjectDictionary>("O:8:\"stdClass\":1:{i:0;s:4:\"true\";}")
+		);
 	}
 }

@@ -4,47 +4,46 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using PhpSerializerNET.Test.DataTypes;
 
-namespace PhpSerializerNET.Test {
-	[TestClass]
-	public partial class DeserializeWithRuntimeTypeTest {
+namespace PhpSerializerNET.Test;
 
-		[TestMethod]
-		public void DeserializeObjectWithRuntimeType() {
-			var expectedType = typeof(NamedClass);
-			var result = PhpSerialization.Deserialize("O:8:\"stdClass\":2:{s:3:\"Foo\";d:3.14;s:3:\"Bar\";d:2.718;}", expectedType);
+public partial class DeserializeWithRuntimeTypeTest {
 
-			Assert.IsNotNull(result);
-			Assert.IsInstanceOfType(result, expectedType);
+	[Fact]
+	public void DeserializeObjectWithRuntimeType() {
+		var expectedType = typeof(NamedClass);
+		var result = PhpSerialization.Deserialize("O:8:\"stdClass\":2:{s:3:\"Foo\";d:3.14;s:3:\"Bar\";d:2.718;}", expectedType);
 
-			Assert.AreEqual(
-				3.14,
-				((NamedClass)result).Foo
-			);
-			Assert.AreEqual(
-				2.718,
-				((NamedClass)result).Bar
-			);
-		}
+		Assert.NotNull(result);
+		Assert.IsType(expectedType, result);
 
-		[TestMethod]
-		public void DeserializeArrayWithRuntimeType() {
-			var expectedType = typeof(NamedClass);
-			var result = PhpSerialization.Deserialize("a:2:{s:3:\"Foo\";d:3.14;s:3:\"Bar\";d:2.718;}", expectedType);
+		Assert.Equal(
+			3.14,
+			((NamedClass)result).Foo
+		);
+		Assert.Equal(
+			2.718,
+			((NamedClass)result).Bar
+		);
+	}
 
-			Assert.IsNotNull(result);
-			Assert.IsInstanceOfType(result, expectedType);
+	[Fact]
+	public void DeserializeArrayWithRuntimeType() {
+		var expectedType = typeof(NamedClass);
+		var result = PhpSerialization.Deserialize("a:2:{s:3:\"Foo\";d:3.14;s:3:\"Bar\";d:2.718;}", expectedType);
 
-			Assert.AreEqual(
-				3.14,
-				((NamedClass)result).Foo
-			);
-			Assert.AreEqual(
-				2.718,
-				((NamedClass)result).Bar
-			);
-		}
+		Assert.NotNull(result);
+		Assert.IsType(expectedType, result);
+
+		Assert.Equal(
+			3.14,
+			((NamedClass)result).Foo
+		);
+		Assert.Equal(
+			2.718,
+			((NamedClass)result).Bar
+		);
 	}
 }

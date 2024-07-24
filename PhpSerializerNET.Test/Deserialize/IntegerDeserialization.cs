@@ -5,69 +5,40 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
-namespace PhpSerializerNET.Test.Deserialize {
-	[TestClass]
-	public class IntegerDeserializationTest {
-		[TestMethod]
-		public void DeserializeZero() {
-			Assert.AreEqual(
-				0,
-				PhpSerialization.Deserialize<int>("i:0;")
-			);
-		}
+namespace PhpSerializerNET.Test.Deserialize;
 
-		[TestMethod]
-		public void DeserializeOne() {
-			Assert.AreEqual(
-				1,
-				PhpSerialization.Deserialize<int>("i:1;")
-			);
-		}
+public class IntegerDeserializationTest {
+	[Theory]
+	[InlineData("i:0;", 0)]
+	[InlineData("i:1;", 1)]
+	[InlineData("i:2147483647;", int.MaxValue)]
+	[InlineData("i:-2147483648;", int.MinValue)]
+	public void DeserializeZero(string input, int expected) {
+		Assert.Equal(expected, PhpSerialization.Deserialize<int>(input));
+	}
 
-		[TestMethod]
-		public void DeserializeToNullable() {
-			var result = PhpSerialization.Deserialize<int?>("i:1;");
-			Assert.IsInstanceOfType(result, typeof(int?));
-			Assert.AreEqual(
-				1,
-				result.Value
-			);
-		}
+	[Fact]
+	public void DeserializeToNullable() {
+		var result = PhpSerialization.Deserialize<int?>("i:1;");
+		Assert.Equal(1, result.Value);
+	}
 
-		[TestMethod]
-		public void DeserializeIntMaxValue() {
-			Assert.AreEqual(
-				int.MaxValue,
-				PhpSerialization.Deserialize<int>("i:2147483647;")
-			);
-		}
+	[Fact]
+	public void DeserializeIntToDouble() {
+		double number = PhpSerialization.Deserialize<double>("i:10;");
+		Assert.Equal(10.00, number);
+	}
 
-		[TestMethod]
-		public void DeserializeIntMinValue() {
-			Assert.AreEqual(
-				int.MinValue,
-				PhpSerialization.Deserialize<int>("i:-2147483648;")
-			);
-		}
-
-		[TestMethod]
-		public void DeserializeIntToDouble() {
-			double number = PhpSerialization.Deserialize<double>("i:10;");
-			Assert.AreEqual(10.00, number);
-		}
-
-		[TestMethod]
-		public void ExplictCastFormatException() {
-			var ex = Assert.ThrowsException<PhpSerializerNET.DeserializationException>(() =>
-			   PhpSerialization.Deserialize<int>(
-				   "s:3:\"1b1\";"
-			   )
-			);
-			Assert.IsInstanceOfType(ex.InnerException, typeof(System.FormatException));
-			Assert.AreEqual("Exception encountered while trying to assign '1b1' to type Int32. See inner exception for details.", ex.Message);
-		}
-
+	[Fact]
+	public void ExplictCastFormatException() {
+		var ex = Assert.Throws<DeserializationException>(() =>
+			PhpSerialization.Deserialize<int>(
+				"s:3:\"1b1\";"
+			)
+		);
+		Assert.IsType<System.FormatException>(ex.InnerException);
+		Assert.Equal("Exception encountered while trying to assign '1b1' to type Int32. See inner exception for details.", ex.Message);
 	}
 }

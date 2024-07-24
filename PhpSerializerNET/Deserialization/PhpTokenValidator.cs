@@ -89,10 +89,8 @@ internal ref struct PhpTokenValidator {
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetFloat() {
-		bool valid = true;
-		int end = this._position;
-
-		for (; this._input[this._position] != ';' && this._position < this._lastIndex && valid; this._position++) {
+		int i = this._position;
+		for (; this._input[i] != (byte)';' && i < this._lastIndex; i++) {
 			_ = this._input[this._position] switch {
 				>= (byte)'0' and <= (byte)'9' => true,
 				(byte)'+' => true,
@@ -103,16 +101,19 @@ internal ref struct PhpTokenValidator {
 				(byte)'N' or (byte)'A' => true, // NaN.
 				_ => throw new DeserializationException(
 					$"Unexpected token at index {this._position}. " +
-					$"'{(char)this._input[this._position]}' is not a valid part of a floating point number."
+					$"'{this.GetCharAt(this._position)}' is not a valid part of a floating point number."
 				),
 			};
-			end++;
 		}
-
-		this._position = end;
+			if (i == this._position) {
+				throw new DeserializationException(
+					$"Unexpected token at index {i}: Expected floating point number, but found ';' instead."
+				);
+			}
+		this._position = i;
 
 		// Edgecase: input ends here without a delimeter following. Normal handling would give a misleading exception:
-		if (this._lastIndex == this._position && (char)this._input[this._position] != ';') {
+		if (this._lastIndex == this._position && this._input[this._position] != (byte)';') {
 			throw new DeserializationException(
 				$"Unexpected end of input. Expected ':' at index {this._position}, but input ends at index {this._lastIndex}"
 			);
@@ -120,21 +121,24 @@ internal ref struct PhpTokenValidator {
 	}
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetInteger() {
-		int end = this._position;
-		for (; this._input[this._position] != ';' && this._position < this._lastIndex; this._position++) {
-			_ = this._input[this._position] switch {
+		int i = this._position;
+		for (; this._input[i] != ';' && i < this._lastIndex; i++) {
+			_ = this._input[i] switch {
 				>= (byte)'0' and <= (byte)'9' => true,
 				(byte)'+' => true,
 				(byte)'-' => true,
 				_ => throw new DeserializationException(
-					$"Unexpected token at index {this._position}. " +
-					$"'{(char)this._input[this._position]}' is not a valid part of a number."
+					$"Unexpected token at index {i}. " +
+					$"'{this.GetCharAt(i)}' is not a valid part of a number."
 				),
 			};
-			end++;
 		}
-
-		this._position = end;
+		if (i == this._position) {
+			throw new DeserializationException(
+				$"Unexpected token at index {i}: Expected number, but found ';' instead."
+			);
+		}
+		this._position = i;
 
 		// Edgecase: input ends here without a delimeter following. Normal handling would give a misleading exception:
 		if (this._lastIndex == this._position && this._input[this._position] != (byte)';') {

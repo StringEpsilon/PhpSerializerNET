@@ -4,6 +4,9 @@
 - `PhpTokenizer` class is now internal
 - Removed support for `net6.0` and `net7.0`
 
+## Regular changes
+- Integers and doubles without a value now give a better error message (`i:;` and `d:;`).
+
 ## Internal
 Split the deserialization into 3 phases:
   1. Validation of the input and counting of the data tokens.
@@ -19,7 +22,6 @@ less memory. On my machine, deserializing an array of 24 integers:
 | **After**  | 1.883 us | 4.13 KB         |
 
 Other benchmarks also indicate a roughly 5-10% performance penalty on arrays, objects and strings.
-
 
 # 1.4.0
 - Now targets .NET 6.0, 7.0 and 8.0

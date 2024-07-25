@@ -374,7 +374,7 @@ private object MakeClass(PhpToken token) {
 	}
 
 	private object MakeList(Type targetType, PhpToken token) {
-		for (int i = 0; i < token.Length; i += 2) {
+		for (int i = 0; i < token.Length * 2; i+=2) {
 			if (this._tokens[_currentToken+i].Type != PhpDataType.Integer) {
 				var badToken = this._tokens[_currentToken+i];
 				throw new DeserializationException(

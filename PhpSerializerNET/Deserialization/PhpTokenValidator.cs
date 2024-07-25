@@ -9,39 +9,32 @@ using System.Runtime.CompilerServices;
 
 namespace PhpSerializerNET;
 
+#nullable enable
+
 internal ref struct PhpTokenValidator {
 	private int _position;
-	private int _tokenCount = 0;
+	private int _tokenCount;
 	private readonly ReadOnlySpan<byte> _input;
 	private readonly int _lastIndex;
 
 	internal PhpTokenValidator(in ReadOnlySpan<byte> input) {
+		this._tokenCount = 1;
 		this._input = input;
 		this._position = 0;
 		this._lastIndex = this._input.Length - 1;
 	}
 
 	internal void GetToken() {
-		PhpDataType dataType = this._input[this._position++] switch {
-			(byte)'N' => PhpDataType.Null,
-			(byte)'b' => PhpDataType.Boolean,
-			(byte)'s' => PhpDataType.String,
-			(byte)'i' => PhpDataType.Integer,
-			(byte)'d' => PhpDataType.Floating,
-			(byte)'a' => PhpDataType.Array,
-			(byte)'O' => PhpDataType.Object,
-			_ => throw new DeserializationException($"Unexpected token '{this.GetCharAt(this._position - 1)}' at position {this._position - 1}.")
-		};
-		switch (dataType) {
-			case PhpDataType.Boolean:
+		switch ( this._input[this._position++]) {
+			case (byte)'b':
 				this.GetCharacter(':');
 				this.GetBoolean();
 				this.GetCharacter(';');
 				break;
-			case PhpDataType.Null:
+			case (byte)'N':
 				this.GetCharacter(';');
 				break;
-			case PhpDataType.String:
+			case (byte)'s':
 				this.GetCharacter(':');
 				int length = this.GetLength(PhpDataType.String);
 				this.GetCharacter(':');
@@ -50,24 +43,27 @@ internal ref struct PhpTokenValidator {
 				this.GetCharacter('"');
 				this.GetCharacter(';');
 				break;
-			case PhpDataType.Integer:
+			case (byte)'i':
 				this.GetCharacter(':');
 				this.GetInteger();
 				this.GetCharacter(';');
 				break;
-			case PhpDataType.Floating:
+			case (byte)'d':
 				this.GetCharacter(':');
 				this.GetFloat();
 				this.GetCharacter(';');
 				break;
-			case PhpDataType.Array:
+			case (byte)'a':
 				this.GetArrayToken();
 				break;
-			case PhpDataType.Object:
+			case (byte)'O':
 				this.GetObjectToken();
 				break;
+			default:
+				throw new DeserializationException(
+					$"Unexpected token '{this.GetCharAt(this._position - 1)}' at position {this._position - 1}."
+				);
 		};
-		this._tokenCount++;
 	}
 
 	private char GetCharAt(int position) {
@@ -119,6 +115,7 @@ internal ref struct PhpTokenValidator {
 			);
 		}
 	}
+
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetInteger() {
 		int i = this._position;
@@ -205,14 +202,16 @@ internal ref struct PhpTokenValidator {
 		int i = 0;
 		while (this._input[this._position] != '}') {
 			this.GetToken();
+			this.GetToken();
 			i++;
-			if (i > propertyCount * 2) {
+			if (i > propertyCount) {
 				throw new DeserializationException(
 					$"Object at position {position} should have {propertyCount} properties, " +
-					$"but actually has {(i + 1) / 2} or more properties."
+					$"but actually has {i} or more properties."
 				);
 			}
 		}
+		this._tokenCount += propertyCount * 2;
 		this.GetCharacter('}');
 	}
 
@@ -223,18 +222,19 @@ internal ref struct PhpTokenValidator {
 		int length = this.GetLength(PhpDataType.Array);
 		this.GetCharacter(':');
 		this.GetCharacter('{');
-		int maxTokenCount = length * 2;
 		int i = 0;
 		while (this._input[this._position] != '}') {
 			this.GetToken();
+			this.GetToken();
 			i++;
-			if (i > maxTokenCount) {
+			if (i > length) {
 				throw new DeserializationException(
 					$"Array at position {position} should be of length {length}, " +
-					$"but actual length is {(i + 1) / 2} or more."
+					$"but actual length is {i} or more."
 				);
 			}
 		}
+		this._tokenCount += length * 2;
 		this.GetCharacter('}');
 	}
 

@@ -5,6 +5,8 @@
 **/
 namespace PhpSerializerNET;
 
+#nullable enable
+
 /// <summary>
 /// PHP data token. Holds the type, position (in the input string), length and value.
 /// </summary>
@@ -12,8 +14,8 @@ internal readonly struct PhpToken {
 	internal readonly PhpDataType Type;
 	internal readonly int Position;
 	internal readonly int Length;
-	internal readonly string Value;
-	internal PhpToken(PhpDataType type, int position, string value = "", int length = 0) {
+	internal readonly string? Value;
+	internal PhpToken(PhpDataType type, int position, string? value = null, int length = 0) {
 		this.Type = type;
 		this.Position = position;
 		this.Value = value;

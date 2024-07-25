@@ -9,17 +9,22 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace PhpSerializerNET;
 
 internal ref struct PhpDeserializer {
 	private readonly PhpDeserializationOptions _options;
+	private Encoding _inputEncoding;
 	private readonly Span<PhpToken> _tokens;
+	private readonly ReadOnlySpan<byte> _input;
 	private int _currentToken = 0;
 
-	internal PhpDeserializer(Span<PhpToken> tokens, PhpDeserializationOptions options) {
+	internal PhpDeserializer(Span<PhpToken> tokens, ReadOnlySpan<byte> input, PhpDeserializationOptions options) {
 		_options = options;
+		_input = input;
 		_tokens = tokens;
+		_inputEncoding = _options.InputEncoding;
 	}
 
 	internal object Deserialize() {
@@ -39,16 +44,18 @@ internal ref struct PhpDeserializer {
 		this._currentToken++;
 		switch (token.Type) {
 			case PhpDataType.Boolean:
-				return token.Value.PhpToBool();
+				return token.Value.GetBool(this._input);
 			case PhpDataType.Integer:
-				return token.Value.PhpToLong();
+				return token.Value.GetLong(this._input);
 			case PhpDataType.Floating:
-				return token.Value.PhpToDouble();
+				return token.Value.GetDouble(this._input);
 			case PhpDataType.String:
-				if (this._options.NumberStringToBool && (token.Value == "0" || token.Value == "1")) {
-					return token.Value.PhpToBool();
+				if (this._options.NumberStringToBool) {
+					if (_input[token.Value.Start] == (byte)'1' || _input[token.Value.Start] == (byte)'0') {
+						return token.Value.GetBool(this._input);
+					}
 				}
-				return token.Value;
+				return this.GetString(token);
 			case PhpDataType.Array:
 				return MakeCollection(token);
 			case PhpDataType.Object:
@@ -75,7 +82,12 @@ internal ref struct PhpDeserializer {
 			case PhpDataType.Floating:
 				return DeserializeDouble(targetType, token);
 			case PhpDataType.String:
-				return DeserializeTokenFromSimpleType(targetType, token.Type, token.Value, token.Position);
+				return DeserializeTokenFromSimpleType(
+					targetType,
+					token.Type,
+					this.GetString(token),
+					token.Position
+				);
 			case PhpDataType.Object: {
 					object result;
 					if (typeof(IDictionary).IsAssignableFrom(targetType)) {
@@ -86,7 +98,7 @@ internal ref struct PhpDeserializer {
 						result = MakeStruct(targetType, token);
 					}
 					if (result is IPhpObject phpObject and not PhpDateTime) {
-						phpObject.SetClassName(token.Value);
+						phpObject.SetClassName(this.GetString(token));
 					}
 					return result;
 				}
@@ -111,35 +123,41 @@ internal ref struct PhpDeserializer {
 		}
 	}
 
-	private object DeserializeInteger(Type targetType, PhpToken token) {
+	private object DeserializeInteger(Type targetType, in PhpToken token) {
 		return Type.GetTypeCode(targetType) switch {
-			TypeCode.Int16 => short.Parse(token.Value),
-			TypeCode.Int32 => int.Parse(token.Value),
-			TypeCode.Int64 => long.Parse(token.Value),
-			TypeCode.UInt16 => ushort.Parse(token.Value),
-			TypeCode.UInt32 => uint.Parse(token.Value),
-			TypeCode.UInt64 => ulong.Parse(token.Value),
-			TypeCode.SByte => sbyte.Parse(token.Value),
-			_ => this.DeserializeTokenFromSimpleType(targetType, token.Type, token.Value, token.Position),
+			TypeCode.Int16 => short.Parse(token.Value.GetSlice(_input), CultureInfo.InvariantCulture),
+			TypeCode.Int32 => int.Parse(token.Value.GetSlice(_input), CultureInfo.InvariantCulture),
+			TypeCode.Int64 => long.Parse(token.Value.GetSlice(_input), CultureInfo.InvariantCulture),
+			TypeCode.UInt16 => ushort.Parse(token.Value.GetSlice(_input), CultureInfo.InvariantCulture),
+			TypeCode.UInt32 => uint.Parse(token.Value.GetSlice(_input), CultureInfo.InvariantCulture),
+			TypeCode.UInt64 => ulong.Parse(token.Value.GetSlice(_input), CultureInfo.InvariantCulture),
+			TypeCode.SByte => sbyte.Parse(token.Value.GetSlice(_input), CultureInfo.InvariantCulture),
+			_ => this.DeserializeTokenFromSimpleType(
+				targetType,
+				token.Type,
+				this.GetString(token),
+				token.Position
+			),
 		};
 	}
 
-	private object DeserializeDouble(Type targetType, PhpToken token) {
+	private object DeserializeDouble(Type targetType, in PhpToken token) {
 		if (targetType == typeof(double) || targetType == typeof(float)) {
-			return token.Value.PhpToDouble();
+			return token.Value.GetDouble(_input);
 		}
 
-		string value = token.Value switch {
-			"INF" => double.PositiveInfinity.ToString(CultureInfo.InvariantCulture),
-			"-INF" => double.NegativeInfinity.ToString(CultureInfo.InvariantCulture),
-			_ => token.Value,
-		};
+		string value = this.GetString(token);
+		if (value == "INF") {
+			value =  double.PositiveInfinity.ToString(CultureInfo.InvariantCulture);
+		} else if (value == "-INF") {
+			value = double.NegativeInfinity.ToString(CultureInfo.InvariantCulture);
+		}
 		return this.DeserializeTokenFromSimpleType(targetType, token.Type, value, token.Position);
 	}
 
-	private static object DeserializeBoolean(Type targetType, PhpToken token) {
+	private object DeserializeBoolean(Type targetType, in PhpToken token) {
 		if (targetType == typeof(bool) || targetType == typeof(bool?)) {
-			return token.Value.PhpToBool();
+			return token.Value.GetBool(_input);
 		}
 		Type underlyingType = targetType;
 		if (targetType.IsNullableReferenceType()) {
@@ -147,10 +165,10 @@ internal ref struct PhpDeserializer {
 		}
 
 		if (underlyingType.IsIConvertible()) {
-			return ((IConvertible)token.Value.PhpToBool()).ToType(underlyingType, CultureInfo.InvariantCulture);
+			return ((IConvertible)token.Value.GetBool(_input)).ToType(underlyingType, CultureInfo.InvariantCulture);
 		} else {
 			throw new DeserializationException(
-				$"Can not assign value \"{token.Value}\" (at position {token.Position}) to target type of {targetType.Name}."
+				$"Can not assign value \"{this.GetString(token)}\" (at position {token.Position}) to target type of {targetType.Name}."
 			);
 		}
 	}
@@ -236,8 +254,8 @@ internal ref struct PhpDeserializer {
 		throw new DeserializationException($"Can not assign value \"{value}\" (at position {tokenPosition}) to target type of {targetType.Name}.");
 	}
 
-private object MakeClass(PhpToken token) {
-		var typeName = token.Value;
+	private object MakeClass(in PhpToken token) {
+		var typeName = this.GetString(token);
 		object constructedObject;
 		Type targetType = null;
 		if (typeName != "stdClass" && this._options.EnableTypeLookup) {
@@ -272,14 +290,15 @@ private object MakeClass(PhpToken token) {
 		return constructedObject;
 	}
 
-	private object MakeStruct(Type targetType, PhpToken token) {
+	private object MakeStruct(Type targetType, in PhpToken token) {
 		var result = Activator.CreateInstance(targetType);
 		Dictionary<string, FieldInfo> fields = TypeLookup.GetFieldInfos(targetType, this._options);
 
 		for (int i = 0; i < token.Length; i++) {
-			var fieldName = this._options.CaseSensitiveProperties
-				? this._tokens[this._currentToken++].Value
-				: this._tokens[this._currentToken++].Value.ToLower();
+			var fieldName = this._tokens[this._currentToken++].Value.GetString(_input, _options.InputEncoding);
+			if (!this._options.CaseSensitiveProperties) {
+				fieldName = fieldName.ToLower();
+			}
 
 			if (!fields.ContainsKey(fieldName)) {
 				if (!this._options.AllowExcessKeys) {
@@ -306,7 +325,7 @@ private object MakeClass(PhpToken token) {
 		return result;
 	}
 
-	private object MakeObject(Type targetType, PhpToken token) {
+	private object MakeObject(Type targetType, in PhpToken token) {
 		var result = Activator.CreateInstance(targetType);
 		Dictionary<object, PropertyInfo> properties = TypeLookup.GetPropertyInfos(targetType, this._options);
 
@@ -315,14 +334,14 @@ private object MakeClass(PhpToken token) {
 			var nameToken = this._tokens[_currentToken++];
 			if (nameToken.Type == PhpDataType.String) {
 				propertyName = this._options.CaseSensitiveProperties
-					? nameToken.Value
-					: nameToken.Value.ToLower();
+					? this.GetString(nameToken)
+					: this.GetString(nameToken).ToLower();
 			} else if (nameToken.Type == PhpDataType.Integer) {
-				propertyName = nameToken.Value.PhpToLong();
+				propertyName = nameToken.Value.GetLong(_input);
 			} else {
 				throw new DeserializationException(
 					$"Error encountered deserizalizing an object of type '{targetType.FullName}': " +
-					$"The key '{nameToken.Value}' (from the token at position {nameToken.Position}) has an unsupported type of '{nameToken.Type}'."
+					$"The key '{this.GetString(nameToken)}' (from the token at position {nameToken.Position}) has an unsupported type of '{nameToken.Type}'."
 				);
 			}
 			if (!properties.ContainsKey(propertyName)) {
@@ -344,7 +363,7 @@ private object MakeClass(PhpToken token) {
 				} catch (Exception exception) {
 					var valueToken = _tokens[_currentToken-1];
 					throw new DeserializationException(
-						$"Exception encountered while trying to assign '{valueToken.Value}' to {targetType.Name}.{property.Name}. See inner exception for details.",
+						$"Exception encountered while trying to assign '{this.GetString(valueToken)}' to {targetType.Name}.{property.Name}. See inner exception for details.",
 						exception
 					);
 				}
@@ -355,7 +374,7 @@ private object MakeClass(PhpToken token) {
 		return result;
 	}
 
-	private object MakeArray(Type targetType, PhpToken token) {
+	private object MakeArray(Type targetType, in PhpToken token) {
 		var elementType = targetType.GetElementType() ?? throw new InvalidOperationException("targetType.GetElementType() returned null");
 		Array result = Array.CreateInstance(elementType, token.Length);
 
@@ -373,13 +392,13 @@ private object MakeClass(PhpToken token) {
 		return result;
 	}
 
-	private object MakeList(Type targetType, PhpToken token) {
+	private object MakeList(Type targetType, in PhpToken token) {
 		for (int i = 0; i < token.Length * 2; i+=2) {
 			if (this._tokens[_currentToken+i].Type != PhpDataType.Integer) {
 				var badToken = this._tokens[_currentToken+i];
 				throw new DeserializationException(
 					$"Can not deserialize array at position {token.Position} to list: " +
-					$"It has a non-integer key '{badToken.Value}' at element {i} (position {badToken.Position})."
+					$"It has a non-integer key '{this.GetString(badToken)}' at element {i} (position {badToken.Position})."
 				);
 			}
 		}
@@ -409,7 +428,7 @@ private object MakeClass(PhpToken token) {
 		return result;
 	}
 
-	private object MakeDictionary(Type targetType, PhpToken token) {
+	private object MakeDictionary(Type targetType, in PhpToken token) {
 		var result = (IDictionary)Activator.CreateInstance(targetType);
 		if (result == null) {
 			throw new NullReferenceException($"Activator.CreateInstance({targetType.FullName}) returned null");
@@ -439,7 +458,7 @@ private object MakeClass(PhpToken token) {
 		return result;
 	}
 
-	private object MakeCollection(PhpToken token) {
+	private object MakeCollection(in PhpToken token) {
 		if (this._options.UseLists == ListOptions.Never) {
 			return this.MakeDictionary(typeof(Dictionary<object, object>), token);
 		}
@@ -451,7 +470,7 @@ private object MakeClass(PhpToken token) {
 				isList = false;
 				break;
 			} else {
-				var key = this._tokens[_currentToken+i].Value.PhpToLong();
+				var key = this._tokens[_currentToken+i].Value.GetLong(_input);
 				if (i == 0 || key == previousKey + 1) {
 					previousKey = key;
 				} else {
@@ -476,5 +495,9 @@ private object MakeClass(PhpToken token) {
 			}
 			return result;
 		}
+	}
+
+	private string GetString(in PhpToken token) {
+		return token.Value.GetString(this._input, this._options.InputEncoding);
 	}
 }

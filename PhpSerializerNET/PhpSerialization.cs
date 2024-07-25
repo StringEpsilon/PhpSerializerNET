@@ -9,23 +9,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace PhpSerializerNET;
 
 public static class PhpSerialization {
-	private static Span<PhpToken> Tokenize(ReadOnlySpan<char> input, Encoding inputEncoding) {
-		int size = inputEncoding.GetByteCount(input);
-		Span<byte> inputBytes = size < 256
-			? stackalloc byte[size]
-			: new byte[size];
-		inputEncoding.GetBytes(input, inputBytes);
-		int tokenCount = PhpTokenValidator.Validate(inputBytes);
-		Span<PhpToken> tokens = new PhpToken[tokenCount];
-		PhpTokenizer.Tokenize(inputBytes, inputEncoding, tokens);
-		return tokens;
-	}
-
 	/// <summary>
 	/// Reset the type lookup cache.
 	/// Can be useful for scenarios in which new types are loaded at runtime in between deserialization tasks.
@@ -64,7 +51,15 @@ public static class PhpSerialization {
 		if (options == null)  {
 			options = PhpDeserializationOptions.DefaultOptions;
 		}
-		return new PhpDeserializer(Tokenize(input, options.InputEncoding), options).Deserialize();
+		int size = options.InputEncoding.GetByteCount(input);
+		Span<byte> inputBytes = size < 256
+			? stackalloc byte[size]
+			: new byte[size];
+		options.InputEncoding.GetBytes(input, inputBytes);
+		int tokenCount = PhpTokenValidator.Validate(inputBytes);
+		Span<PhpToken> tokens = new PhpToken[tokenCount];
+		PhpTokenizer.Tokenize(inputBytes, tokens);
+		return new PhpDeserializer(tokens, inputBytes, options).Deserialize();
 	}
 
 	/// <summary>
@@ -93,7 +88,15 @@ public static class PhpSerialization {
 		if (options == null)  {
 			options = PhpDeserializationOptions.DefaultOptions;
 		}
-		return new PhpDeserializer(Tokenize(input, options.InputEncoding), options).Deserialize<T>();
+		int size = options.InputEncoding.GetByteCount(input);
+		Span<byte> inputBytes = size < 256
+			? stackalloc byte[size]
+			: new byte[size];
+		options.InputEncoding.GetBytes(input, inputBytes);
+		int tokenCount = PhpTokenValidator.Validate(inputBytes);
+		Span<PhpToken> tokens = new PhpToken[tokenCount];
+		PhpTokenizer.Tokenize(inputBytes, tokens);
+		return new PhpDeserializer(tokens, inputBytes, options).Deserialize<T>();
 	}
 
 	/// <summary>
@@ -126,7 +129,15 @@ public static class PhpSerialization {
 		if (options == null)  {
 			options = PhpDeserializationOptions.DefaultOptions;
 		}
-		return new PhpDeserializer(Tokenize(input, options.InputEncoding), options).Deserialize(type);
+		int size = options.InputEncoding.GetByteCount(input);
+		Span<byte> inputBytes = size < 256
+			? stackalloc byte[size]
+			: new byte[size];
+		options.InputEncoding.GetBytes(input, inputBytes);
+		int tokenCount = PhpTokenValidator.Validate(inputBytes);
+		Span<PhpToken> tokens = new PhpToken[tokenCount];
+		PhpTokenizer.Tokenize(inputBytes, tokens);
+		return new PhpDeserializer(tokens, inputBytes, options).Deserialize(type);
 	}
 
 	/// <summary>

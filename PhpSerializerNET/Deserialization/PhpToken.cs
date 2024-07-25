@@ -4,7 +4,6 @@
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 **/
 namespace PhpSerializerNET;
-
 #nullable enable
 
 /// <summary>
@@ -14,8 +13,9 @@ internal readonly struct PhpToken {
 	internal readonly PhpDataType Type;
 	internal readonly int Position;
 	internal readonly int Length;
-	internal readonly string? Value;
-	internal PhpToken(PhpDataType type, int position, string? value = null, int length = 0) {
+
+	internal readonly ValueSpan Value;
+	internal PhpToken(PhpDataType type, int position, in ValueSpan value, int length = 0) {
 		this.Type = type;
 		this.Position = position;
 		this.Value = value;

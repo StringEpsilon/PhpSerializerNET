@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<Title>PhpSerializerNET</Title>
 		<TargetFrameworks>net8.0</TargetFrameworks>
-		<LangVersion>10.0</LangVersion>
+		<LangVersion>12.0</LangVersion>
 		<Version>1.4.0</Version>
 		<Authors>StringEpsilon</Authors>
 		<Summary>A library for working with the PHP serialization format.</Summary>

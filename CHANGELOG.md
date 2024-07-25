@@ -1,11 +1,15 @@
 # Future
 
 ## Breaking
-- `PhpTokenizer` class is now internal
-- Removed support for `net6.0` and `net7.0`
+- `PhpTokenizer` class is now internal.
+- Removed support for `net6.0` and `net7.0`.
 
 ## Regular changes
 - Integers and doubles without a value now give a better error message (`i:;` and `d:;`).
+
+## Performance
+- Reduced time to decode / re-encode the input string.
+- Reduced memory allocations both in the input re-encoding and the deserialization.
 
 ## Internal
 Split the deserialization into 3 phases:
@@ -13,15 +17,8 @@ Split the deserialization into 3 phases:
   2. Parsing of the input into tokens
   3. Deserializations of the tokens into the target C# objects/structs.
 
-In version 1.4 and prior, this was a 2 step process. The new approach is slightly slower in some benchmarks, but needs
-less memory. On my machine, deserializing an array of 24 integers:
-
-|            | Time     | Heap allocation |
-|------------|---------:|----------------:|
-| **Before** | 1.799 us | 4.54 KB         |
-| **After**  | 1.883 us | 4.13 KB         |
-
-Other benchmarks also indicate a roughly 5-10% performance penalty on arrays, objects and strings.
+In version 1.4 and prior, this was a 2 step process. This is slightly slower on some inputs, but overall a little 
+neater because we're cleanly separating the tasks. 
 
 # 1.4.0
 - Now targets .NET 6.0, 7.0 and 8.0

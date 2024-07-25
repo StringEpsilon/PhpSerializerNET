@@ -9,18 +9,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace PhpSerializerNET;
 
 public static class PhpSerialization {
-	private static Span<PhpToken> Tokenize(string input, Encoding inputEncoding) {
-		ReadOnlySpan<byte> inputBytes = Encoding.Convert(
-			Encoding.Default,
-			inputEncoding,
-			Encoding.Default.GetBytes(input)
-		);
+	private static Span<PhpToken> Tokenize(ReadOnlySpan<char> input, Encoding inputEncoding) {
+		int size = inputEncoding.GetByteCount(input);
+		Span<byte> inputBytes = size < 256
+			? stackalloc byte[size]
+			: new byte[size];
+		inputEncoding.GetBytes(input, inputBytes);
 		int tokenCount = PhpTokenValidator.Validate(inputBytes);
 		Span<PhpToken> tokens = new PhpToken[tokenCount];
 		PhpTokenizer.Tokenize(inputBytes, inputEncoding, tokens);

@@ -37,6 +37,10 @@ internal enum PhpDataType : byte {
 	/// <summary>
 	/// Object (O:[identLength]:"[ident]":[length]:{[children]})
 	/// </summary>
-	Object
+	Object,
+	/// <summary>
+	/// Reference (r:[index])
+	/// </summary>
+	Reference
 }
 

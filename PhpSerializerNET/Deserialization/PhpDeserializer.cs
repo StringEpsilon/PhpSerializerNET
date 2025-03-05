@@ -26,17 +26,31 @@ internal ref struct PhpDeserializer {
 	}
 
 	internal object Deserialize() {
-		return this.DeserializeToken();
+		return this.Next();
 	}
 
 	internal object Deserialize(Type targetType) {
-		return this.DeserializeToken(targetType);
+		return this.Next(targetType);
 	}
 
-	private object DeserializeToken() {
-		var token = this._tokens[this._currentToken];
-		this._currentToken++;
+	private object DeserializeToken(in PhpToken token) {
 		switch (token.Type) {
+			case PhpDataType.Reference:
+				for(int i = 0; i < this._tokens.Length; i++) {
+					if (this._tokens[i].Reference == token.Reference) {
+						// This is a hack because this whole class was never designed with references in mind.
+						// Because of that we're always assuming that this._currentToken points to the token
+						// that needs to be deserialized next when filling arrays and objects.
+						// Going back in the token-list therefore does not work if we don't also reset the
+						// currentToken position and restore it after.
+						var tokenPosition = this._currentToken;
+						this._currentToken = i+1;
+						var reference = this.DeserializeToken(this._tokens[i]);
+						this._currentToken = tokenPosition;
+						return reference;
+					}
+				}
+				throw new DeserializationException("Can not resolve reference");
 			case PhpDataType.Boolean:
 				return token.Value.GetBool(this._input);
 			case PhpDataType.Integer:
@@ -49,7 +63,6 @@ internal ref struct PhpDeserializer {
 						return token.Value.GetBool(this._input);
 					}
 				}
-
 				return this.GetString(token);
 			case PhpDataType.Array:
 				return this.MakeCollection(token);
@@ -60,11 +73,30 @@ internal ref struct PhpDeserializer {
 				return null;
 		}
 	}
-
-	private object DeserializeToken(Type targetType) {
+	private object Next() {
 		var token = this._tokens[this._currentToken];
 		this._currentToken++;
+		return this.DeserializeToken(token);
+	}
+
+	private object DeserializeToken(Type targetType, in PhpToken token) {
 		switch (token.Type) {
+			case PhpDataType.Reference:
+				for(int i = 0; i < this._tokens.Length; i++) {
+					if (this._tokens[i].Reference == token.Reference) {
+						// This is a hack because this whole class was never designed with references in mind.
+						// Because of that we're always assuming that this._currentToken points to the token
+						// that needs to be deserialized next when filling arrays and objects.
+						// Going back in the token-list therefore does not work if we don't also reset the
+						// currentToken position and restore it after.
+						var tokenPosition = this._currentToken;
+						this._currentToken = i+1;
+						var reference = this.DeserializeToken(targetType, this._tokens[i]);
+						this._currentToken = tokenPosition;
+						return reference;
+					}
+				}
+				throw new DeserializationException("Can not resolve reference");
 			case PhpDataType.Boolean:
 				return this.DeserializeBoolean(targetType, token);
 			case PhpDataType.Integer:
@@ -110,15 +142,21 @@ internal ref struct PhpDeserializer {
 		}
 	}
 
+	private object Next(Type targetType) {
+		var token = this._tokens[this._currentToken];
+		this._currentToken++;
+		return DeserializeToken(targetType, token);
+	}
+
 	private object DeserializeInteger(Type targetType, in PhpToken token) {
 		return Type.GetTypeCode(targetType) switch {
-			TypeCode.Int16 => short.Parse(token.Value.GetSlice(this._input), CultureInfo.InvariantCulture),
-			TypeCode.Int32 => int.Parse(token.Value.GetSlice(this._input), CultureInfo.InvariantCulture),
-			TypeCode.Int64 => long.Parse(token.Value.GetSlice(this._input), CultureInfo.InvariantCulture),
-			TypeCode.UInt16 => ushort.Parse(token.Value.GetSlice(this._input), CultureInfo.InvariantCulture),
-			TypeCode.UInt32 => uint.Parse(token.Value.GetSlice(this._input), CultureInfo.InvariantCulture),
-			TypeCode.UInt64 => ulong.Parse(token.Value.GetSlice(this._input), CultureInfo.InvariantCulture),
-			TypeCode.SByte => sbyte.Parse(token.Value.GetSlice(this._input), CultureInfo.InvariantCulture),
+			TypeCode.Int16 => short.Parse(token.Value.GetSlice(in this._input), CultureInfo.InvariantCulture),
+			TypeCode.Int32 => int.Parse(token.Value.GetSlice(in this._input), CultureInfo.InvariantCulture),
+			TypeCode.Int64 => long.Parse(token.Value.GetSlice(in this._input), CultureInfo.InvariantCulture),
+			TypeCode.UInt16 => ushort.Parse(token.Value.GetSlice(in this._input), CultureInfo.InvariantCulture),
+			TypeCode.UInt32 => uint.Parse(token.Value.GetSlice(in this._input), CultureInfo.InvariantCulture),
+			TypeCode.UInt64 => ulong.Parse(token.Value.GetSlice(in this._input), CultureInfo.InvariantCulture),
+			TypeCode.SByte => sbyte.Parse(token.Value.GetSlice(in this._input), CultureInfo.InvariantCulture),
 			_ => this.DeserializeTokenFromSimpleType(targetType, token.Type, this.GetString(token), token.Position),
 		};
 	}
@@ -251,7 +289,7 @@ internal ref struct PhpDeserializer {
 				var result = new PhpDynamicObject(token.Length, typeName);
 				result.SetClassName(typeName);
 				for (int i = 0; i < token.Length; i++) {
-					result.TryAdd((string)this.DeserializeToken(), this.DeserializeToken());
+					result.TryAdd((string)this.Next(), this.Next());
 				}
 
 				return result;
@@ -259,7 +297,7 @@ internal ref struct PhpDeserializer {
 				var result = new PhpObjectDictionary(token.Length, typeName);
 				result.SetClassName(typeName);
 				for (int i = 0; i < token.Length; i++) {
-					result.TryAdd((string)this.DeserializeToken(), this.DeserializeToken());
+					result.TryAdd((string)this.Next(), this.Next());
 				}
 
 				return result;
@@ -272,7 +310,7 @@ internal ref struct PhpDeserializer {
 		// go back one because we're basically re-entering the object-token from the top.
 		// If we don't decrement the pointer, we'd start with the first child token instead of the object token.
 		this._currentToken--;
-		var constructedObject = this.DeserializeToken(targetType);
+		var constructedObject = this.Next(targetType);
 		if (constructedObject is IPhpObject phpObject and not PhpDateTime) {
 			phpObject.SetClassName(typeName);
 		}
@@ -303,7 +341,7 @@ internal ref struct PhpDeserializer {
 			if (fields[fieldName] != null) {
 				var field = fields[fieldName];
 				try {
-					field.SetValue(result, this.DeserializeToken(field.FieldType));
+					field.SetValue(result, this.Next(field.FieldType));
 				} catch (Exception exception) {
 					var valueToken = this._tokens[this._currentToken];
 					throw new DeserializationException(
@@ -353,7 +391,7 @@ internal ref struct PhpDeserializer {
 				// null if PhpIgnore'd
 				try {
 					property.SetValue(
-						result, this.DeserializeToken(property.PropertyType)
+						result, this.Next(property.PropertyType)
 					);
 				} catch (Exception exception) {
 					var valueToken = this._tokens[this._currentToken-1];
@@ -378,12 +416,12 @@ internal ref struct PhpDeserializer {
 		if (elementType == typeof(object)) {
 			for (int i = 0; i < token.Length; i++) {
 				this._currentToken++;
-				result.SetValue(this.DeserializeToken(), i);
+				result.SetValue(this.Next(), i);
 			}
 		} else {
 			for (int i = 0; i < token.Length; i++) {
 				this._currentToken++;
-				result.SetValue(this.DeserializeToken(elementType), i);
+				result.SetValue(this.Next(elementType), i);
 			}
 		}
 
@@ -425,12 +463,12 @@ internal ref struct PhpDeserializer {
 		if (itemType == typeof(object)) {
 			for (int i = 0; i < token.Length; i++) {
 				this._currentToken++;
-				result.Add(this.DeserializeToken());
+				result.Add(this.Next());
 			}
 		} else {
 			for (int i = 0; i < token.Length; i++) {
 				this._currentToken++;
-				result.Add(this.DeserializeToken(itemType));
+				result.Add(this.Next(itemType));
 			}
 		}
 		return result;
@@ -444,7 +482,7 @@ internal ref struct PhpDeserializer {
 
 		if (!targetType.GenericTypeArguments.Any()) {
 			for (int i = 0; i < token.Length; i++) {
-				result.Add(this.DeserializeToken(), this.DeserializeToken());
+				result.Add(this.Next(), this.Next());
 			}
 			return result;
 		}
@@ -455,11 +493,11 @@ internal ref struct PhpDeserializer {
 		for (int i = 0; i < token.Length; i++) {
 			result.Add(
 				keyType == typeof(object)
-					? this.DeserializeToken()
-					: this.DeserializeToken(keyType),
+					? this.Next()
+					: this.Next(keyType),
 				valueType == typeof(object)
-					? this.DeserializeToken()
-					: this.DeserializeToken(valueType)
+					? this.Next()
+					: this.Next(valueType)
 			);
 		}
 		return result;
@@ -498,14 +536,14 @@ internal ref struct PhpDeserializer {
 		if (!isList || (this._options.UseLists == ListOptions.Default && !consecutive)) {
 			var result = new Dictionary<object, object>(token.Length);
 			for (int i = 0; i < token.Length; i++) {
-				result.Add(this.DeserializeToken(), this.DeserializeToken());
+				result.Add(this.Next(), this.Next());
 			}
 			return result;
 		} else {
 			var result = new List<object>(token.Length);
 			for (int i = 0; i < token.Length; i++) {
 				this._currentToken++;
-				result.Add(this.DeserializeToken());
+				result.Add(this.Next());
 			}
 			return result;
 		}

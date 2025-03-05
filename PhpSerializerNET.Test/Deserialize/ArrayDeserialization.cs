@@ -174,6 +174,14 @@ public class DeserializeArraysTest {
 	}
 
 	[Fact]
+	public void ExplicitToListReference() {
+		var result = PhpSerialization.Deserialize<List<string>>("a:2:{i:0;s:5:\"Hello\";i:1;R:2;}");
+
+		Assert.Equal(2, result.Count);
+		Assert.Equal(new List<string>() { "Hello", "Hello" }, result);
+	}
+
+	[Fact]
 	public void ExplicitToObjectList() {
 		var result = PhpSerialization.Deserialize<List<object>>("a:3:{i:0;s:5:\"Hello\";i:1;s:5:\"World\";i:2;i:12345;}");
 

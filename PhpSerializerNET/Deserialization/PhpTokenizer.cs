@@ -5,6 +5,7 @@
 **/
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 #nullable enable
@@ -16,6 +17,7 @@ public ref struct PhpTokenizer {
 	private readonly ReadOnlySpan<byte> _input;
 	private int _position;
 	private int _tokenPosition;
+	private int _reference = 0;
 
 	private PhpTokenizer(ReadOnlySpan<byte> input, Span<PhpToken> array) {
 		this._input = input;
@@ -45,46 +47,56 @@ public ref struct PhpTokenizer {
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-	private void GetToken() {
+	private void GetToken(in bool countReference) {
 		switch (this._input[this._position++]) {
+			case (byte)'r':
+			case (byte)'R':
+				this.GetReferenceToken();
+				break;
 			case (byte)'b':
-				this.GetBooleanToken();
+				this.GetBooleanToken(in countReference);
 				break;
 			case (byte)'N':
-				this._tokens[this._tokenPosition++] = new PhpToken(PhpDataType.Null, this._position - 1, ValueSpan.Empty);
+				this._tokens[this._tokenPosition++] = new PhpToken(
+					PhpDataType.Null,
+					this._position - 1,
+					ValueSpan.Empty,
+					0
+				);
 				this._position++;
 				break;
 			case (byte)'s':
-				this.GetStringToken();
+				this.GetStringToken(in countReference);
 				break;
 			case (byte)'i':
-				this.GetIntegerToken();
+				this.GetIntegerToken(in countReference);
 				break;
 			case (byte)'d':
-				this.GetFloatingToken();
+				this.GetFloatingToken(in countReference);
 				break;
 			case (byte)'a':
-				this.GetArrayToken();
+				this.GetArrayToken(in countReference);
 				break;
 			case (byte)'O':
-				this.GetObjectToken();
+				this.GetObjectToken(in countReference);
 				break;
 		}
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void GetBooleanToken() {
+	private void GetBooleanToken(ref readonly bool reference) {
 		this._position++;
 		this._tokens[this._tokenPosition++] = new PhpToken(
 			PhpDataType.Boolean,
 			this._position - 2,
-			new ValueSpan(this._position++, 1)
+			new ValueSpan(this._position++, 1),
+			reference ? ++this._reference : 0
 		);
 		this._position++;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void GetStringToken() {
+	private void GetStringToken(ref readonly bool reference) {
 		int position = this._position - 1;
 		this._position++;
 		int length = this.GetLength();
@@ -92,47 +104,64 @@ public ref struct PhpTokenizer {
 		this._tokens[this._tokenPosition++] = new PhpToken(
 			PhpDataType.String,
 			position,
-			new ValueSpan(this._position, length)
+			new ValueSpan(this._position, length),
+			reference ? ++this._reference : 0
 		);
 		this._position += 2 + length;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void GetIntegerToken() {
+	private void GetIntegerToken(ref readonly bool reference) {
 		this._position++;
 		this._tokens[this._tokenPosition++] = new PhpToken(
 			PhpDataType.Integer,
 			this._position - 2,
-			this.GetNumbers()
+			this.GetNumbers(),
+			reference ? ++this._reference : 0
 		);
 		this._position++;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void GetFloatingToken() {
+	private void GetReferenceToken() {
+		this._position++;
+		int index = this.GetNumbers().GetInt(this._input);
+		if (index <= 0 || index > this._reference) {
+			throw new DeserializationException($"Invalid reference: '{index}' can not be resolved.");
+		}
+		this._tokens[this._tokenPosition++] = new PhpToken(PhpDataType.Reference, this._position, ValueSpan.Empty, index);
+		this._position++;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private void GetFloatingToken(ref readonly bool reference) {
 		this._position++;
 		this._tokens[this._tokenPosition++] = new PhpToken(
 			PhpDataType.Floating,
 			this._position - 2,
-			this.GetNumbers()
+			this.GetNumbers(),
+			reference ? ++this._reference : 0
 		);
 		this._position++;
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void GetArrayToken() {
+	private void GetArrayToken(ref readonly bool reference) {
 		var tokenPosition = this._tokenPosition++;
 		int position = this._position - 1;
+		int referenceIndex = reference ? ++this._reference : 0;
 		this._position++;
 		int length = this.GetLength();
 		this.Advance(2);
-		for (int i = 0; i < length * 2; i++) {
-			this.GetToken();
+		for (int i = 0; i < length; i++) {
+			this.GetToken(false);
+			this.GetToken(true);
 		}
 		this._tokens[tokenPosition] = new PhpToken(
 			PhpDataType.Array,
 			position,
 			ValueSpan.Empty,
+			referenceIndex,
 			length,
 			lastValuePosition: this._tokenPosition -1
 		);
@@ -140,8 +169,9 @@ public ref struct PhpTokenizer {
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	private void GetObjectToken() {
+	private void GetObjectToken(ref readonly bool reference) {
 		var tokenPosition = this._tokenPosition++;
+		int referenceIndex = reference ? ++this._reference : 0;
 		int position = this._position - 1;
 		this._position++;
 		int classNameLength = this.GetLength();
@@ -150,13 +180,15 @@ public ref struct PhpTokenizer {
 		this.Advance(2 + classNameLength);
 		int propertyCount = this.GetLength();
 		this.Advance(2);
-		for (int i = 0; i < propertyCount * 2; i++) {
-			this.GetToken();
+		for (int i = 0; i < propertyCount; i++) {
+			this.GetToken(false);
+			this.GetToken(true);
 		}
 		this._tokens[tokenPosition] = new PhpToken(
 			PhpDataType.Object,
 			position,
-			classNameSpan,
+			value: classNameSpan,
+			reference: referenceIndex,
 			propertyCount,
 			lastValuePosition: this._tokenPosition -1
 		);
@@ -164,6 +196,6 @@ public ref struct PhpTokenizer {
 	}
 
 	internal static void Tokenize(ReadOnlySpan<byte> inputBytes, Span<PhpToken> tokens) {
-		new PhpTokenizer(inputBytes, tokens).GetToken();
+		new PhpTokenizer(inputBytes, tokens).GetToken(true);
 	}
 }

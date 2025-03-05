@@ -26,6 +26,12 @@ internal ref struct PhpTokenValidator {
 
 	internal void GetToken() {
 		switch (this._input[this._position++]) {
+			case (byte)'r':
+			case (byte)'R':
+				this.GetCharacter(':');
+				this.GetInteger();
+				this.GetCharacter(';');
+				break;
 			case (byte)'b':
 				this.GetCharacter(':');
 				this.GetBoolean();

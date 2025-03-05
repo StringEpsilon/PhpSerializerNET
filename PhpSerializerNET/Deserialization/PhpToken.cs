@@ -17,7 +17,6 @@ internal readonly struct PhpToken {
 	internal readonly PhpDataType Type;
 	internal readonly int Position;
 	internal readonly int Length;
-	internal readonly ValueSpan Value;
 	/// <summary>
 	/// For <see cref="PhpDataType.Array"/> and <see cref="PhpDataType.Object"/> only. Holds the index of the last value
 	/// token inside the respective array/object.
@@ -27,11 +26,14 @@ internal readonly struct PhpToken {
 	/// object inside an array, when the "last value" of the array would be the object itself.
 	/// </remarks>
 	internal readonly int LastValuePosition;
+	internal readonly int Reference;
+	internal readonly ValueSpan Value;
 
 	internal PhpToken(
 		in PhpDataType type,
 		in int position,
 		in ValueSpan value,
+		int reference,
 		int length = 0,
 		int lastValuePosition = 0
 	) {
@@ -39,6 +41,7 @@ internal readonly struct PhpToken {
 		this.Position = position;
 		this.Value = value;
 		this.Length = length;
+		this.Reference = reference;
 		this.LastValuePosition = lastValuePosition;
 	}
 }

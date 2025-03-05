@@ -18,6 +18,14 @@ public class DeserializeStructsTest {
 		Assert.Equal("Foo", value.foo);
 		Assert.Equal("Bar", value.bar);
 	}
+	[Fact]
+	public void DeserializeArrayToStructWithReference() {
+		var value = PhpSerialization.Deserialize<AStruct>(
+			"a:2:{s:3:\"foo\";s:3:\"Foo\";s:3:\"bar\";R:2;}"
+		);
+		Assert.Equal("Foo", value.foo);
+		Assert.Equal("Foo", value.bar);
+	}
 
 	[Fact]
 	public void DeserializeObjectToStruct() {
@@ -80,6 +88,27 @@ public class DeserializeStructsTest {
 			"Can not assign value \"foo\" (at position 0) to target type of AStruct.",
 			ex.Message
 		);
+	}
+	[Fact]
+	public void DeserializeNestedStruct() {
+		var value = PhpSerialization.Deserialize<BStruct>(
+			"""a:2:{s:5:"First";a:1:{s:3:"foo";s:3:"one";}s:6:"Second";a:1:{s:3:"foo";s:3:"two";}}"""
+		);
+
+		Assert.Equal("one", value.First.foo);
+		Assert.Equal("two", value.Second.foo);
+	}
+
+	[Fact]
+	public void DeserializeStructReference() {
+		var value = PhpSerialization.Deserialize<BStruct>(
+			"""a:2:{s:5:"First";a:2:{s:3:"foo";s:3:"one";s:3:"bar";s:3:"two";}s:6:"Second";R:2;}"""
+		);
+
+		Assert.Equal("one", value.First.foo);
+		Assert.Equal("two", value.First.bar);
+		Assert.Equal("one", value.Second.foo);
+		Assert.Equal("two", value.Second.bar);
 	}
 
 	[Fact]

@@ -6,7 +6,7 @@
 
 namespace PhpSerializerNET.Test.DataTypes;
 
-public struct AStruct {
-	public string foo;
-	public string bar;
+public struct BStruct {
+	public AStruct First;
+	public AStruct Second;
 }

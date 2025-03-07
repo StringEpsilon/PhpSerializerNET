@@ -1,4 +1,10 @@
-# 2.0.2 (Future)
+# 2.1.0 (2025-03-07)
+
+## Features
+- Add support for references (`r:1;`)
+
+## Bugfixes
+
 - Fixed a bug where integers with a plus sign where deserialized incorrectly
   `i:+1;` was deserialized as `49`.
 

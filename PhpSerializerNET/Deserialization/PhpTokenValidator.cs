@@ -5,7 +5,6 @@
 **/
 
 using System;
-using System.Runtime.CompilerServices;
 
 namespace PhpSerializerNET;
 
@@ -90,7 +89,6 @@ internal ref struct PhpTokenValidator {
 		}
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetFloat() {
 		int i = this._position;
 		for (; this._input[i] != (byte)';' && i < this._lastIndex; i++) {
@@ -123,7 +121,6 @@ internal ref struct PhpTokenValidator {
 		}
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetInteger() {
 		int i = this._position;
 		for (; this._input[i] != ';' && i < this._lastIndex; i++) {
@@ -152,7 +149,6 @@ internal ref struct PhpTokenValidator {
 		}
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetLength(PhpDataType dataType, ref int length) {
 		for (; this._input[this._position] != ':' && this._position < this._lastIndex; this._position++) {
 			length = this._input[this._position] switch {
@@ -164,7 +160,6 @@ internal ref struct PhpTokenValidator {
 		}
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetBoolean() {
 		if (this._lastIndex < this._position) {
 			throw new DeserializationException(
@@ -180,7 +175,6 @@ internal ref struct PhpTokenValidator {
 		}
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetNCharacters(int length) {
 		if (this._position + length > this._lastIndex) {
 			throw new DeserializationException(
@@ -190,7 +184,6 @@ internal ref struct PhpTokenValidator {
 		this._position += length;
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetObjectToken() {
 		int position = this._position - 1;
 		int classNamelength = 0;
@@ -221,7 +214,7 @@ internal ref struct PhpTokenValidator {
 		this.GetCharacter('}');
 	}
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	// [MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private void GetArrayToken() {
 		int position = this._position - 1;
 		this.GetCharacter(':');
@@ -251,7 +244,7 @@ internal ref struct PhpTokenValidator {
 	/// <param name="input"> The raw UTF8 bytes of PHP data to validate. </param>
 	/// <returns> The number of tokens found. </returns>
 	/// <exception cref="DeserializationException"></exception>
-	internal static int Validate(ReadOnlySpan<byte> input) {
+	internal static int Validate(in ReadOnlySpan<byte> input) {
 		var validatior = new PhpTokenValidator(input);
 		validatior.GetToken();
 		if (validatior._position <= validatior._lastIndex) {

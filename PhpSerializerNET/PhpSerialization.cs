@@ -64,7 +64,7 @@ public static class PhpSerialization {
 	}
 
 	public static object? DeserializeUtf8(
-		ReadOnlySpan<byte> input,
+		in ReadOnlySpan<byte> input,
 		PhpDeserializationOptions? options = null
 	) {
 		if (input.Length == 0) {
@@ -145,7 +145,7 @@ public static class PhpSerialization {
 		return new PhpDeserializer(tokens, inputBytes, options).Deserialize(type);
 	}
 
-		/// <summary>
+	/// <summary>
 	/// The serialized data to deserialize.
 	/// </summary>
 	/// <param name="input">

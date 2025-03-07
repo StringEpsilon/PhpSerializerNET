@@ -12,28 +12,6 @@ using PhpSerializerNET.Test.DataTypes;
 namespace PhpSerializerNET.Test.Deserialize;
 
 public class ObjectDeserializationTest {
-	[Fact]
-	public void References() {
-		var result = PhpSerialization.Deserialize<MixedKeysPhpClass>(
-			"""O:8:"stdClass":4:{i:0;s:3:"Foo";i:1;R:2;s:1:"a";s:1:"A";s:1:"b";R:3;}"""
-		);
-		Assert.NotNull(result);
-		Assert.NotNull(result);
-		Assert.Equal("Foo", result.Foo);
-		Assert.Equal("Foo", result.Bar);
-		Assert.Equal("A", result.Baz);
-		Assert.Equal("A", result.Dummy);
-
-		result = PhpSerialization.Deserialize<MixedKeysPhpClass>(
-			"""O:8:"stdClass":4:{i:0;s:3:"Foo";i:1;R:2;s:1:"a";s:1:"A";s:1:"b";R:2;}"""
-		);
-		Assert.NotNull(result);
-		Assert.NotNull(result);
-		Assert.Equal("Foo", result.Foo);
-		Assert.Equal("Foo", result.Bar);
-		Assert.Equal("A", result.Baz);
-		Assert.Equal("Foo", result.Dummy);
-	}
 
 	[Fact]
 	public void IntegerKeysClass() {

@@ -12,7 +12,7 @@ namespace PhpSerializerNET;
 /// <summary>
 /// PHP data token. Holds the type, position (in the input string), length and value.
 /// </summary>
-[StructLayout(LayoutKind.Sequential, Size = 1)]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 internal readonly struct PhpToken {
 	internal readonly PhpDataType Type;
 	internal readonly int Position;
@@ -30,9 +30,9 @@ internal readonly struct PhpToken {
 	internal readonly ValueSpan Value;
 
 	internal PhpToken(
-		in PhpDataType type,
-		in int position,
-		in ValueSpan value,
+		PhpDataType type,
+		int position,
+		ValueSpan value,
 		int reference,
 		int length = 0,
 		int lastValuePosition = 0

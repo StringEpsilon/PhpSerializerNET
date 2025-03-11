@@ -14,7 +14,7 @@ public class TestIntegerValidation {
 	[InlineData("i:NaN;", "Unexpected token at index 2. 'N' is not a valid part of a number.")]
 	[InlineData("i:12345b:;", "Unexpected token at index 7. 'b' is not a valid part of a number.")]
 	[InlineData("i:12345.;", "Unexpected token at index 7. '.' is not a valid part of a number.")]
-	[InlineData("i:12345", "Unexpected end of input. Expected ':' at index 6, but input ends at index 6")]
+	[InlineData("i:12345", "Unexpected end of input. Expected ';' at index 7, but input ends at index 6")]
 	public void ThrowsOnMalformedInteger(string input, string exceptionMessage) {
 		var exception = Assert.Throws<DeserializationException>(() => {
 			PhpSerialization.Deserialize(input);

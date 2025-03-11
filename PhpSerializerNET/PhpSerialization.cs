@@ -57,7 +57,7 @@ public static class PhpSerialization {
 			? stackalloc byte[size]
 			: new byte[size];
 		options.InputEncoding.GetBytes(input, inputBytes);
-		int tokenCount = PhpTokenValidator.Validate(inputBytes);
+		int tokenCount = FormatValidator.Validate(inputBytes);
 		Span<PhpToken> tokens = new PhpToken[tokenCount];
 		PhpTokenizer.Tokenize(inputBytes, tokens);
 		return new PhpDeserializer(tokens, inputBytes, options).Deserialize();
@@ -78,7 +78,7 @@ public static class PhpSerialization {
 		} else if (options.InputEncoding != Encoding.UTF8) {
 			throw new ArgumentException("Can not use input encoding other than UTF8", nameof(options));
 		}
-		int tokenCount = PhpTokenValidator.Validate(input);
+		int tokenCount = FormatValidator.Validate(input);
 		Span<PhpToken> tokens = new PhpToken[tokenCount];
 		PhpTokenizer.Tokenize(input, tokens);
 		return new PhpDeserializer(tokens, input, options).Deserialize();
@@ -135,11 +135,9 @@ public static class PhpSerialization {
 			options = PhpDeserializationOptions.DefaultOptions;
 		}
 		int size = options.InputEncoding.GetByteCount(input);
-		Span<byte> inputBytes = size < 256
-			? stackalloc byte[size]
-			: new byte[size];
+		Span<byte> inputBytes = new byte[size];
 		options.InputEncoding.GetBytes(input, inputBytes);
-		int tokenCount = PhpTokenValidator.Validate(inputBytes);
+		int tokenCount = FormatValidator.Validate(inputBytes);
 		Span<PhpToken> tokens = new PhpToken[tokenCount];
 		PhpTokenizer.Tokenize(inputBytes, tokens);
 		return new PhpDeserializer(tokens, inputBytes, options).Deserialize(type);
@@ -177,7 +175,7 @@ public static class PhpSerialization {
 		} else if (options.InputEncoding != Encoding.UTF8) {
 			throw new ArgumentException("Can not use input encoding other than UTF8", nameof(options));
 		}
-		int tokenCount = PhpTokenValidator.Validate(input);
+		int tokenCount = FormatValidator.Validate(input);
 		Span<PhpToken> tokens = new PhpToken[tokenCount];
 		PhpTokenizer.Tokenize(input, tokens);
 		return new PhpDeserializer(tokens, input, options).Deserialize(type);

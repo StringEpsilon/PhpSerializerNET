@@ -297,7 +297,7 @@ internal ref struct PhpDeserializer {
 				var result = new PhpObjectDictionary(token.Length, typeName);
 				result.SetClassName(typeName);
 				for (int i = 0; i < token.Length; i++) {
-					result.TryAdd((string)this.Next(), this.Next());
+					result.TryAdd((string)this.Next(typeof(string)), this.Next());
 				}
 
 				return result;

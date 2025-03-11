@@ -24,6 +24,16 @@ public class ObjectSerializationTest {
 	}
 
 	[Fact]
+	public void HandlesIntegerKeys() {
+		// https://github.com/StringEpsilon/PhpSerializerNET/issues/43
+		var result = (PhpObjectDictionary)PhpSerialization.Deserialize(
+			"""O:3:"foo":1:{i:0;s:7:"QG3GHPX";}""",
+			new() { EnableTypeLookup = false }
+		);
+		Assert.Equal("QG3GHPX", result["0"]);
+	}
+
+	[Fact]
 	public void SerializesToSpecificClass() {
 		var testObject = new NamedClass() {
 			Foo = 3.14,

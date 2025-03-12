@@ -1,4 +1,4 @@
-# 2.1.1 (Future)
+# 2.1.1 (2025-03-12)
 
 ## Bugfixes
 - Deserializing into a `PhpObjectDictionary` with an integer key failed with an invalid cast exception. [#43](https://github.com/StringEpsilon/PhpSerializerNET/issues/43).

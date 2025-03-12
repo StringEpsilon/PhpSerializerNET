@@ -3,7 +3,7 @@
 		<Title>PhpSerializerNET</Title>
 		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 		<LangVersion>12.0</LangVersion>
-		<Version>2.1.0</Version>
+		<Version>2.1.1</Version>
 		<Authors>StringEpsilon</Authors>
 		<Summary>A library for working with the PHP serialization format.</Summary>
 		<PackageTags>php-serialization, php-serializer, php-deserializer</PackageTags>
@@ -16,9 +16,10 @@
 		<RepositoryUrl>https://github.com/StringEpsilon/PhpSerializerNET</RepositoryUrl>
 		<RespositoryType>git</RespositoryType>
 		<PackageIcon>icon.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 	<ItemGroup>
-		<None Include="..\LICENSE" Pack="true" PackagePath="/" />
+		<None Include="..\LICENSE" Pack="true" PackagePath="/"/>
 		<None Include="..\README.md" Pack="true" PackagePath="/"/>
 		<None Include="..\assets\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>

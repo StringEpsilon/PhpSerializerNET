@@ -55,4 +55,28 @@ public class ReferenceDeserializationTest {
 		Assert.Equal("two", value.Second.bar);
 	}
 
+	[Fact]
+	public void ReferenceWithNullValuesBefore() {
+		var value = PhpSerialization.Deserialize<ReferenceWithNulls>(
+			"""a:2:{s:5:"first";a:2:{s:9:"modifiers";N;s:5:"inner";O:5:"Inner":1:{s:5:"value";s:4:"test";}}s:6:"second";a:2:{s:9:"modifiers";N;s:5:"inner";r:4;}}"""
+		);
+
+		Assert.Null(value.first.modifiers);
+		Assert.Null(value.second.modifiers);
+		Assert.Equal("test", value.first.inner.value);
+		Assert.Equal("test", value.second.inner.value);
+	}
+
+	[Fact]
+	public void MultipleValueReferencesBeforeTarget() {
+		var value = PhpSerialization.Deserialize<MultiRef>(
+			"""a:5:{s:5:"first";O:3:"Obj":1:{s:2:"id";s:1:"A";}s:6:"second";r:2;s:5:"third";r:2;s:6:"fourth";O:3:"Obj":1:{s:2:"id";s:1:"B";}s:5:"fifth";r:6;}"""
+		);
+
+		Assert.Equal("A", value.first.id);
+		Assert.Equal("A", value.second.id);
+		Assert.Equal("A", value.third.id);
+		Assert.Equal("B", value.fourth.id);
+		Assert.Equal("B", value.fifth.id);
+	}
 }

@@ -45,8 +45,10 @@ public ref struct PhpTokenizer {
 	private void GetToken(bool countReference) {
 		switch (this._input[this._position++]) {
 			case (byte)'r':
+				this.GetValueReferenceToken(countReference);
+				break;
 			case (byte)'R':
-				this.GetReferenceToken();
+				this.GetVariableReferenceToken();
 				break;
 			case (byte)'b':
 				this.GetBooleanToken(countReference);
@@ -56,7 +58,7 @@ public ref struct PhpTokenizer {
 					PhpDataType.Null,
 					this._position - 1,
 					ValueSpan.Empty,
-					0
+					countReference ? ++this._reference : 0
 				);
 				this._position++;
 				break;
@@ -114,11 +116,24 @@ public ref struct PhpTokenizer {
 		this._position++;
 	}
 
-	private void GetReferenceToken() {
+	private void GetVariableReferenceToken() {
 		this._position++;
 		int index = this.GetNumbers().GetInt(this._input);
 		if (index <= 0 || index > this._reference) {
 			throw new DeserializationException($"Invalid reference: '{index}' can not be resolved.");
+		}
+		this._tokens[this._tokenPosition++] = new PhpToken(PhpDataType.Reference, this._position, ValueSpan.Empty, index);
+		this._position++;
+	}
+
+	private void GetValueReferenceToken(bool reference) {
+		this._position++;
+		int index = this.GetNumbers().GetInt(this._input);
+		if (index <= 0 || index > this._reference) {
+			throw new DeserializationException($"Invalid reference: '{index}' can not be resolved.");
+		}
+		if (reference) {
+			this._reference++;
 		}
 		this._tokens[this._tokenPosition++] = new PhpToken(PhpDataType.Reference, this._position, ValueSpan.Empty, index);
 		this._position++;

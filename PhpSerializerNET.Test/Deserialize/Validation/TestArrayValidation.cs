@@ -29,7 +29,7 @@ public class TestArrayValidation {
 		if (result is List<object>) {
 			Assert.Equal(24, ((List<object>)result).Count);
 		} else {
-			Assert.True(false, "Expected List<object> but got " + result.GetType().Name);
+			Assert.Fail("Expected List<object> but got " + result.GetType().Name);
 		}
 	}
 }

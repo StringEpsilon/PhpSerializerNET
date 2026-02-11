@@ -1,3 +1,9 @@
+# 2.1.2 (future)
+
+## Bugfixes
+- Fixed reference numbering for `null` values: In PHP serialization, `null` values (`N;`) are counted in reference numbering, but the library was not incrementing the reference counter for them. This caused incorrect reference resolution when `null` values appeared before referenced objects.
+- Fixed reference numbering for value references: In PHP, value references (`r:`) are counted towards reference numbering, while variable references (`R:`) are not. The library was treating both types the same way (not counting either), which caused reference resolution failures when multiple value references appeared before a later reference target.
+
 # 2.1.1 (2025-03-12)
 
 ## Bugfixes

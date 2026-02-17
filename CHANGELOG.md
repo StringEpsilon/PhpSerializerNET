@@ -1,5 +1,8 @@
 # 2.1.2 (future)
 
+## Changes
+- Target .NET 10.0 (now targeting 8, 9 and 10).
+
 ## Bugfixes
 - Fixed `null`  values cause improper de-referencing  when they occur before a reference.
 - Fixed a similar issue caused by the handling of *value* references (as opposed to *variable* references).

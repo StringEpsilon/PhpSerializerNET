@@ -100,7 +100,9 @@ public ref struct PhpTokenizer {
 			PhpDataType.String,
 			position,
 			new ValueSpan(this._position, length),
-			reference ? ++this._reference : 0
+			reference
+				? ++this._reference
+				: 0
 		);
 		this._position += 2 + length;
 	}
@@ -111,7 +113,9 @@ public ref struct PhpTokenizer {
 			PhpDataType.Integer,
 			this._position - 2,
 			this.GetNumbers(),
-			reference ? ++this._reference : 0
+			reference
+				? ++this._reference
+				: 0
 		);
 		this._position++;
 	}

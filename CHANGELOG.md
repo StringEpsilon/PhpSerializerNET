@@ -1,4 +1,4 @@
-# 2.1.2 (future)
+# 2.1.2 (2026-03-29)
 
 ## Changes
 - Target .NET 10.0 (now targeting 8, 9 and 10).

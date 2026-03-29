@@ -3,7 +3,7 @@
 		<Title>PhpSerializerNET</Title>
 		<TargetFrameworks>net8.0;net9.0;net10.0;</TargetFrameworks>
 		<LangVersion>14.0</LangVersion>
-		<Version>2.1.1</Version>
+		<Version>2.1.2</Version>
 		<Authors>StringEpsilon</Authors>
 		<Summary>A library for working with the PHP serialization format.</Summary>
 		<PackageTags>php-serialization, php-serializer, php-deserializer</PackageTags>
